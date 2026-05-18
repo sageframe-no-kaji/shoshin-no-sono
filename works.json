@@ -1,0 +1,163 @@
+{
+  "document": {
+    "title": "初心の園 — Shoshin no Sono",
+    "author": "Andrew T. Marcus",
+    "last_updated": "2026-05-18",
+    "purpose": "Public-facing catalog of the Sageframe body of work. Routes visitors to canonical homes; demonstrates coherence through typed relationships rendered as interference cartography."
+  },
+
+  "web_properties": [
+    {
+      "property": "sageframe.net",
+      "job": "The catalog. Routes visitors to canonical homes; demonstrates that the body of work is one project."
+    },
+    {
+      "property": "atmarcus.net",
+      "job": "Professional landing site. Practice history, bio, consulting contact."
+    },
+    {
+      "property": "sageframe.substack.com",
+      "job": "Constructive Interference — the essay practice. Writing about AI collaboration, methodology, and the practitioner's inquiry."
+    },
+    {
+      "property": "pinkteaming.net",
+      "job": "The Pink Teaming manifesto, the cooperative-counterpart-to-red-teaming argument."
+    }
+  ],
+
+  "additional_outlets": [
+    {
+      "name": "GitHub",
+      "handle": "sageframe-no-kaji",
+      "role": "Source repos for all software and methodology work."
+    },
+    {
+      "name": "LinkedIn",
+      "handle": "atmarcus",
+      "role": "Professional presence. Some essays also published here."
+    },
+    {
+      "name": "Medium",
+      "handle": "atmarcus",
+      "role": "Secondary outlet for some essays."
+    }
+  ],
+
+  "theme_vocabulary": {
+    "craft": "Practice, discipline, how-to-make. Ho System, Dandori, m4Bookmaker, methodology work.",
+    "relationship": "How humans encounter AI, each other, or systems. Pink Teaming, Voice DNA, Constructive Interference essays.",
+    "attention": "Where focus goes, how it's protected, how it's directed. Reading Instrument, Resonance Field, *, Actually.",
+    "agency": "Autonomy, authorship, control over one's own work and judgment. Sutra, Glassroom, Edelmore.",
+    "continuity": "Persistence across time — of voice, of method, of infrastructure. Hōzō, Shodō, the writing program.",
+    "knowledge": "Building, organizing, transferring understanding. Sageframe knowledge system, Glassroom, case studies.",
+    "sovereignty": "Self-determination in tools, data, and infrastructure. m4Bookmaker, Hōzō, the homelab work.",
+    "infrastructure": "Systems beneath the visible work — what makes the rest possible. SSH Actually, Hōzō, adobe-peace, pptx-builder."
+  },
+
+  "work_groups": [
+    {
+      "id": "methodology",
+      "number": 1,
+      "name": "Methodology",
+      "intro": "The foundation. Without the methodology layer, the production systems don't exist. Ho System, Dandori, and Kinhin form the operating discipline that makes everything downstream possible."
+    },
+    {
+      "id": "production-systems",
+      "number": 2,
+      "name": "Sageframe Production Systems",
+      "intro": "The evidence. Real software in real use — at Harvard, in the App Store, on PyPI, in production homelabs. The proof that the methodology works."
+    },
+    {
+      "id": "constructive-interference",
+      "number": 3,
+      "name": "Constructive Interference Research Program",
+      "intro": "The parallel intellectual project on how humans maintain identity, voice, and judgment in sustained AI collaboration. Includes the Pink Teaming manifesto, the Destructive Interference taxonomy, and a layered tool system."
+    },
+    {
+      "id": "knowledge-architecture",
+      "number": 4,
+      "name": "Knowledge Architecture",
+      "intro": "*, Actually and SSH, Actually — restructuring how technical knowledge gets to humans."
+    },
+    {
+      "id": "interactive-demonstrations",
+      "number": 5,
+      "name": "Interactive Demonstrations",
+      "intro": "Working demonstrations, teaching artifacts, and research instruments at once. The Resonance Field and the Pink Teaming Reading Instrument embed real computational substrate and use it to teach a discipline by walking the reader through it."
+    },
+    {
+      "id": "adaptive-tools",
+      "number": 6,
+      "name": "Adaptive Tools",
+      "intro": "Built for a specific person, holding the design discipline that everything else also holds."
+    },
+    {
+      "id": "infrastructure",
+      "number": 7,
+      "name": "Infrastructure (Kṣetra-Ops)",
+      "intro": "Homelab tooling for the practitioner's own operating environment. The systems beneath the systems."
+    },
+    {
+      "id": "personal-utilities",
+      "number": 8,
+      "name": "Personal Utilities",
+      "intro": "Small daily-use tools that earned their place."
+    },
+    {
+      "id": "archived",
+      "number": 9,
+      "name": "Archived",
+      "intro": "Timeline markers. Work that preceded the current practice or has been superseded."
+    }
+  ],
+
+  "works": [
+    {
+      "id": "ho-system",
+      "name": "Ho System",
+      "native_script": "歩",
+      "native_translation": "Step",
+      "hero": "Architectural authority held. Implementation partnered.",
+      "importance": 9,
+      "color": null,
+      "featured": true,
+      "media": ["methodology"],
+      "group": "methodology",
+      "themes": ["craft", "agency"],
+      "status": "shipped",
+      "tags": ["methodology", "published", "human-ai-collaboration", "shu-ha-ri", "open-source"],
+      "repo": "https://github.com/sageframe-no-kaji/ho-system",
+      "license": "CC BY-NC-ND 4.0",
+      "deployment": [
+        {
+          "label": "Methodology site",
+          "url": "https://atmarcus.net/ho"
+        },
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/ho-system"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-01-01",
+      "last_updated": "2026-05-17",
+      "short_description": "Published open methodology for human-AI collaborative software development in which the human practitioner maintains full architectural authority while using AI as an implementation partner. The core unit is a ho — a bounded ~2-hour session producing something real, connecting to the project arc via commit hash, ending with structured reflection. Practitioners progress through Shu-Ha-Ri stages; tiered understanding (Black Box, Functional, Deep) gives an honest frame for tracking what's understood versus delegated.",
+      "substantive_description": [
+        "The dominant frame for AI-assisted development assumes the model leads. Vibe coding names the position with unembarrassed clarity: the human gestures, the model generates, the human accepts or rejects. The Ho System refuses the position.",
+        "It treats AI as an implementation partner inside a discipline the human owns — architectural authority held, structural decisions made consciously, every session bounded, every artifact reviewed. Eight production systems shipped under it, including a computer vision platform at Harvard and a ZFS backup orchestrator with 278 tests at 99% coverage.",
+        "The deeper claim is about agency in the age of capable models. Capable models tempt the practitioner to delegate the parts of the work that build the practitioner's judgment. The Ho System is the operational answer to that temptation: a methodology that lets you ship without becoming someone who cannot ship alone."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    }
+  ]
+}
