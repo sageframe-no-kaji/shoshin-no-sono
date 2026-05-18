@@ -1,6 +1,6 @@
 # 初心の園 — Shoshin no Sono — Ho Overview
 
-Five phases. Seventeen hos plus ho-00. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
+Five phases. Eighteen hos including ho-00 and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
 
 ## What this is, and what it is not
 
@@ -15,9 +15,9 @@ It is also not a per-ho document. Each ho gets its own scope at session time via
 | Phase | Hos | What it produces |
 |---|---|---|
 | 0. Foundation | ho-00 | The repo exists; the framing documents are committed; schema is finalized; a preview URL serves an empty page |
-| 1. Data and visible catalog | ho-01, ho-02, ho-03 | A shareable MVP catalog: grid view, filter URLs, the body of work in `works.json` |
+| 1. Data and visible catalog | ho-01, ho-02, ho-03 | A shareable MVP catalog: grid view, filter URLs, the MVP sample (~20 entries) of the body of work in `works.json` |
 | 2. Cartography | ho-04, ho-05, ho-06, ho-07, ho-08, ho-09 | The procedural interference cartography rendering on desktop with full interaction |
-| 3. Authoring | ho-10, ho-11, ho-12 | A live catalog: the Steward edits existing works; the Founder adds new ones with AI-assist via the Scribe |
+| 3. Authoring | ho-10, ho-11, ho-12, ho-12.5 | A live, fully-populated catalog: the Steward edits existing works; the Founder adds new ones with AI-assist via the Scribe; ho-12.5 completes the hydration as the Founder's first real stress test |
 | 4. Polish and ship | ho-13, ho-14, ho-15, ho-16 | Mobile experience, accessibility, the companion essay, retirement of the prototype, v1.0 |
 
 Three replan checkpoints sit at phase boundaries (end of Phase 1, end of Phase 2, end of Phase 3). One additional decision-trigger checkpoint sits after ho-04 because the visual register exploration commits the aesthetic before procedural generation begins.
@@ -58,34 +58,36 @@ This ho creates `sageframe-no-kaji/shoshin-no-sono`, tags the existing `sagefram
 
 ## Phase 1 — Data and visible catalog
 
-This phase produces the first version of the catalog that someone can actually visit. By the end, every work in the body of work is in `works.json` with relationships and themes; the Indexer's query API works; the grid view renders cards organized by `work_group`; and the Garden Gate makes URLs into doors. The cartography is still the next phase, but the site is already legible — a stranger sent a URL with `?theme=craft` lands on a filtered grid view of the relevant works. This is the MVP threshold. After this phase, the project could in principle ship as a grid-only catalog; the cartography is what makes it the demonstration the seed describes, but the catalog itself is real after Phase 1.
+This phase produces the first version of the catalog that someone can actually visit. By the end, an MVP sample of ~20 entries is in `works.json` with relationships and themes — enough to exercise every media type in the schema and every major relationship pattern, not the entire body of work; the Indexer's query API works; the grid view renders cards organized by `work_group`; and the Garden Gate makes URLs into doors. The cartography is still the next phase, but the site is already legible — a stranger sent a URL with `?theme=craft` lands on a filtered grid view of the relevant works. This is the MVP threshold. After this phase, the project could in principle ship as a grid-only catalog; the cartography is what makes it the demonstration the seed describes, but the catalog itself is real after Phase 1. Full hydration of the remaining works happens later through the Founder in ho-12.5.
 
 *Release on phase complete: v0.1*
 
-### ho-01 — Hydrate works.json from the existing inventory
+### ho-01 — Build the catalog from the schema (MVP sample)
 
-The body of work already exists as a structured document: `sageframe_labs_work.md`, ~750 lines, two-register descriptions per work, current as of mid-May 2026. This ho turns that document into a populated `works.json`. A one-time local Python or Node script calls the Claude API directly (not the Worker — the Worker does not exist yet) with the inventory document, the schema, and a prompt template instructing the model to produce schema-compliant entries with proposed relationships, themes, tags, work_group placement, and importance values. The practitioner reviews every entry; corrections happen against the proposal, not from blank. The result is a `works.json` carrying roughly thirty to fifty entries.
+The schema (v4) is the contract. This ho inhabits it — builds works.json entry by entry — until enough of the body of work is represented to stress-test the data model. The MVP target is ~20 entries selected to exercise every media type in the schema and every major relationship pattern, not to represent the full body of work. The remaining works hydrate later in ho-12.5, where the Founder makes that its first real-world test. Execution happens conversationally in this Project's chat space — the schema is in project knowledge, the inventory document is in project knowledge, and the work is the practitioner-plus-Claude editorial loop. No Python script, no agent task.
 
 **Depends on:** ho-00.
 
 **What's in scope:**
-- One-time hydration script (local, not deployed)
-- Prompt template for inventory-to-schema conversion (may share lineage with the future `prompts/ai-assist.md` but is its own artifact)
-- Author review of every proposed entry
-- Final commit of populated `works.json`
+- ~20 entries covering every media type (software, writing, website, image, talk, methodology)
+- At least two instances of each major relationship type (descends_from, paired_with, companion_to, operationalizes, documents at strengths 1/2/3, succeeded_by, validates)
+- A handful of entries using the new `articulated_in` field
+- A surfacings log capturing schema gaps, vocabulary gaps, and other observations from execution
 
 **What "done" means:**
-- `works.json` contains all current works, methodologies, and writing pieces
-- Every entry validates against the schema
-- Relationships, themes, tags, importance reviewed and corrected
-- Schema validation passes in the build pipeline
+- `works.json` contains ~20 entries validating against `schema.json`
+- The MVP composition exercises every media type and major relationship type
+- A surfacings log exists capturing what the data model revealed under real entries
+- Commit history on `labs` shows the build-up of entries in identifiable batches
 
-**What's out of scope:** Anything that renders this data. No Indexer, no views.
+**What's out of scope:** Anything that renders this data (ho-02, ho-03). Full hydration of the body of work (ho-12.5). Any script or automation.
 
 **Decisions required:**
-- **Hydration script implementation language**: Python or Node. Decision criterion: whichever produces the cleanest one-time-use script that handles JSON-mode Claude API output and writes validated output to disk. Lean Python unless there's a reason to match a future Node build pipeline.
+- **Approach to hydration**: conversational in the Project chat space vs Python script vs hybrid. Default: conversational, because the bottleneck is editorial judgment, not throughput, and the chat keeps the editorial loop continuous.
+- **MVP scope**: ~20 entries exercising every media type and relationship pattern, with full hydration deferred to ho-12.5. Composition target is the shape (counts per media type), not a fixed list of works.
+- **Review and commit cadence**: per-entry edit-and-commit, with batch git commits every 5-7 entries.
 
-**Possible split:** If the corpus turns out larger than expected, or if the proposed entries need substantial cleanup, split into ho-01.1 (script + first-pass generation) and ho-01.2 (review and corrections). Real-world data sometimes reveals schema gaps that need addressing before the file is committed; a small ho-01.5 may be needed if so.
+**Possible split:** Unlikely. If the surfacings reveal substantial schema revisions that should land before the MVP completes, split into ho-01.1 (first 10 entries + surfacings synthesis) and ho-01.2 (schema revision + remaining entries against revised schema). Otherwise, this is one focused conversational session, possibly across multiple Project chats if token budget warrants.
 
 ### ho-02 — The Indexer
 
@@ -297,7 +299,7 @@ Hover-highlight with dimming of unrelated features. Click on a peak opens an in-
 
 ## Phase 3 — Authoring
 
-This phase makes the catalog alive. The Steward (Sveltia CMS) handles general editing of existing entries. The Scribe (Cloudflare Worker) holds the Anthropic API key and proxies AI-assist calls. The Founder (custom new-work admin tool) integrates with the Scribe to make adding new works a fifteen-minute practice. By the end of this phase, the Dandori test passes: a real new work goes from "I've shipped this" to "it's live in the catalog with correct relationships" in one focused session.
+This phase makes the catalog alive. The Steward (Sveltia CMS) handles general editing of existing entries. The Scribe (Cloudflare Worker) holds the Anthropic API key and proxies AI-assist calls. The Founder (custom new-work admin tool) integrates with the Scribe to make adding new works a fifteen-minute practice. Verification of the Founder happens by adding the next real work (ho-12); the bulk hydration of the remaining body of work happens in ho-12.5 — the Founder's first real-world stress test. By the end of this phase, the Dandori test passes at scale: ~40-45 real works in the catalog, each added through the production workflow, with the practitioner having walked the path the production tool was built for.
 
 *Release on phase complete: v0.3*
 
@@ -368,22 +370,48 @@ The Founder is the new-work creation flow as a purpose-built single-page tool at
 - Shared GitHub OAuth flow with the Steward
 
 **What "done" means:**
-- Use the Founder to add a hypothetical fifty-first work
+- Use the Founder to add the next real work to the catalog (the first not in the MVP sample)
 - AI-assist proposes sensible relationships
 - The diff review is clear and operable
 - Commit lands; site rebuilds; new work integrated
-- The Dandori test passes: 15-20 minutes from form-open to live
+- The Dandori test passes at unit scale: 15-20 minutes from form-open to live for a single new work
 
-**What's out of scope:** Editing existing works (the Steward handles this). Bulk operations.
+**What's out of scope:** Editing existing works (the Steward handles this). Bulk operations (ho-12.5 does that as the Founder's first real stress test).
 
 **Decisions required:**
 - **Founder implementation language**: vanilla JS or Svelte. Decision criterion: whichever produces the simplest and most learnable implementation of the in-browser-to-Worker-to-API pattern. Lean vanilla JS unless Svelte's reactivity meaningfully simplifies the diff review UI.
 
 **Possible split:** Likely. The Founder has three distinct sub-problems — form-and-OAuth (ho-12.1), AI-assist call and response handling (ho-12.2), diff review UI and commit (ho-12.3) — and any of them could turn out larger than anticipated. Splitting is anticipated as a normal evolution rather than a fallback.
 
+### ho-12.5 — Complete the hydration via the Founder
+
+The MVP sample from ho-01 covers ~20 entries — enough to exercise the schema and run Phase 2's cartography against real density, but not the full body of work. This ho completes the hydration by using the Founder to add the remaining ~20-25 works. Each work goes through the production workflow: form → AI-assist → diff review → commit. The point is not just to populate the catalog. The point is that the Founder's first real test is bulk operation against real works, not a single hypothetical addition.
+
+**Depends on:** ho-12.
+
+**What's in scope:**
+- The remaining ~20-25 works added through the Founder
+- Each work's relationships proposed by the Scribe, reviewed by the practitioner, committed
+- Reverse-direction edges to existing MVP entries proposed and applied as part of each commit
+- Surfacings logged: prompt template issues, Founder UX issues, schema gaps revealed by the broader corpus
+- Iteration on the Scribe's prompt template (`prompts/ai-assist.md`) if proposals are uneven
+
+**What "done" means:**
+- All currently-shipped/published/in-development works in the body of work are in `works.json` (estimated total: ~40-50 entries)
+- Every entry validated against the schema
+- The Founder workflow has been exercised at scale — patterns the single-test of ho-12 wouldn't surface have been surfaced
+- Prompt template revisions committed to `prompts/ai-assist.md`
+- Surfacings log carries the Founder-workflow observations alongside the ho-01 surfacings
+
+**What's out of scope:** Improving the Founder beyond fixes required by what surfaces. Major schema revisions revealed (those become a separate inserted ho if substantial). Photography subsystem (deferred, post-v1).
+
+**Decisions required:** None pre-decided. Decisions emerge during execution: prompt iterations, Founder UX adjustments if needed, whether to defer particular works (archived ones, controversial ones) to post-v1.
+
+**Possible split:** Unlikely. Bulk operation through the Founder is one focused practice. If individual works repeatedly surface prompt-template issues, pause and iterate the template rather than splitting the ho.
+
 ---
 
-**Phase boundary — replan checkpoint.** Authoring works. The Dandori test passes. The catalog is alive. Three questions to settle before committing to Phase 4: Are there changes to the AI-assist prompt template that real usage during this phase has revealed? Should the visual register be revised based on what real data has surfaced (e.g., certain relationship features may need adjustment now that the practitioner has been clicking around the cartography for days)? Is the practitioner ready to commit to a target date for v1.0 or holding open? Default: continue to Phase 4 — the remaining work is polish and ship.
+**Phase boundary — replan checkpoint.** Authoring works. The catalog is fully populated. The Founder has been stress-tested. Three questions to settle before committing to Phase 4: Are there changes to the AI-assist prompt template that bulk hydration revealed? Should the visual register be revised based on what real data has surfaced (e.g., certain relationship features may need adjustment now that the practitioner has been clicking around the cartography with a full corpus)? Is the practitioner ready to commit to a target date for v1.0 or holding open? Default: continue to Phase 4 — the remaining work is polish and ship.
 
 ---
 
@@ -504,7 +532,7 @@ Three phase-boundary checkpoints plus one mid-phase decision-trigger checkpoint:
 1. **End of Phase 1 (after ho-03).** MVP catalog is live. Decision: continue to Phase 2 (cartography) or ship MVP as v1 and defer cartography. Default: continue.
 2. **After ho-04 (mid-Phase 2).** Visual register exploration is committed. Decision: confirm register reads correctly at planned scale; if not, another ho-04 pass before ho-05 begins.
 3. **End of Phase 2 (after ho-09).** Cartography works on desktop. Decision: continue to Phase 3 (authoring) or ship desktop-only as v1. Default: continue, because the Dandori friction is real and Phase 3 fixes it.
-4. **End of Phase 3 (after ho-12).** Authoring works. Decision: continue to Phase 4 (polish and ship). Default: continue, no real alternative.
+4. **End of Phase 3 (after ho-12.5).** Authoring works; the catalog is fully populated. Decision: continue to Phase 4 (polish and ship). Default: continue, no real alternative.
 
 The Phase 4 boundary is the ship moment, not a replan checkpoint. By the time the practitioner reaches it, the decision was made phases ago.
 
@@ -520,19 +548,21 @@ The overview is updated when splits or insertions happen. New hos are added to t
 
 **Most likely splits:**
 
-- **ho-01 → ho-01.1, ho-01.2** (if hydration script generation and author review each become substantial work in their own right)
+- **ho-01 → ho-01.1, ho-01.2** (only if surfacings during MVP hydration reveal substantial schema revisions warranting a midpoint pause; ho-01.1 = first 10 entries + surfacings synthesis; ho-01.2 = schema revision + remaining entries)
 - **ho-04 → ho-04.1, ho-04.2** (peaks-and-contours register vs towns-and-features register)
 - **ho-05 → ho-05.1, ho-05.2** (positions vs heightfield)
 - **ho-08 → ho-08.1, ho-08.2** (structural edges vs linear edges)
 - **ho-12 → ho-12.1, ho-12.2, ho-12.3** (form-and-OAuth, AI-assist integration, diff review UI) — splitting is anticipated as normal evolution rather than fallback
 - **ho-13 → ho-13.1, ho-13.2** (simplified cartography vs URL state preservation)
 
-**Most likely insertions:**
+**Planned insertions:**
 
-- **ho-01.5** (schema refinement after real-data reveals gaps)
+- **ho-12.5 — Complete the hydration via the Founder.** Now a planned ho, not a contingency. ho-01 produces an MVP sample of ~20 entries; the remaining works in the body of work (estimated 20-30 more) hydrate through the Founder UI in ho-12.5. This makes the Founder's first real-world test a bulk operation against the production workflow, which is a much stronger validation than adding a single hypothetical new work. Surfacings from ho-12.5 may also drive prompt-template iteration for the Scribe.
+
+**Conditional insertions:**
+
 - **ho-04.5** (recalibration after the visual-register checkpoint, before procedural generation begins)
 - **ho-09.5** (cartography performance tuning if needed after the full visualization is live)
-- **ho-12.5** (prompt template iteration after first real Dandori test if proposals aren't reliably good)
 
 The practitioner is not bound to these. They are the patterns the build is most likely to produce, named so they don't surprise.
 
@@ -554,7 +584,7 @@ Decisions that don't tie to a specific v1 ho:
 ho-00 (scaffold)
   │
   ▼
-ho-01 (data)
+ho-01 (MVP sample, ~20 entries)
   │
   ▼
 ho-02 (indexer)
@@ -584,7 +614,10 @@ ho-09 (interactions) ───────► v0.2 ★ replan checkpoint
   │
   ├──► ho-11 (Scribe)
   │
-  └──► ho-12 (Founder) ─────► v0.3 ★ replan checkpoint
+  └──► ho-12 (Founder, single-work verification)
+            │
+            ▼
+       ho-12.5 (Founder bulk hydration, ~20-25 entries) ───► v0.3 ★ replan checkpoint
                                  │
                                  ▼
                               ho-13 (mobile)

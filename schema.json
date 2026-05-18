@@ -1,0 +1,178 @@
+{
+  "$comment": "Sageframe catalog source-of-truth. v4 — applies the four revisions queued in the Shoshin no Sono Kamae chain: (1) renamed `weight` → `importance` everywhere; (2) added `articulated_in` as optional per-edge field; (3) removed the composite-importance calculation from the rendering block — importance is now a direct manual integer driving peak height; (4) redefined `strength` as an integer 1/2/3 for documents-class edges per the editorial specificity convention. Other portions of the rendering block still describe the older force-directed-graph architecture before procedural cartography; the System Design at kamae/shoshin-no-sono-kamae-2-system-design.md supersedes those portions and is the operating source of truth for visualization.",
+
+  "document": {
+    "$comment": "Site-level metadata. Rendered in header, footer, About page, and SEO tags.",
+    "title": "string",
+    "author": "string",
+    "last_updated": "ISO 8601 date",
+    "purpose": "string"
+  },
+
+  "rendering": {
+    "$comment": "Documents how the catalog renderer behaves. Not data the renderer reads — reference for future-self, agents, and the prompts that populate `works`. NOTE: this block is partially superseded by the procedural cartography architecture in the System Design. The visualization-specific portions below describe the earlier force-directed-graph design; where they conflict with the System Design, defer to the System Design.",
+
+    "architecture": "Single-page site (plus About). No per-work detail pages. The catalog is genuinely an index, not a destination. Each work renders as a peak in the cartography or a card in the grid; click opens a small in-place card with preview image, name, native script, one-line description, and a primary CTA. CTA links to the work's canonical home (deployment[0].url). Visitors leave the catalog to encounter the work itself.",
+
+    "default_view": "Cartography (procedural topographic map). Toggle to Grid available in the header. On mobile (narrow viewport), default switches to simplified-decorative cartography with tap-to-grid; full cartography remains desktop-only.",
+
+    "click_behavior": "Peak click (cartography) or card click (grid) → in-place card overlay appears with: preview image, name, native_script, short_description (one line, may differ from the schema's short_description field if that's too long for the card — renderer truncates), media badges, primary CTA ('Visit Kanyō', 'Read on Substack', etc.) linking to deployment[0].url, optional secondary links (repo, alt deployments). The CTA leaves the catalog. The substantive_description in the schema is NOT rendered on the catalog — it lives in the data for export to other surfaces.",
+
+    "filter_composition": "Filters compose multiplicatively across categories (Software AND Status:Shipped AND Tag:computer-vision = Kanyō) and additively within a category (Software OR Writing). Filter state lives in the URL for shareability (sageframe.net/?media=writing&theme=craft). A 'Reset filters' control is always visible when filters are active.",
+
+    "importance_drives_peak_height": "The manual editorial `importance` field (integer 1-10) drives peak height in the cartography directly. No composite calculation, no renormalization. importance=10 produces the tallest peaks (Sageframe itself); importance=1 produces low-amplitude features barely above the contour baseline. Incoming relationship count affects feature density around the peak (more incoming edges → more cartographic features radiating from the peak) but does NOT affect peak height. The renderer maps importance directly: peak amplitude is proportional to importance × filter_relevance.",
+
+    "relationship_features": "Typed edges render as cartographic features per the relationship grammar defined in the System Design. descends_from = ridge from parent peak to child. succeeded_by/succeeds = directional ridge. paired_with = twin peaks at similar elevation. companion_to = adjacent towns sharing a road. operationalizes = town at the foot of the operationalized peak. validates = trail from valley to summit. uses_pedagogy_of = pedagogical-descent trail. documents = road from writing-town to documented work, with road prominence driven by strength. argues_for, responds_to, illustrates = smaller markers and connections. When an edge carries `articulated_in`, clicking the feature opens a card linking to that articulating essay.",
+
+    "documents_edge_strength_drives_settlements": "For documents-type edges, the `strength` field (integer 1/2/3) drives both the town's position and size. A writing piece's town sits at the barycentric center of its documented works, weighted by edge strength (strength=3 anchors pull harder than strength=1). Settlement size is computed as log of the sum of all documents-edge strengths: more strong documentation produces a larger settlement (hamlet → village → town → city). See System Design § Data Model for the full computation.",
+
+    "performance_target": "Initial payload under 500KB including d3-force module (~30KB) and works.json (~50–100KB at 30–50 records). Time-to-interactive under 2 seconds on good connection. The cartography renders client-side; no server. The catalog should feel instant once loaded — filters, view toggles, and card overlays are all in-memory operations."
+  },
+
+  "web_properties": [
+    {
+      "$comment": "The four primary Sageframe/atmarcus properties and what each does. Rendered on the About page.",
+      "property": "string (domain)",
+      "job": "string"
+    }
+  ],
+
+  "additional_outlets": [
+    {
+      "$comment": "Secondary outlets (Medium, LinkedIn, GitHub) where work also appears. Rendered as supplementary links, smaller than web_properties.",
+      "name": "string",
+      "handle": "string",
+      "role": "string"
+    }
+  ],
+
+  "theme_vocabulary": {
+    "$comment": "Controlled vocabulary for the `themes` field. Themes capture the *concern* a work addresses — the lens through which it can be read — as distinct from tags (which capture what the work *is* technically/topically). Small vocabulary on purpose: themes should cluster meaningfully when filtered. 1–3 themes per work, never more. Candidate vocabulary below; refine during data population.",
+    "values": {
+      "craft": "Practice, discipline, how-to-make. Ho System, Dandori, m4Bookmaker, methodology work.",
+      "relationship": "How humans encounter AI, each other, or systems. Pink Teaming, Voice DNA, Constructive Interference essays.",
+      "attention": "Where focus goes, how it's protected, how it's directed. Reading Instrument, Resonance Field, *, Actually.",
+      "agency": "Autonomy, authorship, control over one's own work and judgment. Sutra, Glassroom, Edelmore.",
+      "continuity": "Persistence across time — of voice, of method, of infrastructure. Hōzō, Shodo, the writing program.",
+      "knowledge": "Building, organizing, transferring understanding. Sageframe knowledge system, Glassroom, case studies.",
+      "sovereignty": "Self-determination in tools, data, and infrastructure. m4Bookmaker, Hōzō, the homelab work.",
+      "infrastructure": "Systems beneath the visible work — what makes the rest possible. SSH Actually, Hōzō, adobe-peace, pptx-builder."
+    }
+  },
+
+  "work_groups": [
+    {
+      "$comment": "Exclusive categorical groupings — every work belongs to exactly one group. Drives section placement on the catalog index and filter chips in the cartography view. Group vocabulary is curatorial; review during seed conversation. Likely candidates: 'Methodology', 'Production Systems', 'Constructive Interference Tools', 'Knowledge Architecture', 'Interactive Demonstrations', 'Infrastructure', 'Writing', 'Photography', 'Position & Manifesto', 'Archived'.",
+      "id": "string (slug)",
+      "number": "integer (display order)",
+      "name": "string",
+      "intro": "string (paragraph rendered at the top of the group's section in grid view)"
+    }
+  ],
+
+  "works": [
+    {
+      "$comment": "The atoms of the catalog. Unified collection — a work can be software, writing, an image, a website, a methodology, or a talk, declared via `media`. Each work is a complete record. Rendered as a peak in the cartography view OR a card in the grid view; click opens an in-place card with the work's CTA to its canonical home.",
+
+      "id": "string (slug, kebab-case). $comment: Stable identifier — never change after initial publication. Used as the target value in relationships. Globally unique across all works regardless of media.",
+
+      "name": "string. $comment: Display name. Includes apostrophes, accents, and punctuation as needed.",
+
+      "native_script": "string | null. $comment: Japanese/Sanskrit/etc. characters for works with native-language names (歩, 観鷹, 経, 段取り, 書道, 聴く). Renders prominently on the card.",
+
+      "native_translation": "string | null. $comment: English meaning of the native script. Renders as tooltip or parenthetical.",
+
+      "hero": "string | null. $comment: Tagline/positioning line. Renders on the card if present.",
+
+      "importance": "integer 1-10. $comment: Manual editorial significance ranking. Drives peak height in the cartography directly (importance=10 → tallest peaks; importance=1 → low-amplitude features). 10 = permanent (Sageframe itself only); reserve carefully. Also read by the Resonance Field on atmarcus.net for ripple reach, wavelength, lifespan, and label size. The integer is the input — no composite calculation downstream.",
+
+      "color": "string | null (hex). $comment: Work-specific color for visual identity across the catalog (accent on card, town tint in cartography). Null falls back to group color.",
+
+      "featured": "boolean. $comment: Curatorial flag, orthogonal to status. Featured works get fuller cards with imagery; non-featured renders as compact catalog-tier listing.",
+
+      "media": [
+        "string. $comment: Form the work takes. Controlled vocabulary: 'software' | 'writing' | 'website' | 'image' | 'talk' | 'methodology'. Multi-valued — a work can be more than one (Pink Teaming is ['website', 'writing']; Resonance Field is ['website', 'software']; an annotated photograph is ['image', 'writing'])."
+      ],
+
+      "group": "string (references work_groups.id). $comment: Exclusive grouping — exactly one. Drives section placement in grid view and group-filter behavior in cartography view.",
+
+      "themes": [
+        "string. $comment: Curatorial themes from theme_vocabulary. 1–3 per work. Captures the *concern* the work addresses — the lens through which it can be read, as distinct from tags (which describe topical/technical content). Drives filter behavior: filtering by theme produces a Venice where works sharing that theme are the prominent peaks."
+      ],
+
+      "status": "shipped | live | in-development | scaffolded | archived | published | near-publication. $comment: Controlled vocabulary. 'shipped' = software in production. 'live' = public web piece, manifesto, or always-on demonstration. 'in-development' = active build, not yet public. 'scaffolded' = Kamae chain committed, first hos underway. 'archived' = no longer active, kept as timeline marker. 'published' = position paper, manifesto, or essay in its final form. 'near-publication' = imminent publication.",
+
+      "tags": [
+        "string. $comment: Multi-valued, fine-grained, free-vocabulary descriptors. Describe what the work *is* (technically, topically). Examples: 'computer vision', 'pedagogy', 'safety practice', 'homelab', 'command-line', 'critical-ai'. Distinct from themes (which capture the *concern*). Tags drive faceted filtering. Many tags per work; theme-vocabulary stays small."
+      ],
+
+      "repo": "string | null. $comment: GitHub URL. Null for works without a public repo — essays, manifestos that are link-only, methodologies that are documentation-only.",
+
+      "license": "string | null. $comment: License identifier — 'CC BY-NC-ND 4.0', 'MIT', 'Apache-2.0', 'Proprietary'. Renders as a small badge on the card if present.",
+
+      "deployment": [
+        {
+          "$comment": "Live deployment locations — the always-link targets. The first entry is canonical (the CTA on the card links here). Multiple per work: a tool can be on PyPI, GitHub, a sageframe.net subdomain, and a third-party host. An essay has its Substack URL. A manifesto has its domain.",
+          "label": "string. $comment: Human-readable label ('live tool', 'PyPI package', 'GitHub repo', 'Substack', 'Payhip product page')",
+          "url": "string | null"
+        }
+      ],
+
+      "tech_stack": "string | null. $comment: One-line summary of technologies. Populated when media includes 'software'. Null otherwise.",
+
+      "publication_date": "ISO 8601 date | null. $comment: Date the writing was published. Populated when media includes 'writing'. Null otherwise.",
+
+      "outlet": "string | null. $comment: Publishing venue — 'Substack — Constructive Interference', 'Medium', 'Aeon Magazine', 'LinkedIn essay'. Populated when media includes 'writing'.",
+
+      "word_count": "integer | null. $comment: Approximate word count for writing. Optional even when media includes 'writing'.",
+
+      "embed_url": "string | null. $comment: Embed source for video/audio talks. Populated when media includes 'talk'.",
+
+      "personal_stake": "string | null. $comment: Optional first-person context for why the work exists. Renders on the card as a separate small block when present, distinct from short_description.",
+
+      "created": "ISO 8601 date. $comment: First-public or first-shipped date. Distinct from last_updated, which moves on every change. Drives chronological populate animation in the cartography (towns fade in over time in publication-date order).",
+
+      "last_updated": "ISO 8601 date. $comment: Per-work update date. Helps visitors see what's recent.",
+
+      "short_description": "string. $comment: README-voice, one paragraph. The 'what it is, what it does' summary. Renders at the top of the card on click. May be truncated by the renderer if too long for card real estate.",
+
+      "substantive_description": [
+        "string. $comment: Substack-voice paragraphs, one item per paragraph. The intellectual register. NOT rendered on the catalog under the current always-link architecture — lives in the data for export to other surfaces (atmarcus.net research entries, social cards, README content)."
+      ],
+
+      "relationships": [
+        {
+          "$comment": "Structured edges to other works — the graph data underlying the cartography. Each relationship is a typed edge from this work to another. Cross-media: a writing can target a software work, an image can target a writing. Renders as a cartographic feature per relationship type; see rendering.relationship_features for the type-to-feature mapping.",
+          "target": "string (work id — must reference an existing works[].id)",
+          "type": "descends_from | paired_with | companion_to | operationalizes | personalizes | integrates | succeeded_by | succeeds | validates | uses_pedagogy_of | documents | argues_for | responds_to | illustrates. $comment: Controlled vocabulary. descends_from = methodology lineage. paired_with = symmetric structural pair (declare once, renderer treats bidirectional). companion_to = asymmetric support, also symmetric in rendering. operationalizes = tool implements methodology/taxonomy. personalizes = layer that calibrates to individual. integrates = planned future incorporation. succeeded_by / succeeds = temporal succession (declare once, renderer infers inverse). validates = proof relationship. uses_pedagogy_of = shared pedagogical pattern. documents = writing documents how a software/methodology works. argues_for = writing argues a position another work demonstrates. responds_to = writing-to-writing. illustrates = image illustrates writing.",
+          "strength": "integer 1, 2, or 3 | null. $comment: For 'documents'-type edges ONLY. 1 = topical (writing shares topical territory with the target). 2 = named (writing names the target explicitly). 3 = specifically-about (writing is specifically about the target). Drives town placement (barycentric weighting) and settlement size (log of sum of strengths) in the cartography. For all other edge types, should be null. For documents-type edges where strength is unspecified, defaults to 1 (topical).",
+          "articulated_in": "string (work id) | null. $comment: Optional reference to a writing-type work that articulates this specific relationship. When present, clicking on the corresponding cartographic feature opens a card linking to that articulating essay. Example: the descends_from edge from Hōzō to the Ho System is articulated_in: 'three-hours' (since Three Hours is the essay that articulates the descent). Most edges have no articulating essay and leave this null.",
+          "note": "string | null. $comment: Optional free-form context for this specific edge. Renders as a tooltip on the cartographic feature or as a brief line when the card surfaces related works."
+        }
+      ],
+
+      "images": {
+        "$comment": "Catalog-owned imagery. Always-link architecture means images here are for the catalog's own rendering, not embeds of the live work. For works with media including 'image' (photography), the gallery IS the work and links out to the canonical photography destination.",
+        "preview": {
+          "$comment": "Canonical image for the card and cartographic feature hover. The 'face' of the work in the catalog. Null acceptable for catalog-tier works without imagery.",
+          "url": "string",
+          "alt": "string"
+        },
+        "gallery": [
+          {
+            "$comment": "Optional additional imagery. Less critical under the one-page architecture; may render on the card as a small thumbnail strip if present.",
+            "url": "string",
+            "alt": "string",
+            "caption": "string | null"
+          }
+        ]
+      },
+
+      "sort_order_within_group": "integer (lower = earlier; default 100). $comment: Editorial control over order within a work_group in grid view. Use sparse values (10, 20, 30) so new works can be inserted between existing ones without renumbering.",
+
+      "_optional_typed_extensions": {
+        "$comment": "Escape hatch for work-specific structured data that doesn't fit the standard fields. Under always-link architecture, generally not used — works with structured content (Pink Teaming declarations, Ho kokoroe, DI classes) keep that content at their canonical home and the catalog links out. Reserved for works that have no canonical home of their own and benefit from structured display on the card."
+      }
+    }
+  ]
+}
