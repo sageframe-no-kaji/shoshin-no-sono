@@ -280,6 +280,8 @@ This is a communication tool, not a learning vehicle. The technical skills above
 
 What I am explicitly *not* trying to learn: whether having the site live affects how I make the next work. The site is a communication tool. A means, not an end. The next work will be made because it needs to be made, regardless of whether the previous work has been plotted onto the map. The map is downstream of the work, not upstream.
 
+How to architect a static web frontend that orchestrates LLM API calls via a serverless Worker proxy — a transferable pattern for any future tool that needs in-browser AI capability without exposing API keys.
+
 ---
 
 ## Open Questions
