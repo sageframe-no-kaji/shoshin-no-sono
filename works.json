@@ -2,7 +2,7 @@
   "document": {
     "title": "初心の園 — Shoshin no Sono",
     "author": "Andrew T. Marcus",
-    "last_updated": "2026-05-18",
+    "last_updated": "2026-06-11",
     "purpose": "Public-facing catalog of the Sageframe body of work. Routes visitors to canonical homes; demonstrates coherence through typed relationships rendered as interference cartography."
   },
 
@@ -1048,6 +1048,335 @@
         "gallery": []
       },
       "sort_order_within_group": 10
+    },
+    {
+      "id": "falcon-cameras",
+      "name": "I Built a Computer Vision System for Harvard's Falcon Cameras",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 5,
+      "color": null,
+      "featured": false,
+      "media": ["writing"],
+      "group": "constructive-interference",
+      "themes": ["craft"],
+      "status": "published",
+      "tags": ["essay", "methodology-debut", "build-story", "computer-vision"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com/p/ho-process-methodology"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-02-10",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-10",
+      "last_updated": "2026-05-17",
+      "short_description": "The Ho Process methodology debut, paired with the Kanyō result. The build story of the Harvard falcon-camera computer vision system: what it means for a practitioner with no formal engineering background to ship production AI in six weeks under a disciplined methodology.",
+      "substantive_description": [
+        "The essay that introduced the Ho Process in public, told through the build it produced. The methodology argument and the Kanyō evidence arrive together: the discipline is the story, and the deployed system at Harvard is the receipt."
+      ],
+      "relationships": [
+        {
+          "target": "kanyo",
+          "type": "documents",
+          "strength": 3,
+          "articulated_in": null,
+          "note": "The Kanyō build story."
+        },
+        {
+          "target": "ho-system",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": "The Ho Process methodology debut."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 40
+    },
+    {
+      "id": "three-hours",
+      "name": "Three Hours",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 6,
+      "color": null,
+      "featured": false,
+      "media": ["writing"],
+      "group": "constructive-interference",
+      "themes": ["craft", "continuity"],
+      "status": "published",
+      "tags": ["essay", "shu-ha-ri", "methodology", "shipping-story"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com/p/three-hours"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-03",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-03",
+      "last_updated": "2026-05-17",
+      "short_description": "The Shu-Ha-Ri argument as the Hōzō shipping story. The same practitioner who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime — 278 tests, 99% coverage — and the essay traces what changed: not the projects, the practitioner.",
+      "substantive_description": [
+        "The methodology's claim isn't you can ship one thing this way. The methodology's claim is you become someone who ships this way. Three Hours is that claim made narrative — the documented progression from six weeks to three hours, with the test counts and coverage numbers a skeptical reader requires."
+      ],
+      "relationships": [
+        {
+          "target": "hozo",
+          "type": "documents",
+          "strength": 3,
+          "articulated_in": null,
+          "note": "The Hōzō shipping story."
+        },
+        {
+          "target": "ho-system",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": "The Shu-Ha-Ri argument in practice."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 50
+    },
+    {
+      "id": "the-same-lever",
+      "name": "The Same Lever",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 6,
+      "color": null,
+      "featured": false,
+      "media": ["writing"],
+      "group": "constructive-interference",
+      "themes": ["agency", "knowledge"],
+      "status": "published",
+      "tags": ["manifesto", "education", "capability-amplification"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com/p/the-same-lever"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-31",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-31",
+      "last_updated": "2026-05-17",
+      "short_description": "Manifesto on AI as universal capability amplifier, and the educational system critique that follows: education cannot absorb AI the way it absorbed prior technologies, because this technology amplifies the very capability education exists to develop.",
+      "substantive_description": [
+        "The institutional argument in the body of work. Prior technologies extended what students could produce; this one amplifies what they can become — and the same lever moves in every hand. The essay argues that institutions built to ration capability development cannot simply bolt on a tool that amplifies it universally."
+      ],
+      "relationships": [
+        {
+          "target": "glassroom",
+          "type": "argues_for",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The institutional argument Glassroom demonstrates: education cannot absorb AI as it absorbed prior technologies."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 60
+    },
+    {
+      "id": "the-empty-container",
+      "name": "The Empty Container",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 5,
+      "color": null,
+      "featured": false,
+      "media": ["writing"],
+      "group": "constructive-interference",
+      "themes": ["knowledge", "agency"],
+      "status": "published",
+      "tags": ["position-paper", "educational-accountability", "empirical-audit"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "atmarcus.net position paper",
+          "url": "https://atmarcus.net/work/empty-container"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-04-15",
+      "outlet": "atmarcus.net",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-15",
+      "last_updated": "2026-05-17",
+      "short_description": "Companion position paper to Glassroom: the empirical audit of variance in deployed Google Classroom implementations. What the instrument surfaced, formalized as the argument the data makes about institutional opacity.",
+      "substantive_description": [
+        "The paper that does for Glassroom what Three Hours does for Hōzō — articulates in argument form what the artifact demonstrates in operation. The empirical audit shows implementation variance between teachers that the platform's own interface obscures, and makes the case that the opacity is structural, not incidental."
+      ],
+      "relationships": [
+        {
+          "target": "glassroom",
+          "type": "documents",
+          "strength": 3,
+          "articulated_in": null,
+          "note": "The companion position paper: the empirical audit of variance in deployed Google Classroom implementations."
+        },
+        {
+          "target": "the-same-lever",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The empirical companion to The Same Lever's institutional argument."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 70
+    },
+    {
+      "id": "the-fourth-boundary",
+      "name": "The Fourth Boundary",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 5,
+      "color": null,
+      "featured": false,
+      "media": ["writing"],
+      "group": "constructive-interference",
+      "themes": ["relationship", "attention"],
+      "status": "published",
+      "tags": ["essay", "sycophancy", "safety", "sustained-collaboration"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com/p/the-fourth-boundary"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-04-08",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-08",
+      "last_updated": "2026-05-17",
+      "short_description": "Recursive sycophancy in sustained AI collaboration — the conceptual foundation for the Pink Teaming discipline. What voice integrity requires when the collaborator is structurally agreeable.",
+      "substantive_description": [
+        "The essay that names the failure mode the rest of the safety conversation misses: not a single bad output but a gradient of accommodation that compounds across months of sustained collaboration, invisible in any one session. The Fourth Boundary is the conceptual foundation that Pink Teaming turns into practice."
+      ],
+      "relationships": [
+        {
+          "target": "pink-teaming",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": "The conceptual foundation: recursive sycophancy in sustained AI collaboration."
+        },
+        {
+          "target": "destructive-interference",
+          "type": "documents",
+          "strength": 1,
+          "articulated_in": null,
+          "note": "Shares the drift-and-judgment-erosion territory the taxonomy diagnoses."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 80
+    },
+    {
+      "id": "judgment-at-scale",
+      "name": "Judgment at Scale",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 5,
+      "color": null,
+      "featured": false,
+      "media": ["writing"],
+      "group": "constructive-interference",
+      "themes": ["agency", "knowledge"],
+      "status": "published",
+      "tags": ["position-paper", "ai-governance", "civic-infrastructure"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "atmarcus.net position paper",
+          "url": "https://atmarcus.net/work/judgment-at-scale"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-04-15",
+      "outlet": "atmarcus.net",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-15",
+      "last_updated": "2026-05-17",
+      "short_description": "Long-form position paper on AI governance as civic infrastructure: the structural argument that Glassroom and Satori both demonstrate at the architectural level. Where the boundaries are drawn between generation, execution, and narration determines what AI is allowed to do and what humans evaluate.",
+      "substantive_description": [
+        "The essay that articulates the pairing: Satori uses layer separation to protect downstream consumers from upstream AI generation; Glassroom uses it to surface institutional data structured to be obscure. Same principle, inverse directions, one argument — governance lives in the architecture, not in the model."
+      ],
+      "relationships": [
+        {
+          "target": "glassroom",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": "The structural argument Glassroom demonstrates at the architectural level."
+        },
+        {
+          "target": "satori",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": "The structural argument Satori demonstrates at the architectural level."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 90
     }
   ]
 }
