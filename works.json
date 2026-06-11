@@ -158,6 +158,311 @@
         "gallery": []
       },
       "sort_order_within_group": 10
+    },
+    {
+      "id": "dandori",
+      "name": "Dandori",
+      "native_script": "段取り",
+      "native_translation": "Preparation; the order of things",
+      "hero": "A prompt is a sentence; a handoff is an artifact.",
+      "importance": 6,
+      "color": null,
+      "featured": true,
+      "media": ["methodology"],
+      "group": "methodology",
+      "themes": ["craft", "agency"],
+      "status": "shipped",
+      "tags": ["methodology", "agent-infrastructure", "published", "claude-skill", "human-ai-collaboration"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Claude Skill (GitHub)",
+          "url": null
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-20",
+      "last_updated": "2026-05-17",
+      "short_description": "Methodology for autonomous coding agent prep discipline. A prompt is a sentence; a handoff is an artifact. Dandori transforms planning conversations into bounded markdown specs that the agent reads as one unit of work. Published as a Skill on GitHub. Sits alongside the Ho System: where Ho structures the practitioner's session, Dandori structures the agent's brief.",
+      "substantive_description": [
+        "The current generation of coding agents is capable of running unattended for hours on tasks they will get spectacularly wrong if briefed casually. The failure mode is structural: prompts are sentences, and sentences are the wrong artifact for autonomous work. Dandori is the answer in methodology form — a discipline for converting planning conversations into bounded, reviewable specifications the agent treats as one unit of work. The metaphor is correct: a Japanese workshop's dandori is the prep that makes the skilled labor possible.",
+        "The deeper argument is about authorship of agent work: who decided what gets built, and where in the artifact chain that decision is recorded. Without Dandori the answer is nobody, nowhere. With Dandori the answer is the practitioner, in the spec. That distinction is the difference between agent work that's auditable and agent work that's autopilot."
+      ],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Where Ho structures the practitioner's session, Dandori structures the agent's brief."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
+    },
+    {
+      "id": "kanyo",
+      "name": "Kanyō",
+      "native_script": "観鷹",
+      "native_translation": "Contemplating falcons",
+      "hero": "The existence proof.",
+      "importance": 8,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "production-systems",
+      "themes": ["craft", "attention"],
+      "status": "shipped",
+      "tags": ["software", "production-system", "computer-vision", "yolov8", "wildlife-monitoring", "harvard"],
+      "repo": "https://github.com/sageframe-no-kaji/kanyo",
+      "license": null,
+      "deployment": [
+        {
+          "label": "Live viewer",
+          "url": "https://kanyo.sageframe.net"
+        },
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/kanyo"
+        }
+      ],
+      "tech_stack": "Python, FastAPI, YOLOv8, React, Tailwind, Docker; NVIDIA, Intel, and CPU-only hardware profiles",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-01-20",
+      "last_updated": "2026-05-17",
+      "short_description": "Production computer vision pipeline for wildlife monitoring. Streams from YouTube (or any rtsp/http source), runs YOLOv8 bird detection with a debounced state machine to suppress false positives, records arrival/departure clips, sends Telegram notifications. Companion web viewer provides a public event archive with HKSV-style timeline, visit statistics, live stream embeds. Deployed at Harvard's Memorial Hall monitoring peregrine falcons, developed for Nobel laureate economist Claudia Goldin and Harvard FAS. Species-agnostic architecture. Built from zero development experience in six weeks using the Ho System. 114 passing tests.",
+      "substantive_description": [
+        "Kanyō is the existence proof. The methodology question — can a practitioner with strong systems thinking but no formal engineering background ship production AI? — needed an answer that wasn't a position paper. Six weeks. 114 tests. Deployed at Harvard, monitoring peregrine falcons through an academic partnership with a Nobel laureate. The system is real, and it works.",
+        "Beyond the personal evidence, Kanyō makes a more interesting argument: the kind of work this is — domain-specific computer vision with research-grade requirements — has historically required either a specialist engineering team or compromise on quality. The Ho System collapses the dichotomy. The deployment context matters: a peregrine falcon is not a benchmark. Harvard FAS is not a test environment. The system runs in production for a researcher who needed it to work. That's the evidence the methodology needed."
+      ],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "validates",
+          "strength": null,
+          "articulated_in": "falcon-cameras",
+          "note": "Six weeks, 114 tests, deployed at Harvard — the methodology's first existence proof."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    },
+    {
+      "id": "hozo",
+      "name": "Hōzō",
+      "native_script": "宝蔵",
+      "native_translation": "Treasury",
+      "hero": "Three hours, 278 tests, 99% coverage.",
+      "importance": 7,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "production-systems",
+      "themes": ["sovereignty", "continuity", "infrastructure"],
+      "status": "shipped",
+      "tags": ["software", "production-system", "zfs", "backup-orchestration", "infrastructure", "ho-system-validation"],
+      "repo": "https://github.com/sageframe-no-kaji/hozo",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/hozo"
+        }
+      ],
+      "tech_stack": "Python, syncoid, Wake-on-LAN, WebAuthn, bootstrap web UI",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-25",
+      "last_updated": "2026-05-17",
+      "short_description": "Wake-on-demand ZFS backup orchestrator. Pushes ZFS snapshots to a low-power remote backup node using syncoid over SSH, waking the node only when a backup run is scheduled or triggered. Runs entirely on the source machine — no agent needed on the remote. Bootstrap web UI with WebAuthn passkey auth provides job dashboard, run history, log viewer, break-glass DR restore. 278 tests, 99% coverage, zero lint or type errors. Built in approximately three hours using the Ho System.",
+      "substantive_description": [
+        "Hōzō is the second proof, and the more interesting one. Kanyō took six weeks; Hōzō took three hours. The delta is not about the projects' relative complexity — it's about the practitioner's progression through Shu, Ha, and Ri. The same person who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime, with higher test coverage and lower error rate.",
+        "The methodology's claim isn't you can ship one thing this way. The methodology's claim is you become someone who ships this way. Hōzō is the documented evidence. The 278 tests aren't decoration. The 99% coverage isn't decoration. They're the receipts a skeptical reader requires before believing that a non-engineer running a disciplined practice can produce work indistinguishable from senior engineering output."
+      ],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "validates",
+          "strength": null,
+          "articulated_in": "three-hours",
+          "note": "The Shu-Ha-Ri progression made shippable: three hours, 278 tests, 99% coverage."
+        },
+        {
+          "target": "kanyo",
+          "type": "descends_from",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The Kanyō-to-Hōzō delta — six weeks to three hours — is the practitioner-progression evidence."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
+    },
+    {
+      "id": "kinhin",
+      "name": "Kinhin",
+      "native_script": "経行",
+      "native_translation": "Walking meditation",
+      "hero": "The zazen of the system, not the workshop.",
+      "importance": 5,
+      "color": null,
+      "featured": false,
+      "media": ["software"],
+      "group": "methodology",
+      "themes": ["craft", "continuity"],
+      "status": "in-development",
+      "tags": ["software", "instrument", "methodology-pilot", "practitioner-workbench"],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": "Python 3.12, FastAPI, PostgreSQL, HTMX, Docker Compose",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-10",
+      "last_updated": "2026-05-17",
+      "short_description": "Structured workbench application for Ho System practitioners. A place to define a project arc, sequence the hos within it, write structured devlogs, track progression through Shu-Ha-Ri stages, build a navigable learning trajectory over time. MVP deliberately excludes IDE integration, git interaction, and AI assistance — it is a record-keeping and reflection tool, not an execution environment. The second major Ho System pilot (after Kanyō), built using the methodology it implements.",
+      "substantive_description": [
+        "A practice you can't see is a practice you can't improve. Kinhin makes Ho System practice visible to its own practitioner — the arc of a project, the rhythm of its hos, the structural rotation between modes, the visible movement through Shu, Ha, and Ri. The deliberate exclusion of execution capability is the design point: Kinhin is the zazen of the system, not the workshop.",
+        "The deeper argument is that mastery requires reflection, and reflection requires infrastructure — the same infrastructure that lets a martial artist watch tape of their own practice or a clinician keep a procedural log. The model has near-infinite memory of code patterns and zero memory of your learning trajectory. Kinhin restores the asymmetry the right way around."
+      ],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "operationalizes",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The practitioner workbench: arcs, hos, devlogs, and Shu-Ha-Ri progression as software."
+        },
+        {
+          "target": "kanyo",
+          "type": "descends_from",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The second major Ho System pilot, after Kanyō — demonstrating the methodology's generalizability."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30
+    },
+    {
+      "id": "satori",
+      "name": "Satori — Internal Affairs",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "Governance lives in architecture, not in the model.",
+      "importance": 7,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "production-systems",
+      "themes": ["knowledge", "agency"],
+      "status": "in-development",
+      "tags": ["software", "demonstration", "ai-governance", "medical-simulation", "deterministic-engine"],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": "Python, Pydantic, SvelteKit, TypeScript; four-package monorepo",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": "Built for my teenage daughter, who lives with epilepsy from a TBI. She loves medical dramas and has spent enough time in hospitals to want to understand the medicine.",
+      "created": "2026-04-28",
+      "last_updated": "2026-05-17",
+      "short_description": "Interactive medical mystery simulator. Players make genuine diagnostic decisions under pressure — ordering tests, forming differential diagnoses, managing uncertainty — with death as a possible consequence of error. Built as a demonstration of AI governance. Four-package monorepo: Anamnesis (LLM case-generation pipeline at design-time), Satori (deterministic game engine running frozen cases with no runtime generation), an LLM client abstraction layer, and Internal Affairs (SvelteKit frontend). Cases are generated once and frozen as immutable JSON — gameplay is deterministic and auditable even though the cases themselves are AI-authored.",
+      "substantive_description": [
+        "Version one was a single prompt: present a case, let the LLM improvise. That broke fast — facts invented, diagnoses changed mid-game, contradictions everywhere. Version two separates generation, execution, and narration into three layers. An LLM pipeline grounded in rigorous medical research generates cases from structured seeds; cases are validated against a JSON schema and frozen. A deterministic engine runs gameplay — actions, time, vitals, deterioration, outcomes. A final LLM layer adds narrative color at runtime, tightly bounded: it describes what happens, never decides what's medically true. Four boundaries enforce these separations: Freeze, Truth, Narration, Provider.",
+        "This is what AI in safety-sensitive domains has to do. The toy version is a medical game for one teenager. The general argument is for every regulated domain: healthcare, finance, law. Where you draw the boundaries between generation, execution, and narration determines what AI is allowed to do, what humans evaluate, and what factual integrity is preserved. Satori is the working demonstration. Its paired companion in this body of work is Glassroom — same architectural principle, inverse direction."
+      ],
+      "relationships": [
+        {
+          "target": "glassroom",
+          "type": "paired_with",
+          "strength": null,
+          "articulated_in": "judgment-at-scale",
+          "note": "Same architectural principle, inverse direction: Satori protects downstream consumers from upstream AI generation; Glassroom surfaces institutional data structured to be obscure. Both built for the same daughter."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 40
+    },
+    {
+      "id": "glassroom",
+      "name": "Glassroom",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The system's defense was opacity. I built the instrument that removed it.",
+      "importance": 8,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "production-systems",
+      "themes": ["agency", "knowledge"],
+      "status": "shipped",
+      "tags": ["software", "production-system", "research-instrument", "educational-accountability", "playwright"],
+      "repo": "https://github.com/sageframe-no-kaji/glassroom",
+      "license": null,
+      "deployment": [
+        {
+          "label": "Live tool",
+          "url": "https://glassroom.sageframe.net"
+        },
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/glassroom"
+        }
+      ],
+      "tech_stack": "Playwright (browser automation), Docker",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": "Built for my daughter, whose rare neurological condition defies institutional understanding. The school system she was inside had a tool that produced data about her education while being structured to make that data illegible to a parent trying to advocate for a child the institution didn't know how to see.",
+      "created": "2026-04-10",
+      "last_updated": "2026-05-17",
+      "short_description": "Open-source research instrument that scrapes Google Classroom at the student level and aggregates assignment data into a unified dashboard, CSV export, and PDF downloader — without requiring any Google API credentials. Playwright browser automation operates entirely within a student account, surfacing implementation variance between teachers that Google's own interface deliberately obscures: assignment counts, due-date usage, completion rates, structural patterns across all classes at once. Built originally for IEP advocacy. Harvard GSE research collaboration in pursuit for a multi-site empirical audit.",
+      "substantive_description": [
+        "Assignments scattered across teachers, no aggregate view, no way to compare implementation between classrooms, no way to demonstrate the variance that was visibly affecting her. The system's defense was opacity. I built the instrument that removed it.",
+        "The architectural argument generalizes. Glassroom is the inverse companion to Satori: where Satori uses architecture to protect downstream consumers from upstream AI generation, Glassroom uses architecture to surface downstream institutional data that an upstream system was structured to obscure. Same principle of layer separation, deployed for inverse purposes. The pair makes the structural point: governance lives in the architecture, not in the model.",
+        "Both tools were built for the same daughter — different needs, same person being failed by existing options, same generalizable architectural argument extracted from a specific case of love and necessity. The pair is the work."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30
     }
   ]
 }
