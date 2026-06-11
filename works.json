@@ -463,6 +463,305 @@
         "gallery": []
       },
       "sort_order_within_group": 30
+    },
+    {
+      "id": "m4bookmaker",
+      "name": "m4Bookmaker",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "You own what you can hold, file by file, on your own machine.",
+      "importance": 5,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "production-systems",
+      "themes": ["sovereignty", "craft"],
+      "status": "shipped",
+      "tags": ["software", "production-system", "digital-sovereignty", "audiobooks", "desktop-app"],
+      "repo": "https://github.com/sageframe-no-kaji/m4bookmaker",
+      "license": null,
+      "deployment": [
+        {
+          "label": "Product site",
+          "url": "https://m4bookmaker.sageframe.net"
+        },
+        {
+          "label": "PyPI package",
+          "url": null
+        },
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/m4bookmaker"
+        }
+      ],
+      "tech_stack": "Python, PyQt5, FFmpeg",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-05",
+      "last_updated": "2026-05-17",
+      "short_description": "Converts folders of MP3 (or other audio) files into clean, properly-chaptered M4B audiobooks for personal use. Ships as a signed macOS app and Windows installer; also distributed as a PyPI package. Full pipeline: automatic chapter detection from filenames, interactive visual chapter editor with built-in audio player, batch queue processing, automatic audio repair for common encoding problems. One of the first tools built under the Ho System; the GUI-to-CLI symmetry was a deliberate architectural choice to keep it scriptable without sacrificing approachability.",
+      "substantive_description": [
+        "A small app with a large argument. m4Bookmaker exists because Audible's ecosystem treats audiobook ownership as a license rather than a possession — a contract that can be revoked, a format that won't move, a library that lives on someone else's server and at someone else's discretion. The technical solution is small (rebuild the M4B yourself from MP3s) and the philosophical position is large (you own what you can hold, file by file, on your own machine).",
+        "The deeper argument is digital sovereignty as a default rather than a niche concern. The Ho System made it shippable as a small project — concept to signed, packaged, distributed product in 3.5 days — but the position it embodies is structural. Every time a tool gets repossessed by its platform, a small piece of personal capacity dies. m4Bookmaker is the refusal of that pattern, sized to one specific failure."
+      ],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "validates",
+          "strength": null,
+          "articulated_in": null,
+          "note": "One of the first Ho System builds: concept to signed, packaged, distributed product in 3.5 days."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 50
+    },
+    {
+      "id": "pink-teaming",
+      "name": "Pink Teaming",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The cooperative counterpart to red teaming.",
+      "importance": 7,
+      "color": null,
+      "featured": true,
+      "media": ["website", "writing"],
+      "group": "constructive-interference",
+      "themes": ["relationship", "attention"],
+      "status": "live",
+      "tags": ["manifesto", "safety-practice", "research", "hermeneutics"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Manifesto site",
+          "url": "https://pinkteaming.net"
+        },
+        {
+          "label": "Practice essay",
+          "url": "https://pinkteaming.net/practice"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-04-25",
+      "outlet": "pinkteaming.net",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-25",
+      "last_updated": "2026-05-17",
+      "short_description": "The Pink Teaming manifesto. The cooperative counterpart to red teaming — where red teaming probes models adversarially for failure modes, pink teaming reads them with sustained hermeneutic attention to develop the practitioner's judgment. Companion to the Destructive Interference white paper. Site live; argument published.",
+      "substantive_description": [
+        "Most safety work on AI is adversarial or theoretical. Red teaming probes a single session for vulnerabilities. Theoretical safety reasons about ideal cases. Both miss the structural feature of how AI actually causes harm: the gradient of drift, sycophancy, and judgment erosion that compounds over months of sustained collaboration and is invisible in any one session. Pink Teaming is the missing layer — practitioner-side safety discipline that reads the model with sustained hermeneutic attention over time, surfacing the patterns that only emerge across extended use.",
+        "The deeper argument is about what safety thinking includes. Adversarial probing is necessary and insufficient. The practitioner — the person actually shipping AI-assisted work day after day — is operating in a different threat environment than the red team, and the discipline they need is structurally different. Pink Teaming names that discipline, models it, and argues that no AI safety program is complete without it."
+      ],
+      "relationships": [
+        {
+          "target": "destructive-interference",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Companion to the DI white paper; the two share the safety/diagnostic foundation."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    },
+    {
+      "id": "destructive-interference",
+      "name": "Destructive Interference",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The degradation is structural, not lexical.",
+      "importance": 7,
+      "color": null,
+      "featured": true,
+      "media": ["methodology"],
+      "group": "constructive-interference",
+      "themes": ["craft", "relationship"],
+      "status": "near-publication",
+      "tags": ["research", "taxonomy", "writing-craft", "diagnostics"],
+      "repo": "https://github.com/sageframe-no-kaji/constructive-interference",
+      "license": null,
+      "deployment": [
+        {
+          "label": "Craft essay companion",
+          "url": "https://destructiveinterference.com"
+        },
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/constructive-interference"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-17",
+      "last_updated": "2026-05-17",
+      "short_description": "A diagnostic taxonomy of eight named structural failure classes in AI-influenced writing: Pre-emptive Evaluation, Performed Urgency, Throat-Clear, Balanced Hedge, Significance Stamp, Mirror Summary, Emotional Instruction, Manufactured Transition. Each has a defined mechanism, a diagnostic test, and documented examples drawn from corpus analysis. The intellectual foundation of the whole Constructive Interference program. White paper near publication, not yet published. Operationalized via Kiku; deployed as a generative constraint in the atm-correspondence skill.",
+      "substantive_description": [
+        "The dominant conversation about AI writing degradation stops at vocabulary — the word \"delve,\" the em-dash. The vocabulary frame is wrong. The degradation is structural. Destructive Interference is the taxonomy that names what's actually happening: eight specific rhetorical and structural failure modes that survive vocabulary substitution because they're not about which words appear but about how arguments are made, evidence is staged, and the reader is positioned. Each pattern reads as good writing until you have the taxonomy, after which you can't unsee them.",
+        "The deeper argument: most prose now is collaborative prose, whether the writer acknowledges the collaboration or not. The question isn't whether AI is involved in writing — that ship has sailed — but whether the writer has the diagnostic apparatus to detect where the collaboration has degraded the work. Destructive Interference is that apparatus. The white paper formalizes the framework academically; the craft essay companion demonstrates the failures and the corrections in worked examples. The pair argues that practitioner-side quality discipline is a real subfield and Destructive Interference is its founding taxonomy."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
+    },
+    {
+      "id": "kiku",
+      "name": "Kiku",
+      "native_script": "聴く",
+      "native_translation": "Listen",
+      "hero": "A taxonomy without instrumentation is a position paper.",
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": ["software"],
+      "group": "constructive-interference",
+      "themes": ["relationship", "craft"],
+      "status": "shipped",
+      "tags": ["software", "research-instrument", "diagnostics", "nlp", "claude-api"],
+      "repo": "https://github.com/sageframe-no-kaji/kiku",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/kiku"
+        }
+      ],
+      "tech_stack": "Python (mypy strict, flake8, full test coverage), regex + Claude API; YAML-defined profiles",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-01",
+      "last_updated": "2026-05-17",
+      "short_description": "Hybrid regex + LLM extraction tool that processes AI conversation exports and surfaces patterns of language behavior. YAML-defined profiles enable two-tier detection: fast regex matching in Tier 1 for literal patterns, Claude API semantic classification in Tier 2 for patterns that resist rules. Built to operationalize the Destructive Interference taxonomy — the diagnostic framework needed an instrument that could scale. In active personal use; built to the full Ho verification stack.",
+      "substantive_description": [
+        "A diagnostic framework that can't scale to corpus is a diagnostic framework that can't generalize. Kiku is the operational answer — a two-tier detector that runs the DI taxonomy across the practitioner's accumulated AI conversation history at speed. The deeper argument is methodological: a taxonomy without instrumentation is a position paper. Instrumentation without a taxonomy is automated nothing. Kiku closes the loop. It makes the eight named failure classes actionable at corpus scale, which is the only scale at which sustained AI collaboration actually happens."
+      ],
+      "relationships": [
+        {
+          "target": "destructive-interference",
+          "type": "operationalizes",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Two-tier detection: regex for literal patterns, Claude API semantic classification for patterns that resist rules."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30
+    },
+    {
+      "id": "star-actually",
+      "name": "*, Actually",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "Enter with a question, navigate by relationship, stop when you understand enough.",
+      "importance": 6,
+      "color": null,
+      "featured": true,
+      "media": ["methodology"],
+      "group": "knowledge-architecture",
+      "themes": ["knowledge", "attention"],
+      "status": "published",
+      "tags": ["methodology", "knowledge-architecture", "progressive-disclosure", "published"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "First instance — SSH, Actually",
+          "url": "https://github.com/sageframe-no-kaji/ssh-actually"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-15",
+      "last_updated": "2026-05-17",
+      "short_description": "Domain-agnostic system for making relational technical knowledge navigable: enter with a question, navigate by concept relationship, stop when you understand enough. Progressive-disclosure design — every concept has depth layers (name, definition, usage, relationships, full theory) and the reader controls how far they go rather than being forced through a linear document. Organized around mental models and questions, not product features or chapters. SSH, Actually is the first complete content set. Replicable across any field where understanding concept relationships matters more than memorizing isolated facts.",
+      "substantive_description": [
+        "Most technical documentation is written by the people who built the thing for the people who already understand the field. The result is reference material that fails the actual job of getting someone from I have a question to I understand enough to act. *, Actually is the answer in methodology form: organize knowledge by question and relationship rather than by product surface. Let the reader dial the depth they need. Make the mental models explicit before the commands. Be honest about where the subject is confusing.",
+        "The deeper argument is about the relationship between knowledge architecture and reader agency. The reader of a typical man page has no agency — the content was structured for an internal logic that has nothing to do with what the reader wants to know. *, Actually is what reader agency looks like when the architecture is built to support it."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    },
+    {
+      "id": "ssh-actually",
+      "name": "SSH, Actually",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "Mental models before commands.",
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": ["website", "writing"],
+      "group": "knowledge-architecture",
+      "themes": ["knowledge", "infrastructure"],
+      "status": "live",
+      "tags": ["content", "knowledge-architecture", "ssh", "security", "htmx"],
+      "repo": "https://github.com/sageframe-no-kaji/ssh-actually",
+      "license": "CC BY-ND 4.0",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/ssh-actually"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-10",
+      "outlet": "Self-published static site",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-10",
+      "last_updated": "2026-05-17",
+      "short_description": "First content set in the *, Actually knowledge architecture system. Comprehensive guide to SSH, key pairs, hardware security keys, and modern authentication using a definition-first approach: mental models before commands, honest about where the subject is confusing, organized around concept relationships rather than product features. Covers SSH fundamentals, cryptographic primitives, FIDO2, passkeys, hardware security keys, with a companion commands reference. HTMX-based, terminal-aesthetic, keyboard-driven, zero framework overhead.",
+      "substantive_description": [
+        "A specific demonstration of *, Actually inside a specific domain whose existing documentation is famously bad. SSH is a system every working developer needs, every working developer pretends to understand, and almost no one was taught well. The official documentation describes commands; the field needs mental models. SSH, Actually starts where understanding starts and works outward through relationships.",
+        "The deeper argument is that the same approach generalizes. Any technical domain whose documentation has accumulated as features-of-tools rather than relationships-between-concepts has the same opportunity. SSH, Actually is the first instance of the answer."
+      ],
+      "relationships": [
+        {
+          "target": "star-actually",
+          "type": "operationalizes",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The first complete content set demonstrating the *, Actually system."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
     }
   ]
 }
