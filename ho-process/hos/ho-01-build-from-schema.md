@@ -1,6 +1,6 @@
 ---
 created: 2026-05-18
-status: draft
+status: ready
 type: ho-document
 project: shoshin-no-sono
 ho: "01"
@@ -15,127 +15,105 @@ builds-on:
 
 # ho-01 — Build the catalog from the schema (MVP sample)
 
-The schema (v4, with the four queued revisions applied) is the contract. This ho inhabits that contract — builds works.json entry by entry against it — until enough of the body of work is represented to exercise every media type and every major relationship pattern. The goal is not a complete catalog. The goal is a data model that has been stress-tested by real entries, with whatever doesn't fit logged for follow-up.
+The schema (v4) is the contract. This ho inhabits it — builds `works.json` entry by entry — until ~20 entries cover every media type and every major relationship pattern in the schema. The remaining works in the body of work hydrate later in ho-12.5 via the Founder, where bulk operation becomes the Founder's first real stress test.
 
-The MVP sample target is around twenty entries. Enough to: cover every media type in the schema (software, writing, website, image, talk, methodology); carry at least two of each major relationship type; populate enough of the work_groups vocabulary that the groups read as real; provide the density that Phase 2's cartography needs to look like a real map rather than a few scattered peaks. The remaining works in the body of work get hydrated later, in ho-12.5, using the Founder — which makes the Founder's first real test bulk-work, not a single new entry.
+**This ho is shaped unusually.** Standard ha hos either decompose into agent tasks or are a single bounded agent conversation. Ho-01 is neither. It runs as an interactive editorial loop in Claude Code — the practitioner drives turn by turn, the agent reads the schema and the inventory, proposes a schema entry, writes it to `works.json` after approval, and waits for the next instruction. `works.json` grows in real time on disk; the schema and inventory stay in context throughout. The Execute phase below specifies the recipe for that loop, not a spec for an agent to run autonomously. Naming this here so the shape isn't a surprise mid-session.
 
-**Out of scope:** Anything that renders this data. No Indexer (ho-02). No views (ho-03). Full hydration of the entire body of work (deferred to ho-12.5). The Worker (ho-11) does not exist yet — no API key handling needed; the work happens in this Project's chat space, calling no external services.
-
-**Resolves deferred decisions** (from the ho-overview):
-
-- Approach to hydration
-- MVP scope and threshold
-- Per-entry review and commit cadence
+**Out of scope:** Anything that renders this data (ho-02, ho-03). Full hydration of the body of work (ho-12.5). Any script, agent task, or automation. Any tooling the agent might propose building to "speed up" the work.
 
 ---
 
 ## Phase 1 — Think
 
-### Decision 1 — Approach: conversational in the Project chat space
+### Decision 1 — Environment: Claude Code, running in the repo root.
 
-Three patterns considered.
+Claude Code reads files from disk directly, which is the leverage that justifies it over a claude.ai chat. The agent reads `schema.json`, reads the inventory, reads and *writes* `works.json`. No copy-paste between chat and editor between turns. Schema validation runs in-process after each write, surfacing errors before commit. Git commits happen in the same session.
 
-**Pattern A — Python script.** Hand-built one-time-use script that calls the Anthropic API in batch, writes works.json, the practitioner reviews afterward in VSCode. Throwaway code. Real engineering effort (parse inventory, build manifest, schema validation, resumability, prompt template).
+### Decision 2 — MVP scope: ~20 entries that exercise every media type and every major relationship pattern.
 
-**Pattern B — Chat-based, conversational.** Open this Project's chat space. The schema is already in project knowledge. The inventory document is available. The practitioner pastes one work's inventory chunk per turn; the model proposes a schema entry; practitioner reviews, edits, commits to works.json before the next turn. Continuous editorial presence; no script build.
+The point is to stress-test the data model, not populate the production catalog. Full hydration of the remaining works happens in ho-12.5 via the Founder.
 
-**Pattern C — Hybrid.** Build a thin Python harness that the practitioner runs interactively. Skip — adds ceremony without removing the script-build cost.
+Composition target (selection happens during execution against the inventory):
 
-Pattern B. The bottleneck on this work is the practitioner's editorial judgment, not throughput. A script that runs in two minutes still requires an hour of review afterward — and that review happens detached from the moment of generation, with no opportunity to iterate the prompt against a specific proposal. The chat keeps the editorial loop continuous: see proposal, react, refine prompt or refine entry, move on. The "script" is the conversation; the file write is manual; works.json grows entry by entry in the same git workflow as everything else.
+- 3-4 methodologies — Ho System, Dandori, Destructive Interference, Pink Teaming taxonomy
+- 5-6 software works — Kanyō, Hōzō, m4Bookmaker, Glassroom, Medical Mystery Simulator, plus one more
+- 6-7 writing pieces — *Three Hours*, *The Same Lever*, *The Empty Container*, *Everything I Own*, *Precedential Thinking*, plus a couple of recent Constructive Interference essays
+- 2-3 websites — atmarcus.net, sageframe.substack.com, pinkteaming.net
+- 1 talk — Eureka 2010
+- 1 image work, if photography surfaces; otherwise skip
 
-Token budget across a long chat: schema (~5K tokens) + inventory manifest (~2K) + accumulated conversation (~20-25 turns × ~1K = ~25K). Total ~35K tokens. Comfortable inside Claude's 200K context window. If a single chat becomes unwieldy, split into multiple project chats; each new chat starts with the schema and manifest plus the existing works.json as context.
+### Decision 3 — Commit cadence: per-entry write to `works.json`, git commits every 5-7 entries, run in-session by the agent.
 
-### Decision 2 — MVP scope: ~20 entries exercising every media type and relationship pattern
+The agent writes each entry to `works.json` immediately after the practitioner approves the proposal. Schema validation runs after write. Every 5-7 entries, the agent runs `git add works.json && git commit -m "ho-01: add <names> (N of MVP)"` — practitioner reviews the diff before each commit.
 
-Two patterns considered.
+### Discoveries deferred to execution
 
-**Pattern A — Full hydration.** All 40-50 works in the body of work, hydrated in ho-01. Maximum data for downstream hos to work against; one big editorial session.
+Things that resolve during the work, not before. Logged so observations get captured rather than lost:
 
-**Pattern B — MVP sample.** ~20 entries selected to exercise every media type and every major relationship pattern. Smaller editorial session; full hydration deferred to ho-12.5 where it becomes the Founder's first real test.
-
-Pattern B. The point of ho-01 is to stress-test the data model with real entries, not to populate the production catalog. Twenty entries is enough to exercise every dimension of the schema. Doing the remaining works through the Founder later validates the Founder against bulk operation, which is a much stronger test than adding a single hypothetical new work to a populated catalog.
-
-**MVP composition target (~20 entries):**
-
-The practitioner picks the specific works during execution. The composition target is the shape, not the list:
-
-- **At least 3-4 methodologies** (Ho System, Dandori, Destructive Interference, Pink Teaming taxonomy or similar) — to exercise the methodology media type, the descends_from / companion_to / operationalizes relationships, and theme="craft"
-- **At least 5-6 software works** (Kanyō, Hōzō, m4Bookmaker, Glassroom, Medical Mystery Simulator, one or two more) — to exercise software media, tech_stack and license fields, the operationalizes relationship from methodology, and a range of statuses (shipped, in-development)
-- **At least 6-7 writing pieces** (Three Hours, The Same Lever, The Empty Container, Everything I Own, Precedential Thinking, and a couple from the recent essays) — to exercise writing media, publication_date and outlet fields, the documents relationship with strength variation (1/2/3), and the responds_to / argues_for relationships
-- **At least 2-3 websites** (atmarcus.net, sageframe.substack.com, pinkteaming.net) — to exercise website media and multi-media works (Pink Teaming is website + writing)
-- **At least 1 talk** (Eureka 2010 talk) — to exercise talk media and embed_url
-- **Possibly 1 image work** if photography is ready to surface; otherwise skip until photography subsystem activates
-
-Total: ~20-22 entries. Selection happens during execution against the inventory document — the practitioner picks works that exercise the schema rather than works that are most important.
-
-### Decision 3 — Review and commit cadence: per-entry, in chat, with works.json updated immediately
-
-Two patterns considered.
-
-**Pattern A — Batch review.** Generate multiple entries in chat without committing. Review at the end. Commit to works.json in one pass.
-
-**Pattern B — Per-entry commit.** After each entry, the practitioner edits as needed in chat, then writes that single entry into works.json. Subsequent entries see the growing works.json as context (their relationships can reference real existing IDs).
-
-Pattern B. Per-entry commit makes each entry's relationship targets concrete — the model proposing a relationship can see what's actually in works.json, not just what's in the inventory manifest. Edit-and-commit also keeps the conversation focused on the entry currently in front of the practitioner; no batch backlog to track.
-
-The works.json file is edited directly in VSCode between turns. Schema validation runs as VSCode flags violations against the bound schema. The file is committed to git in batches at natural pauses (every 5-7 entries, or at end of session) with messages like `ho-01: add Ho System, Dandori, Hōzō (3 of MVP)`.
-
-### Attention items (not decisions; things to watch for as execution surfaces them)
-
-These are not deferred decisions — they're places the work is likely to discover something. Logged here so observations get captured during execution rather than lost.
-
-**Schema gaps.** Fields that don't fit a particular work cleanly. Examples likely to surface: a methodology that has no `deployment` (it's documentation-only, no canonical URL); a website that is itself the deployment; a talk that has no `tech_stack` but is software-adjacent. If a work needs a field the schema doesn't have, log it.
-
-**Theme vocabulary stress.** The current eight themes are candidates. Some works will probably want a theme not in the vocabulary (e.g., something specifically about *humor*, or *play*, or *embodiment*). Log the gap; decide later whether to add a theme or whether tag-level vocabulary covers it.
-
-**Relationship grammar coverage.** Some relationship types may turn out unused or rare in the MVP sample. That's fine — they're available for later works. More concerning: relationships between works that exist intuitively but no relationship type fits. If a real relationship has no type, log it; the relationship grammar may need a new type.
-
-**Description register.** The schema has `short_description` (README-voice, one paragraph) and `substantive_description` (Substack-voice, paragraphs). The inventory document has its own two registers that may not map cleanly. If the model produces short descriptions that read as too long, or substantive ones that read as the wrong voice, the prompt convention needs sharpening — or the schema's register definitions need clarification.
-
-**Work group vocabulary.** The schema lists candidate work_groups ("Methodology", "Production Systems", "Constructive Interference Tools", etc.) but flags them as "review during seed conversation." This MVP is that review. If a work doesn't fit any group cleanly, or two groups seem to fight over the same works, log the gap.
-
-**Importance distribution.** If every work ends up rated 7-9, the scale is collapsing. If too many are rated 10, the "permanent" reservation isn't holding. Watch the distribution as it builds. Recalibrate during the run if needed.
-
-**Articulated_in usage.** This new field is optional and probably mostly null in v1, but some relationships have obvious articulating essays (Three Hours articulates Hōzō's descent from Ho System; The Empty Container articulates Glassroom's pedagogy). If the model under-proposes articulated_in, prompt for it. If it over-proposes (every edge gets one), tighten.
+- **Schema gaps.** Fields a particular work doesn't fit. Apply revisions mid-stream if blocking; batch otherwise.
+- **Theme vocabulary stress.** Themes that don't apply cleanly. Missing themes.
+- **Relationship grammar coverage.** Relationships that exist intuitively but no type fits.
+- **Description register calibration.** Whether `short_description` and `substantive_description` carry distinct voices.
+- **Work group vocabulary.** Whether the candidate groups hold up.
+- **Importance distribution.** Where values cluster; whether the 1-10 scale is being used or collapsing.
+- **`articulated_in` usage.** Obvious cases (*Three Hours* articulating Hōzō ← Ho System; *Empty Container* articulating Glassroom's pedagogy). Captured? Over-applied?
 
 ---
 
 ## Phase 2 — Execute
 
-No agent task. The work is the practitioner-plus-Claude conversation.
+No agent task in the surgical-spec sense. The work is the interactive Claude Code session itself; this section is the recipe the agent reads and the practitioner runs against.
 
-**Setup (one-time, at session start):**
+### Required files (in the repo)
 
-1. Open a new chat in this Project. The schema (`schema.json` v4) and the inventory document (`sageframe_labs_work.md`) are in project knowledge.
-2. Confirm that the model has access to the schema and inventory by asking it to briefly summarize them. (Smoke test for project knowledge availability.)
-3. Articulate the MVP composition target to the model — the shape, not the list — so the model can help with selection decisions if asked.
+- **`schema.json`** (v4) — the contract being inhabited
+- **`works.json`** — initially the one-entry skeleton from ho-00; grows during the session
+- **`sageframe_labs_work.md`** — the inventory; source material for each work's proposed entry
+- **This document** (`ho-process/hos/ho-01-build-from-schema.md`) — the recipe; the agent reads it as its operating instructions
 
-**Per-entry loop (~20-22 iterations):**
+### Setup (one time)
 
-1. **Select the next work.** Practitioner picks from the inventory document. Initial picks: the foundational methodologies first (Ho System, Dandori), since they're the relationship anchors for almost everything else.
-2. **Paste the work's inventory chunk** into chat. Ask for a schema entry.
-3. **Model proposes** a complete schema entry: id, name, native_script if applicable, media, group, themes, status, tags, importance, descriptions, relationships pointing to other works in the manifest or already in works.json, and any other applicable fields.
-4. **Review in chat.** Practitioner reads, reacts, asks for changes, refines. Iteration happens in chat; no need to leave to fix issues.
-5. **Commit to works.json.** Once the entry is right, paste it into the works.json file in VSCode. VSCode's schema binding validates as you save.
-6. **Log any surfacings** to a running notes file (`ho-process/hos/ho-01-surfacings.md` or inline in this document's Reflect section as you go). Schema gaps, theme gaps, relationship grammar gaps, prompt issues.
-7. **Move to the next work.** The previous entry is now in works.json and visible to the next prompt's context (paste it back into chat as part of the running manifest if needed, or rely on the model to pick up from the conversation).
+1. Open Claude Code in the repo root.
+2. Have it read this document first, then `schema.json`, then `sageframe_labs_work.md`, then the current `works.json`. Smoke test: ask it to briefly summarize what it sees in each.
+3. State the goal and the discipline (see Discipline section below). Confirm the agent will work one entry per turn, propose-then-write-after-approval.
 
-**Commit cadence:** Every 5-7 entries, commit works.json to the `labs` branch with a message naming what was added (e.g., `ho-01: add Ho System, Dandori, DI, Hōzō, Kanyō (5 of MVP)`).
+### Per entry (loop ~20 times)
 
-**Pause and rethink triggers:**
+1. Pick the next work from the inventory. First three: **Ho System**, **Dandori**, **Destructive Interference** — they anchor most other entries' relationships.
+2. Tell the agent: `next: <work name>`. The agent reads the relevant section of the inventory, proposes a complete schema entry, shows the JSON before writing.
+3. Read the proposal. Push back, request refinements, until the entry reads right.
+4. Approve. The agent writes the entry to `works.json` and runs schema validation against the single-work definition.
+5. If validation errors: agent reports, you iterate. If clean: log any surfacings to `ho-process/hos/ho-01-surfacings.md` (the agent can append on your direction) and continue.
+6. Next work.
 
-- If three consecutive entries reveal the same schema gap, stop. Apply the schema revision (or log it for batch revision at end of ho) before continuing.
-- If the model starts proposing the same wrong relationship pattern repeatedly, tighten the prompt convention before the next entry.
-- If the importance distribution is collapsing (everything 7-9), recalibrate explicitly: rank the works on the scale aloud and check that the high values are reserved.
+### Discipline
 
-**Done means:**
+The interactive editorial loop is what this ho protects. The risks are familiar — they're how agents drift when given bulk work:
 
-- `works.json` contains ~20-22 entries covering every media type in the schema
-- Every entry validates against `schema.json`
-- At least two instances of each major relationship type (descends_from, paired_with, companion_to, operationalizes, documents at strength 1/2/3, succeeded_by, validates) appear in the data
-- At least 3-4 entries use the `articulated_in` field on at least one relationship
-- A surfacings log exists (in the Reflect section of this document or as a separate file) capturing schema gaps, vocabulary gaps, and other observations from execution
-- The commit history on `labs` shows the build-up of entries in identifiable batches
+- **One entry per turn.** The agent proposes, writes (after approval), and waits. It does not batch five entries before reporting back. If it starts wanting to batch, stop it. That's the chat-or-script divergence trying to reassert from inside the agent.
+- **The practitioner drives selection.** "Next: Hōzō." Not "do the next five in order." Selection is editorial — which works anchor which relationships, which to enter before which — and belongs to you.
+- **Read each proposal before write, or at least before commit.** Default: read-then-approve-then-write. Faster pattern (write-then-edit-in-file) is also fine once the agent is producing reliable entries. Don't let it become write-and-forget.
+- **No tooling drift.** The agent does not need to build a script, a parser, a CLI, a helper module, or any other code to "speed up" the work. The only file it writes is `works.json` (plus appends to the surfacings log when directed). If the agent proposes building tooling, decline.
+
+### Pause triggers
+
+- The same schema gap surfaces three times → stop. Apply a schema revision before continuing.
+- The agent proposes the same wrong relationship pattern three times → tighten the prompt convention you've been using.
+- Importance distribution compresses (every entry landing 7-9) → recalibrate explicitly.
+- The agent proposes building tooling → decline, redirect to the next entry.
+
+### Commit cadence
+
+Every 5-7 entries, the agent runs `git add works.json && git commit` with a message naming what was added. Practitioner reviews the diff before approving the commit. No push to remote until end of session (or you have a reason).
+
+### Done means
+
+- ~20 entries in `works.json`, each validating against `schema.json`
+- Every media type represented (software, writing, website, talk, methodology; image if photography surfaces)
+- At least two instances each of: `descends_from`, `paired_with`, `companion_to`, `operationalizes`, `documents` (with strengths 1, 2, AND 3 represented across the corpus), `succeeded_by`, `validates`
+- 3-4 entries carry `articulated_in` on at least one relationship
+- `ho-process/hos/ho-01-surfacings.md` exists with the run's observations
+- Commits on `main` show the build-up in identifiable batches
 
 ---
 
@@ -143,18 +121,19 @@ No agent task. The work is the practitioner-plus-Claude conversation.
 
 *To be filled in after execution. Prompts:*
 
-- **Did the schema hold?** What schema gaps surfaced? Which gaps need schema revision before ho-02 begins, and which can wait?
-- **Theme vocabulary.** Did the current eight themes cover the MVP sample? Any themes missing? Any candidate themes that turned out unused?
-- **Relationship grammar.** Were all relationship types used? Any relationships that existed intuitively but no type fit? Should the grammar grow?
-- **Description registers.** Did `short_description` and `substantive_description` get distinguishable voice? If not, what needs sharpening?
-- **Work group vocabulary.** Did the candidate work_groups hold up under real entries? Any groups that turned out unused, redundant, or splitting awkwardly?
-- **Importance distribution.** What does the actual distribution look like? Reserved appropriately for 10? Range used across 1-10 or compressed?
-- **Articulated_in usage.** Were the obvious cases captured? Were any false positives proposed?
-- **Token budget.** Did the chat stay manageable across ~20 entries? If split into multiple chats, what was the handoff like?
-- **Prompt convention.** What worked in the prompt convention that emerged during execution? What didn't? Could the convention be promoted into the future `prompts/ai-assist.md` for the Scribe in ho-11?
-- **Followups for ho-02.** Did anything surface that changes the Indexer's design? Any derived computations (settlement weights, importance distributions) that the real data makes obvious tuning targets?
+- Schema gaps that surfaced; which need revision before ho-02
+- Theme vocabulary: missing themes, unused themes
+- Relationship grammar: types that ended up unused, relationships missing a type
+- Description registers: did short and substantive carry distinct voices?
+- Work group vocabulary: held up under real entries?
+- Importance distribution: shape of the actual histogram
+- `articulated_in`: obvious cases captured, false positives proposed
+- Discipline drift: did the one-entry-per-turn rule hold, or did the agent try to batch?
+- Tooling-drift moments: did the agent propose helpers? What did declining cost or save?
+- Prompt convention: what worked; what's promotable to the Scribe's future `prompts/ai-assist.md` in ho-11
+- Followups for ho-02: anything that changes the Indexer's design?
 
 ---
 
-_Authored: 2026-05-18 (Think phase)._
+_Authored: 2026-05-18 (Think phase decisions, Execute recipe for Claude Code)._
 _Execution and Reflect: pending._
