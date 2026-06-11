@@ -762,6 +762,292 @@
         "gallery": []
       },
       "sort_order_within_group": 20
+    },
+    {
+      "id": "resonance-field",
+      "name": "The Resonance Field",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "Where disciplines meet, they amplify.",
+      "importance": 6,
+      "color": null,
+      "featured": true,
+      "media": ["website", "software"],
+      "group": "interactive-demonstrations",
+      "themes": ["attention"],
+      "status": "shipped",
+      "tags": ["software", "interactive", "data-visualization", "pedagogy", "wave-physics", "canonical-identity"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Live hero canvas",
+          "url": "https://atmarcus.net"
+        },
+        {
+          "label": "Explanation page",
+          "url": "https://atmarcus.net/about-the-hero"
+        }
+      ],
+      "tech_stack": "HTML5 Canvas, vanilla JavaScript, requestAnimationFrame loop, device-pixel-ratio handling",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-01",
+      "last_updated": "2026-05-17",
+      "short_description": "The interactive canvas on atmarcus.net. Click anywhere on the field; a ripple expands outward from that spot, a project label appears at the center, and the wave propagates and fades according to physics-derived rules. Each ripple is a real project, weighted by significance that controls reach, wavelength, lifespan, and label size. When two ripples overlap, constructive and destructive interference are visible. The Sageframe node is permanent and central; all others fade on a timescale set by weight. Companion explanation page walks the reader from no-code through full source via progressive disclosure across nine sections.",
+      "substantive_description": [
+        "Most portfolio sites are static grids. The Resonance Field is the opposite — a working model of how the body of work is actually structured, built from real wave physics and tuned by hand over a long span. The Substack name Constructive Interference is literally drawn from this visualization. The visual demonstrates the thesis of the body of work in the most direct way possible — where disciplines meet, they amplify — and it does so not as illustration but as instrument. Click any project; the wave it emits actually interferes with the other waves currently on the field. The visualization is what the thesis claims.",
+        "The companion explanation page at /about-the-hero is the second artifact. Nine sections, three levels (no-code, light-code, full-code), reader-controlled depth. It is the *, Actually progressive-disclosure pattern applied to the artifact's own internals. The deeper argument: a body of work organized as a knowledge architecture should be legible at every depth a reader is willing to reach for."
+      ],
+      "relationships": [
+        {
+          "target": "star-actually",
+          "type": "uses_pedagogy_of",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The /about-the-hero explanation page applies the *, Actually progressive-disclosure pattern to the artifact's own internals."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    },
+    {
+      "id": "reading-instrument",
+      "name": "Pink Teaming Reading Instrument",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The page is already reading.",
+      "importance": 6,
+      "color": null,
+      "featured": true,
+      "media": ["website", "software"],
+      "group": "interactive-demonstrations",
+      "themes": ["attention", "relationship"],
+      "status": "shipped",
+      "tags": ["software", "interactive", "embeddings", "umap", "wave-physics", "pedagogy", "embedded-research"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "The manifesto interface",
+          "url": "https://pinkteaming.net/surface"
+        },
+        {
+          "label": "Explanation page",
+          "url": "https://pinkteaming.net/reading"
+        }
+      ],
+      "tech_stack": "HTML5 Canvas, JavaScript, all-MiniLM-L6-v2 precomputed sentence embeddings, UMAP projection, wave interference physics",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-01",
+      "last_updated": "2026-05-17",
+      "short_description": "The pinkteaming.net manifesto reads itself to you. The active line sits at vertical middle in display weight, bright pink; everything above fades upward (the sky), everything below fades downward (the deep). Pacing is fixed and unhurried. The deep is a 2D UMAP projection of all 103 manifesto sentences embedded in 384 dimensions; dots cluster by semantic similarity and illuminate as the active line reaches their cluster. The sky is wave interference physics — twelve permanent sources that brighten and emit ripples as the active line enters their structural region. Companion explanation page walks the reader through surface, deep, and sky.",
+      "substantive_description": [
+        "Most manifestos let the reader skim. This one refuses. Arrive at pinkteaming.net and the page is already reading the manifesto to you at the pace of careful attention — there are no controls on the wall of the room, the room is moving and you are in it. The design choice IS the argument. Pink teaming, as a discipline, begins with the willingness to be walked. The page enforces that discipline architecturally. If you stay, you have practiced. If you skim, you have not.",
+        "What sits beneath the reading surface is research-grade: real sentence embeddings from a deliberately un-fine-tuned encoder, honest UMAP projections re-seeded per visit, mathematically real wave interference for the manifesto's permanent structures. The deeper argument is that pink teaming earns its seat beside red teaming and mechanistic interpretability by showing its work. The discipline is not less computational. It is computational in service of durational reading. The site is the proof."
+      ],
+      "relationships": [
+        {
+          "target": "pink-teaming",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The instrument that delivers the manifesto at the pace of careful attention."
+        },
+        {
+          "target": "resonance-field",
+          "type": "uses_pedagogy_of",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Same progressive-disclosure pedagogy as /about-the-hero, applied to surface, deep, and sky."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
+    },
+    {
+      "id": "forteller",
+      "name": "Forteller",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "Intent flows outward, not inward.",
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": ["software"],
+      "group": "infrastructure",
+      "themes": ["infrastructure", "sovereignty"],
+      "status": "in-development",
+      "tags": ["software", "cli", "infrastructure", "configuration-management", "homelab"],
+      "repo": "https://github.com/sageframe-no-kaji/forteller",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/forteller"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-05",
+      "last_updated": "2026-05-17",
+      "short_description": "Push-only, vault-first CLI for tending the relationship between a configuration vault and the machines it describes; no agents, no YAML sprawl, declarative intent pushed outward from a single source of truth.",
+      "substantive_description": [
+        "Most infrastructure-as-code tooling assumes agents on every machine, YAML files multiplying past anyone's ability to keep them coherent, and a model of configuration as conversation with the fleet. Forteller refuses the model. There is one source of truth — the vault. Intent flows outward, not inward. No agents. No state drift. The deeper argument is about the dominant tooling assumption that complexity is necessary. For the homelab practitioner, it isn't. For most production environments at most scales, it isn't either. Forteller demonstrates the simpler alternative."
+      ],
+      "relationships": [
+        {
+          "target": "palana",
+          "type": "paired_with",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Forteller pushes declarative intent; Pālana provides the operational state view. The pair is the Kṣetra-Ops suite."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    },
+    {
+      "id": "palana",
+      "name": "Pālana",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The state view, built into the same model.",
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": ["software"],
+      "group": "infrastructure",
+      "themes": ["infrastructure", "sovereignty"],
+      "status": "in-development",
+      "tags": ["software", "desktop-app", "operational-workbench", "zfs", "homelab"],
+      "repo": "https://github.com/sageframe-no-kaji/palana",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/palana"
+        }
+      ],
+      "tech_stack": "Tauri (desktop), Rust backend, Svelte frontend",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-08",
+      "last_updated": "2026-05-17",
+      "short_description": "Operational workbench; dual-pane file manager with true server-side operations, ZFS-aware cross-dataset handling, a field view of machine topology, and Forteller built in as an integrated capability.",
+      "substantive_description": [
+        "Pālana is the live-state companion to Forteller's configuration push. Where Forteller manages the declarative side, Pālana provides the operational visibility: dual-pane file management with server-side operations, ZFS-aware cross-dataset handling, a topological view of the machine fleet. The deeper argument is about the relationship between configuration and visibility. Most infrastructure tooling treats one or the other. The Kṣetra-Ops pair treats both as one problem with two views."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
+    },
+    {
+      "id": "edelmore",
+      "name": "Edelmore",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "A cottage-core diary for a child — kept on your own machine.",
+      "importance": 5,
+      "color": null,
+      "featured": false,
+      "media": ["software"],
+      "group": "adaptive-tools",
+      "themes": ["agency", "sovereignty"],
+      "status": "scaffolded",
+      "tags": ["software", "adaptive-tool", "udl", "diary", "voice-transcription", "personal"],
+      "repo": "https://github.com/sageframe-no-kaji/edelmore",
+      "license": null,
+      "deployment": [],
+      "tech_stack": "Web application, voice transcription, Tailscale-private homelab deployment",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": "Built for a 13-year-old who wanted to keep an Anne Frank–style diary on her own terms.",
+      "created": "2026-05-12",
+      "last_updated": "2026-05-17",
+      "short_description": "A private web diary shaped like a book. It opens to today's page. Pages turn. Voice transcription handles the writing for hands that struggle with the keyboard. Runs on a parent's homelab, behind Tailscale and the home LAN, and nobody reads it but the person who wrote it. Built as an adaptive tool — for kids who have trouble writing — on Universal Design for Learning principles.",
+      "substantive_description": [
+        "Adaptive tools are usually designed apologetically — accommodation as patch, accessibility as afterthought. Edelmore is built from the opposite direction. Universal Design for Learning means the design itself accommodates without naming the accommodation. A diary that opens to today's page and turns its pages and accepts voice as easily as typing isn't a diary for kids with writing difficulties. It's a diary.",
+        "The deeper argument is that scale-of-one design is a legitimate design target. A tool built for one specific 13-year-old, in the shape of a book the child imagined, deployed on her parent's homelab behind Tailscale, is not a small project. It's a complete project at the scale it was meant for. The economics of mass-market software training has obscured this — every tool is supposed to scale to millions or it doesn't count. Edelmore is what one tool, made for one person, looks like when it counts."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
+    },
+    {
+      "id": "aspirational-intelligence",
+      "name": "Aspirational Intelligence",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": ["image"],
+      "group": "archived",
+      "themes": ["attention"],
+      "status": "archived",
+      "tags": ["archived", "creative-practice", "generative-imagery", "machine-vision", "timeline-marker"],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2021-01-01",
+      "last_updated": "2026-05-17",
+      "short_description": "An early creative practice examining how machine vision interprets aspiration, aesthetics, and desire — an Instagram-era body of work in AI-generated image making, before that territory became crowded. Documented as a marker of the timeline: where the work started, before it became systematic.",
+      "substantive_description": [
+        "Included to mark the timeline. The current Sageframe Labs work didn't begin with the Ho System; it began with creative experiments at the edge of what machine vision could do. Aspirational Intelligence is the archive marker of that earlier phase — a reminder that the disciplined methodology came out of practice, not the other way around."
+      ],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "succeeded_by",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The timeline marker: the disciplined methodology came out of this earlier creative practice."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10
     }
   ]
 }
