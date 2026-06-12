@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shoshin no Sono — Visual Register</title>
+    <style>
+      body {
+        margin: 0;
+        background: #fdfcf9;
+        color: #2b2b2b;
+        font-family: Georgia, 'Times New Roman', serif;
+        line-height: 1.5;
+        max-width: 64rem;
+        margin-inline: auto;
+        padding: 2rem 1.5rem 6rem;
+      }
+      h1 {
+        font-weight: normal;
+        font-size: 1.8rem;
+      }
+      h2 {
+        font-weight: normal;
+        font-size: 1.3rem;
+        margin-top: 3.5rem;
+        border-top: 1px solid #e3ded4;
+        padding-top: 1.5rem;
+      }
+      .status {
+        font-size: 0.85rem;
+        color: #6b6b6b;
+        font-style: italic;
+      }
+      .committed {
+        color: #9a5b3c;
+      }
+      pre {
+        background: #f4f1ea;
+        padding: 1rem;
+        font-size: 0.8rem;
+        overflow-x: auto;
+      }
+      .slot {
+        border: 1px dashed #e3ded4;
+        padding: 2rem;
+        text-align: center;
+        color: #6b6b6b;
+        font-style: italic;
+        margin: 1rem 0;
+      }
+      .note {
+        font-size: 0.9rem;
+        color: #6b6b6b;
+      }
+      figure {
+        margin: 1rem 0;
+      }
+      figcaption {
+        font-size: 0.85rem;
+        color: #6b6b6b;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>初心の園 — Visual Register</h1>
+    <p class="note">
+      ho-04's deliverable: the committed aesthetic reference for procedural generation (hos 05–09).
+      Each session contributes its winner — as SVG where the artifact is a drawing, as a parameter
+      block where the artifact is a recipe. Rejected explorations are kept, marked, because what was
+      ruled out is part of the record.
+    </p>
+
+    <h2>1 · The peak</h2>
+    <p class="status">Candidate — freeze pending the amplitude 0 vs 1.8 A/B. Updated 2026-06-12.</p>
+    <p class="note">
+      Register finding: <strong>the hand lives in the form, not in the line.</strong> Strokes are
+      smooth; all character comes from silhouette (baseForm) and slope variation (terrain). Stroke
+      noise (wobble/jitter) was explored and ruled out — the stroke renderer in ho-06 is purely
+      geometric. Index contours every 5th ring carry the form at small scale (the 80px test).
+    </p>
+    <pre id="peak-parameters">{
+  "baseForm": 0.82,
+  "terrain": 0.55,
+  "amplitude": 1.8,
+  "lineWeight": 1.15,
+  "wobbleScale": 0.15,
+  "jitter": 0,
+  "spacingPx": 19,
+  "rings": 11,
+  "indexEvery": 5,
+  "indexRatio": 2,
+  "inkRegular": 0.85,
+  "inkIndex": 1.7,
+  "paper": "#FDFCF9",
+  "ink": "#2B2B2B"
+}</pre>
+    <div class="slot">Paste the frozen peak SVG here (winner), with rejected variants below, marked rejected.</div>
+    <p class="note">
+      Multi-peak caution (for the ho-04 checkpoint): <code>lineWeight</code> and
+      <code>indexRatio</code> were judged on a solo peak — first parameters to re-tune when the
+      assembled register is viewed with many peaks sharing a map.
+    </p>
+
+    <h2>2 · Settlements (hamlet · village · town · city)</h2>
+    <p class="status">Not yet run — design/claude-design/session-2-settlements.md</p>
+    <div class="slot">Winner row + parameter notes land here.</div>
+
+    <h2>3 · Typography</h2>
+    <p class="status">Not yet run — design/claude-design/session-3-typography.md</p>
+    <div class="slot">Type system panel + font stacks land here.</div>
+
+    <h2>4 · The ridge</h2>
+    <p class="status">Not yet run — design/claude-design/session-4-ridge.md</p>
+    <div class="slot">Ridge winner lands here.</div>
+
+    <h2>5 · Road and trail</h2>
+    <p class="status">Not yet run — design/claude-design/session-5-road-and-trail.md</p>
+    <div class="slot">Road + trail winner lands here.</div>
+
+    <h2>6 · The cartouche</h2>
+    <p class="status">Not yet run — design/claude-design/session-6-cartouche.md</p>
+    <div class="slot">Cartouche winner lands here.</div>
+
+    <h2>Palette — ratified at session 1</h2>
+    <pre>paper      #FDFCF9   (cream — ratified, closed)
+ink        #2B2B2B → #6B6B6B   (warm grays)
+accent     #9A5B3C   (terracotta — settlements/roads only; enters at session 2)</pre>
+  </body>
+</html>
