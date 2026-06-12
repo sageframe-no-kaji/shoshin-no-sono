@@ -1,6 +1,6 @@
 # 初心の園 — Shoshin no Sono — Ho Overview
 
-Five phases. Eighteen hos including ho-00 and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
+Five phases. Nineteen hos including ho-00, ho-01.5, and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
 
 ## What this is, and what it is not
 
@@ -15,7 +15,7 @@ It is also not a per-ho document. Each ho gets its own scope at session time via
 | Phase | Hos | What it produces |
 |---|---|---|
 | 0. Foundation | ho-00 | The repo exists; the framing documents are committed; schema is finalized; a preview URL serves an empty page |
-| 1. Data and visible catalog | ho-01, ho-02, ho-03 | A shareable MVP catalog: grid view, filter URLs, the MVP sample (~20 entries) of the body of work in `works.json` |
+| 1. Data and visible catalog | ho-01, ho-01.5, ho-02, ho-03 | A shareable MVP catalog: grid view, filter URLs, the MVP sample (~20 entries) of the body of work in `works.json` |
 | 2. Cartography | ho-04, ho-05, ho-06, ho-07, ho-08, ho-09 | The procedural interference cartography rendering on desktop with full interaction |
 | 3. Authoring | ho-10, ho-11, ho-12, ho-12.5 | A live, fully-populated catalog: the Steward edits existing works; the Founder adds new ones with AI-assist via the Scribe; ho-12.5 completes the hydration as the Founder's first real stress test |
 | 4. Polish and ship | ho-13, ho-14, ho-15, ho-16 | Mobile experience, accessibility, the companion essay, retirement of the prototype, v1.0 |
@@ -89,11 +89,21 @@ The schema (v4) is the contract. This ho inhabits it — builds works.json entry
 
 **Possible split:** Unlikely. If the surfacings reveal substantial schema revisions that should land before the MVP completes, split into ho-01.1 (first 10 entries + surfacings synthesis) and ho-01.2 (schema revision + remaining entries against revised schema). Otherwise, this is one focused conversational session, possibly across multiple Project chats if token budget warrants.
 
+### ho-01.5 — Environment scaffold (inserted)
+
+Inserted 2026-06-12 at ho-02 authoring, when the Kamae 5 pre-conditions check surfaced that no technical scaffold exists: ho-00 produced the repo, schema, and documents; ho-01 produced the data; neither produced a page, a test harness, a lint stack, or a project CLAUDE.md — and ho-02 is the first code ho. This is the forward-only response, not a reopening of ho-00. The ho encodes the verification discipline into the repo: Vitest with 90% coverage thresholds, JSDoc + `tsc --checkJs` strict as the type layer, ESLint + Prettier, the `works.json` validator promoted from ho-01's ephemeral checks into `scripts/validate-works.mjs`, pre-commit wiring, the placeholder `index.html` that doubles as ho-02's console-verification surface, and a project CLAUDE.md carrying the System Design's component boundaries. The served site stays no-build; all tooling is dev-only.
+
+**Depends on:** ho-01.
+
+**What's in scope / what "done" means:** carried by the per-ho document — `ho-process/hos/ho-01.5-environment-scaffold.md`.
+
+**What's out of scope:** Any Indexer code (ho-02). The deploy pipeline. Cloudflare Pages configuration — deferred until the MVP catalog needs a shareable URL (the ho-03 era); local serving suffices through ho-02.
+
 ### ho-02 — The Indexer
 
 The Indexer is a vanilla JS module that loads `works.json` once per page session and builds the derived runtime structures every downstream component depends on: inverse edge index, settlement weights (log-scaled sum of `documents` edge strengths per writing piece), theme membership sets, per-work importance values. It exposes a query API that the Cartographer and Garden Gate will call. By the end of this ho, the data is hydrated into a working query layer; nothing renders yet, but the queries return correct answers in the browser console.
 
-**Depends on:** ho-01.
+**Depends on:** ho-01.5 (which depends on ho-01).
 
 **What's in scope:**
 - Data loading from `works.json`
@@ -103,7 +113,7 @@ The Indexer is a vanilla JS module that loads `works.json` once per page session
 - Query API: `getWork(id)`, `getIncoming(id, edgeType?)`, `getOutgoing(id, edgeType?)`, `worksByTheme(theme)`, `worksByMedia(media)`, `settlementWeight(workId)`, `articulatesEdge(fromId, toId, type)`
 
 **What "done" means:**
-- Browser console on the preview URL: `indexer.getWork('kanyo')` returns the work
+- Browser console on the served page (locally; the preview URL once Pages is configured): `indexer.getWork('kanyo')` returns the work
 - `indexer.getIncoming('ho-system')` returns Kinhin, Hōzō, Kanyō at minimum
 - `indexer.settlementWeight('three-hours')` returns a number consistent with its documents-edge strengths
 - The module is hot-reloadable during development
@@ -565,6 +575,7 @@ The overview is updated when splits or insertions happen. New hos are added to t
 
 **Planned insertions:**
 
+- **ho-01.5 — Environment scaffold.** Inserted (2026-06-12, at ho-02 authoring). The technical scaffold ho-00 didn't produce — test harness, lint/type stack, validator, placeholder page, project CLAUDE.md — landed as its own ho before the first code ho rather than folded into ho-02. See the Phase 1 entry.
 - **ho-12.5 — Complete the hydration via the Founder.** Now a planned ho, not a contingency. ho-01 produces an MVP sample of ~20 entries; the remaining works in the body of work (estimated 20-30 more) hydrate through the Founder UI in ho-12.5. This makes the Founder's first real-world test a bulk operation against the production workflow, which is a much stronger validation than adding a single hypothetical new work. Surfacings from ho-12.5 may also drive prompt-template iteration for the Scribe.
 
 **Conditional insertions:**
@@ -593,6 +604,9 @@ ho-00 (scaffold)
   │
   ▼
 ho-01 (MVP sample, ~20 entries)
+  │
+  ▼
+ho-01.5 (environment scaffold)
   │
   ▼
 ho-02 (indexer)

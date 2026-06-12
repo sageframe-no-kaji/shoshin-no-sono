@@ -15,7 +15,7 @@ builds-on:
 
 # ho-02 — The Indexer
 
-The Indexer makes the data model operational: it loads `works.json` once per page session, builds the derived structures every downstream component depends on (inverse edge index, settlement weights, membership sets), and exposes the query API the Cartographer and Garden Gate call. Nothing renders in this ho. Done means the queries return correct answers — in the test suite and in the browser console on the preview URL.
+The Indexer makes the data model operational: it loads `works.json` once per page session, builds the derived structures every downstream component depends on (inverse edge index, settlement weights, membership sets), and exposes the query API the Cartographer and Garden Gate call. Nothing renders in this ho. Done means the queries return correct answers — in the test suite and in the browser console on the locally served page (the preview URL inherits this for free once Pages is configured in the ho-03 era).
 
 The System Design draws the boundary this module must hold: **the Indexer is the only component that knows the on-disk data shape.** Schema changes get absorbed here; downstream components see query results, never raw JSON.
 
@@ -91,7 +91,7 @@ Sequence:
 
 - `npm test` green, coverage ≥90% on `src/indexer.js`
 - `npm run typecheck` and `npm run lint` clean
-- Against real data, in tests and reproducible in the browser console on the preview URL:
+- Against real data, in tests and reproducible in the browser console on the locally served page:
   - `indexer.getWork('kanyo')` returns the work
   - `indexer.getIncoming('ho-system')` includes kanyō, hōzō, and kinhin (the overview's minimum) — the full set also carries dandori, m4bookmaker, aspirational-intelligence, three-hours, falcon-cameras
   - `indexer.getOutgoing('satori')` and `indexer.getOutgoing('glassroom')` both surface the paired_with edge (declared only on satori)
