@@ -259,6 +259,8 @@ Writing-piece towns get placed at barycentric positions weighted by their `docum
 
 **Finding from ho-01:** software `created` dates in `works.json` are estimates — the inventory carries no first-shipped dates. Verify them, or reframe the populate animation as intentional editorial order rather than chronology, before this ho renders.
 
+**Finding from ho-02 (practitioner-flagged, major design decision):** the settlement-weight scaling — currently `ln(sum of documents strengths)` in the Indexer — is provisional, not the final solution. When towns render, expose the scaling function and the size thresholds as tunable parameters (Claude-Design-style tuners), iterate by feel against the visual register, and re-decide here. The same tuner posture applies to every data-to-visual mapping this ho and ho-05 introduce.
+
 **Possible split:** If the chronological populate animation turns finicky (timing, easing, cancellation when filter changes mid-populate), split into ho-07.1 (placement and static rendering) and ho-07.2 (populate animation).
 
 ### ho-08 — Relationship features as terrain

@@ -172,6 +172,8 @@ export function createIndexer(data) {
   // Settlement weights: ln(sum of documents-edge strengths) per work, 0 when the
   // work has no documents edges (legitimately the case for some writing — see
   // ho-01 surfacings). Level mapping (hamlet→city) belongs to ho-07.
+  // PROVISIONAL (practitioner-flagged): ln is not the final scaling. ho-07
+  // re-decides this with the scaling function exposed as a tunable parameter.
   /** @type {Map<string, number>} */
   const settlementWeights = new Map();
   for (const w of allWorks) {
