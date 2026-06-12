@@ -78,6 +78,14 @@
       noise (wobble/jitter) was explored and ruled out — the stroke renderer in ho-06 is purely
       geometric. Index contours every 5th ring carry the form at small scale (the 80px test).
     </p>
+    <p class="note">
+      Two further rules: <strong>crenellation decays with elevation</strong> — the tool's
+      self-similar footprint (same lobed shape repeated to the summit) is wrong; low contours carry
+      drainage-scale complexity, summit rings converge toward simple convex forms, so field noise
+      attenuates with height. And <strong>the parameters split across the component boundary</strong>:
+      baseForm/terrain are field-side (ho-05 — silhouettes fall out of the heightfield, never
+      authored per-peak); lineWeight/ink are renderer-side (ho-06).
+    </p>
     <pre id="peak-parameters">{
   "baseForm": 0.82,
   "terrain": 0.55,
