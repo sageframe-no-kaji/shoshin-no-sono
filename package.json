@@ -1,0 +1,26 @@
+{
+  "name": "shoshin-no-sono",
+  "private": true,
+  "type": "module",
+  "description": "初心の園 — Shoshin no Sono. The Garden of Beginner's Mind: catalog and interference cartography of the Sageframe body of work. The served site is no-build vanilla ESM; everything in devDependencies is verification tooling only.",
+  "scripts": {
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "node scripts/validate-works.mjs",
+    "serve": "python3 -m http.server 8788"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.9.3",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

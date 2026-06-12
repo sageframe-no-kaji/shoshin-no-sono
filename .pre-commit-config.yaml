@@ -1,0 +1,29 @@
+# The verification stack, declared. Local hooks run the npm scripts so the
+# stack is identical at the hook, the terminal, and (later) the GitHub Action.
+repos:
+  - repo: local
+    hooks:
+      - id: validate-works
+        name: validate works.json against the schema contract
+        entry: npm run validate
+        language: system
+        files: ^(works\.json|schema\.json|scripts/validate-works\.mjs)$
+        pass_filenames: false
+      - id: lint
+        name: eslint
+        entry: npm run lint
+        language: system
+        types_or: [javascript]
+        pass_filenames: false
+      - id: typecheck
+        name: tsc --noEmit (strict, checkJs)
+        entry: npm run typecheck
+        language: system
+        types_or: [javascript]
+        pass_filenames: false
+      - id: test
+        name: vitest with coverage thresholds
+        entry: npm test
+        language: system
+        types_or: [javascript]
+        pass_filenames: false

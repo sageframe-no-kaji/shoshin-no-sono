@@ -1,2 +1,5 @@
 .DS_Store
 ho-process/pre-work
+node_modules/
+coverage/
+.claude/

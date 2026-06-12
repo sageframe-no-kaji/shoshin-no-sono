@@ -1,0 +1,10 @@
+# Prettier formats only the project's JS. Data files keep their hand-curated layout;
+# prose keeps its authors' line discipline.
+node_modules/
+coverage/
+*.md
+works.json
+schema.json
+package-lock.json
+kamae/
+ho-process/
