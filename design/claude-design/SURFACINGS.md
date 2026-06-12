@@ -24,3 +24,7 @@ to the overview's ho entries.
 ### Session 2, round 3
 - Style A's four-size row regressed to rectilinear (aligned identical blocks — reads as grid/Braille). Fix: settlements generate from a **growth rule** — curved corridors radiating from the core, block rotation follows the local street tangent, sizes vary, density falls off, edges ravel. Medieval lives in the growth model, not the block styling.
 - Recurring register rule (second occurrence, after session 1's form-not-stroke): **character comes from process, not decoration.** ho-07's town placement inherits this directly.
+
+### Session 2, round 4
+- Overcorrection: growth rule at tiny block scale produced confetti — streets illegible. Rule: **negative space reads only against contiguous mass** (street walls of nearly-touching blocks). Medieval = strong local order, global irregularity. Proportions: city ≈ 30 chunky blocks, not 80 specks.
+- Settlements are seeded — reseed gives endless non-repeating towns in the style (good; matches the fresh-render-per-visit architecture). Tuner dials when mass is right: blocks, corridors, packing, ravel.
