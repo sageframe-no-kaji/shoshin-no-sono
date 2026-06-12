@@ -1,0 +1,175 @@
+/* Deliberately mute styling — the visual register is ho-04's territory.
+   This sheet exists so the grid is legible, nothing more. */
+
+:root {
+  --ink: #2b2b2b;
+  --faded: #6b6b6b;
+  --paper: #fdfcf9;
+  --line: #e3ded4;
+  --accent: #9a5b3c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.5;
+}
+
+header.site {
+  text-align: center;
+  padding: 3rem 1rem 1.5rem;
+}
+
+header.site h1 {
+  font-size: 2.5rem;
+  font-weight: normal;
+  margin: 0;
+}
+
+header.site .subtitle {
+  margin: 0.25rem 0;
+}
+
+header.site .tagline {
+  font-style: italic;
+  color: var(--faded);
+  margin-top: 1rem;
+}
+
+main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+.controls {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0.75rem 0;
+  margin-bottom: 0.5rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.35rem 0;
+}
+
+.chip,
+.action {
+  font: inherit;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.15rem 0.75rem;
+  cursor: pointer;
+  color: var(--faded);
+}
+
+.chip:hover,
+.action:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.chip-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.chip-active:hover {
+  color: var(--paper);
+}
+
+.actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.count {
+  color: var(--faded);
+  font-size: 0.85rem;
+}
+
+.group-name {
+  font-weight: normal;
+  font-size: 1.5rem;
+  margin: 2.5rem 0 0.25rem;
+}
+
+.group-intro {
+  color: var(--faded);
+  margin: 0 0 1rem;
+  max-width: 48rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem;
+  background: #fffefb;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-name {
+  font-size: 1.1rem;
+  font-weight: normal;
+  margin: 0 0 0.4rem;
+}
+
+.card-native {
+  color: var(--faded);
+  margin-left: 0.25rem;
+}
+
+.card-line {
+  font-size: 0.9rem;
+  margin: 0 0 0.6rem;
+  flex: 1;
+}
+
+.card-badges {
+  margin: 0 0 0.4rem;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 0.35rem;
+  margin-right: 0.3rem;
+  color: var(--faded);
+}
+
+.card-links {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.card-links a {
+  color: var(--accent);
+  margin-right: 0.75rem;
+}
+
+.no-matches {
+  margin: 3rem 0;
+  color: var(--faded);
+}

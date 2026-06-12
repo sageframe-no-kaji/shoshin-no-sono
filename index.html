@@ -4,42 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>初心の園 — Shoshin no Sono</title>
-    <style>
-      /* Placeholder only. The visual register is decided in ho-04 — nothing here pre-empts it. */
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        font-family: Georgia, 'Times New Roman', serif;
-        color: #2b2b2b;
-        background: #fdfcf9;
-        text-align: center;
-      }
-      h1 {
-        font-size: 3rem;
-        font-weight: normal;
-        margin: 0 0 0.25rem;
-      }
-      p {
-        margin: 0.25rem 0;
-      }
-      .tagline {
-        margin-top: 1.5rem;
-        font-style: italic;
-        color: #6b6b6b;
-      }
-    </style>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main>
+    <header class="site">
       <h1 lang="ja">初心の園</h1>
-      <p>Shoshin no Sono</p>
-      <p>The Garden of Beginner's Mind</p>
+      <p class="subtitle">Shoshin no Sono — The Garden of Beginner's Mind</p>
       <p class="tagline">
         An epistemology of learning, creation, and craft.<br />
         The garden has gates on every side.
       </p>
+    </header>
+    <main>
+      <div id="catalog"><p class="count">Loading the garden…</p></div>
     </main>
     <script type="module" src="./src/main.js"></script>
   </body>
