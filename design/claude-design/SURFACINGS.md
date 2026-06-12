@@ -20,3 +20,7 @@ to the overview's ho entries.
 - **Rivers parked as a grammar question, not a garnish.** Every map feature is semantic; a meaningless river weakens the discipline. Candidate meaning: succession (`succeeded_by`) as directional river — possibly with a bridge at the successor's crossing — replacing the "directional ridge." Decide at ho-08, not in a design session. Bridges ride with rivers.
 - **Reference:** Murakami, *Hard-Boiled Wonderland* — the End of the World town map. Deep resonance (walled garden with gates = the project's own metaphor). Take: negative-space streets, solid blocks, landmark towers. Leave: illustrative density.
 - **Session discipline note:** round 2 drifted toward ever-richer towns; the session's question is the *four-size progression* — next round shows the four sizes in the chosen style.
+
+### Session 2, round 3
+- Style A's four-size row regressed to rectilinear (aligned identical blocks — reads as grid/Braille). Fix: settlements generate from a **growth rule** — curved corridors radiating from the core, block rotation follows the local street tangent, sizes vary, density falls off, edges ravel. Medieval lives in the growth model, not the block styling.
+- Recurring register rule (second occurrence, after session 1's form-not-stroke): **character comes from process, not decoration.** ho-07's town placement inherits this directly.
