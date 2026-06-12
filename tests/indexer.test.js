@@ -107,8 +107,8 @@ describe('createIndexer on the fixture', () => {
     expect(idx.getOutgoing('alpha', 'succeeds')).toEqual([]);
   });
 
-  it('settlementWeight is ln(sum of documents strengths), 0 with no documents edges', () => {
-    expect(idx.settlementWeight('delta')).toBeCloseTo(Math.log(5), 10);
+  it('settlementWeight is ln(1+sum of documents strengths), 0 with no documents edges', () => {
+    expect(idx.settlementWeight('delta')).toBeCloseTo(Math.log(1 + 5), 10);
     expect(idx.settlementWeight('epsilon')).toBe(0);
     expect(idx.settlementWeight('alpha')).toBe(0);
     expect(idx.settlementWeight('unknown')).toBe(0);

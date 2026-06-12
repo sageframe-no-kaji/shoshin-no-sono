@@ -41,8 +41,8 @@ describe('the Indexer against the real corpus', () => {
     expect(idx.getOutgoing('glassroom', 'paired_with')[0].declaredOn).toBe('satori');
   });
 
-  it('settlement weights: ln(5) for Three Hours, 0 for The Same Lever', () => {
-    expect(idx.settlementWeight('three-hours')).toBeCloseTo(Math.log(5), 10);
+  it('settlement weights: ln(1+5) for Three Hours, 0 for The Same Lever', () => {
+    expect(idx.settlementWeight('three-hours')).toBeCloseTo(Math.log(1 + 5), 10);
     expect(idx.settlementWeight('the-same-lever')).toBe(0);
   });
 

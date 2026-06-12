@@ -169,10 +169,12 @@ export function createIndexer(data) {
     incoming.set(e.target, inc);
   }
 
-  // Settlement weights: ln(sum of documents-edge strengths) per work, 0 when the
-  // work has no documents edges (legitimately the case for some writing — see
-  // ho-01 surfacings). Level mapping (hamlet→city) belongs to ho-07.
-  // PROVISIONAL (practitioner-flagged): ln is not the final scaling. ho-07
+  // Settlement weights: ln(1 + sum of documents-edge strengths) per work. The
+  // +1 keeps a single strength-1 documentation distinct from no documentation
+  // at all (ln(1) = 0 conflated them), and gives 0 naturally for works with no
+  // documents edges (legitimately the case for some writing — see ho-01
+  // surfacings). Level mapping (hamlet→city) belongs to ho-07.
+  // PROVISIONAL (practitioner-flagged): the scaling family is not final. ho-07
   // re-decides this with the scaling function exposed as a tunable parameter.
   /** @type {Map<string, number>} */
   const settlementWeights = new Map();
@@ -180,7 +182,7 @@ export function createIndexer(data) {
     const sum = (outgoing.get(w.id) ?? [])
       .filter((e) => e.type === 'documents')
       .reduce((acc, e) => acc + (e.strength ?? 0), 0);
-    settlementWeights.set(w.id, sum > 0 ? Math.log(sum) : 0);
+    settlementWeights.set(w.id, Math.log(1 + sum));
   }
 
   // Membership maps.
@@ -286,7 +288,8 @@ export function createIndexer(data) {
     },
 
     /**
-     * ln(sum of documents-edge strengths); 0 for works with no documents edges.
+     * ln(1 + sum of documents-edge strengths); 0 for works with no documents
+     * edges. Provisional scaling — ho-07 re-decides with a tuner.
      * @param {string} workId @returns {number}
      */
     settlementWeight(workId) {
