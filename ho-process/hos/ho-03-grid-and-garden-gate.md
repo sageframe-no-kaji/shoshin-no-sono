@@ -1,6 +1,6 @@
 ---
 created: 2026-06-12
-status: ready
+status: complete
 type: ho-document
 project: shoshin-no-sono
 ho: "03"
@@ -75,13 +75,17 @@ Two practitioner-decision items close Phase 1 after this ho, both real decisions
 
 ## Phase 3 — Reflect
 
-*To be filled in after execution. Prompts:*
+**The URL grammar held.** Round-trip, messy-comma, and unknown-param tests all pass; the hand-built serializer keeps commas literal so doors read clean (`?theme=craft,agency`, not `%2C`). Browser back walks filter history via pushState; popstate re-renders.
 
-- Did the URL grammar survive contact with real filter combinations?
-- Did `filterWorks` need the query combinator after all?
-- What does the populated grid reveal about the data (descriptions too long for cards? groups that read wrong?) — candidates for the Phase 1 replan checkpoint.
+**The query combinator stayed unbuilt.** `filterWorks` composes the multiplicative/additive rule directly over `works()` in eight lines — the Indexer's membership accessors weren't even needed for filtering (they remain for the chip vocabulary and group sections). The deferral from ho-02 resolves as: never build it.
+
+**Coverage and verification.** 75 tests; suite 100% lines / 96.6% branches; gate.js at 100% on every metric. The one deliberately untested seam remains `src/main.js` DOM wiring (delegation, clipboard) — logic-free by design, but it is the seam a headless-browser smoke test would cover if one ever joins the stack. The practitioner's hands-on check: serve, click chips, watch the URL, press back, share.
+
+**What the populated grid reveals** (Phase 1 replan checkpoint candidates): hero lines carry the cards well where present — works without one fall back to truncated `short_description`, which reads denser; authoring heroes for the remaining ~10 works is cheap polish. The corpus-derived chips expose all 7 statuses, which may be more chips than a visitor needs — consider collapsing status to active/archived-ish buckets, or dropping the status row from the visitor-facing chip bar at ho-04's register pass. Group order (Methodology first) reads right.
+
+**Settlement-weight followup landed mid-ho** (practitioner question): scaling is now `ln(1+sum)` — base immaterial, +1 un-conflates single-strength-1 documentation from none; curve family and thresholds are the ho-07 tuners.
 
 ---
 
 _Authored: 2026-06-12 (Think phase)._
-_Execution and Reflect: pending._
+_Executed: 2026-06-12. Closed: 2026-06-12. Phase 1 code complete; Pages deploy and replan checkpoint are the practitioner's phase-boundary decisions._
