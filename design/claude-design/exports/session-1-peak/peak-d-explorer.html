@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peak — Style D · Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FDFCF9; }
+  * { box-sizing: border-box; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; }
+
+  .ctl { display: flex; flex-direction: column; gap: 9px; }
+  .ctl-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .ctl-name { font: 400 15px Spectral, Georgia, serif; color: #3A3A3A; letter-spacing: 0.01em; }
+  .ctl-val { font: 500 14px Spectral, Georgia, serif; color: #2B2B2B; font-variant-numeric: tabular-nums;
+             background: #F3F0E8; border: 1px solid #E7E3DA; padding: 1px 9px; min-width: 46px; text-align: center; }
+
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px;
+    background: transparent; cursor: pointer; margin: 0;
+  }
+  input[type=range]::-webkit-slider-runnable-track { height: 1px; background: #C7C1B4; }
+  input[type=range]::-moz-range-track { height: 1px; background: #C7C1B4; }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 15px; height: 15px; margin-top: -7px;
+    border-radius: 50%; background: #FDFCF9; border: 1.5px solid #2B2B2B; transition: background 0.12s ease;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 15px; height: 15px; border-radius: 50%; background: #FDFCF9; border: 1.5px solid #2B2B2B;
+  }
+  input[type=range]:hover::-webkit-slider-thumb { background: #2B2B2B; }
+  input[type=range]:hover::-moz-range-thumb { background: #2B2B2B; }
+  input[type=range]:active::-webkit-slider-thumb { background: #2B2B2B; }
+
+  .grp-label { font: 500 11px Spectral, Georgia, serif; letter-spacing: 0.26em; text-transform: uppercase;
+               color: #9A958B; margin-bottom: 2px; }
+  .btn { font: 400 13px Spectral, Georgia, serif; color: #6B6B6B; background: none; border: none;
+         border-bottom: 1px solid #C7C1B4; cursor: pointer; padding: 0 0 1px; }
+  .btn:hover { color: #2B2B2B; border-color: #2B2B2B; }
+  pre.json { margin: 0; font: 400 11.5px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: #5C5C5C;
+             background: #F3F0E8; border: 1px solid #E7E3DA; padding: 12px 14px; white-space: pre;
+             overflow-x: auto; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; padding: 48px 40px 64px;">
+  <div style="max-width: 1040px; margin: 0 auto;">
+
+    <header style="display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #E7E3DA; padding-bottom: 22px;">
+      <div style="font: 500 12px Spectral, Georgia, serif; letter-spacing: 0.34em; text-transform: uppercase; color: #9A958B;">Session 1 · Peak — Style D</div>
+      <h1 style="margin: 0; font: 300 32px/1.15 Spectral, Georgia, serif; color: #2B2B2B;">Contour explorer</h1>
+      <p style="margin: 0; max-width: 600px; font: 400 15px/1.6 Spectral, Georgia, serif; color: #6B6B6B;">
+        Index contours, hand-drawn register. Adjust the four axes; the inset shows the same peak at 80&times;80&nbsp;px.
+      </p>
+    </header>
+
+    <div style="display: grid; grid-template-columns: 1fr 318px; gap: 48px; margin-top: 36px; align-items: start;">
+
+      <!-- plate -->
+      <div style="position: relative; background: #FDFCF9; border: 1px solid #E7E3DA; box-shadow: 0 1px 0 rgba(0,0,0,0.03);">
+        <svg id="plate" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style="display: block; width: 100%; height: auto;"></svg>
+        <span style="position: absolute; right: 14px; bottom: 14px; width: 80px; height: 80px; border: 1px solid #E7E3DA; background: #FDFCF9;" title="80×80 legibility test">
+          <svg id="mini" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" width="80" height="80" style="display: block;"></svg>
+        </span>
+      </div>
+
+      <!-- controls -->
+      <div style="display: flex; flex-direction: column; gap: 26px; padding-top: 4px;">
+        <div class="grp-label">Form</div>
+
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Base form <span style="color:#9A958B;font-style:italic;">· silhouette</span></span><span class="ctl-val" id="v-baseForm"></span></div>
+          <input type="range" id="baseForm" min="0" max="1" step="0.01">
+        </div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Terrain <span style="color:#9A958B;font-style:italic;">· slope breathing</span></span><span class="ctl-val" id="v-terrain"></span></div>
+          <input type="range" id="terrain" min="0" max="1" step="0.05">
+        </div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Amplitude <span style="color:#9A958B;font-style:italic;">· hand deviation</span></span><span class="ctl-val" id="v-amplitude"></span></div>
+          <input type="range" id="amplitude" min="0" max="5" step="0.1">
+        </div>
+
+        <div class="grp-label" style="margin-top: 8px;">Ink</div>
+
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Line weight</span><span class="ctl-val" id="v-lineWeight"></span></div>
+          <input type="range" id="lineWeight" min="0.4" max="2.5" step="0.05">
+        </div>
+
+        <div style="display: flex; gap: 22px; margin-top: 6px;">
+          <button class="btn" id="reset">Reset</button>
+          <button class="btn" id="copy">Copy parameters</button>
+        </div>
+
+        <pre class="json" id="json"></pre>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // --- four live sliders ---
+  var SLIDERS = ['baseForm', 'terrain', 'amplitude', 'lineWeight'];
+  var DEFAULTS = { baseForm: 0.50, terrain: 0.40, amplitude: 1.5, lineWeight: 1.00 };
+
+  // --- frozen constants (also exported, so the drawing is reproducible from the JSON alone) ---
+  var FROZEN = {
+    wobbleScale: 0.15,   // coarse value the hand deviation is drawn at
+    jitter: 0,           // concept retired
+    spacingPx: 19,       // ring interval
+    rings: 11,           // contours to the summit
+    indexEvery: 5,       // every 5th ring is an index contour
+    indexRatio: 2,       // index width / regular width
+    inkRegular: 0.85,    // base regular stroke width
+    inkIndex: 1.7,       // base index stroke width (= inkRegular * indexRatio)
+    paper: '#FDFCF9',
+    ink: '#2B2B2B'
+  };
+
+  // --- pipeline constants (fixed; not parameters) ---
+  var SEED = 31, RMIN = 12, CX = 200, CY = 205, NPTS = 120;
+  var TERR_ANGLE = 125 * Math.PI / 180, DIRX = Math.cos(TERR_ANGLE), DIRY = Math.sin(TERR_ANGLE);
+  var BASE_GAIN = 2.0;     // baseForm -> silhouette harmonic depth
+  var ASPECT_GAIN = 0.18;  // baseForm -> ellipticity
+  var AMP_GAIN = 1.4;      // amplitude -> outer-ring deviation in px
+  var DEV_CAP = 0.33;      // deviation ceiling as a fraction of the local gap
+  var TERR_SHIFT = 0.72;   // terrain center-shift as a fraction of spacing
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function makeShape(seed) {
+    var rnd = mulberry32(seed), harm = [];
+    for (var k = 2; k <= 5; k++) harm.push({ k: k, a: 0.03 + rnd() * 0.06, phi: rnd() * Math.PI * 2 });
+    return { harm: harm, rot: (rnd() - 0.5) * 0.5 };
+  }
+  var SHAPE = makeShape(SEED);
+
+  // smooth periodic value-noise; M control points around the ring sets the frequency
+  function makeNoise(M, seed) {
+    var rnd = mulberry32(seed), vals = [];
+    for (var i = 0; i < M; i++) vals.push(rnd() * 2 - 1);
+    return function (t) {
+      var x = t / (Math.PI * 2) * M;
+      var i0 = Math.floor(x), f = x - i0;
+      i0 = ((i0 % M) + M) % M;
+      var i1 = (i0 + 1) % M;
+      var u = f * f * (3 - 2 * f);
+      return vals[i0] * (1 - u) + vals[i1] * u;
+    };
+  }
+  // unit silhouette U(t): 0 = perfect circle, grows with the harmonics
+  function silhouette(t) {
+    var s = 0;
+    for (var h = 0; h < SHAPE.harm.length; h++) s += SHAPE.harm[h].a * Math.sin(SHAPE.harm[h].k * t + SHAPE.harm[h].phi);
+    return s;
+  }
+
+  function ringPoints(R, cx, cy, baseFactor, aspect, devPx, devNoise) {
+    var pts = [];
+    for (var i = 0; i < NPTS; i++) {
+      var t = i / NPTS * Math.PI * 2;
+      var rad = 1 + baseFactor * silhouette(t);     // shared silhouette -> rings nest as parallels
+      var r = R * rad + devPx * devNoise(t);         // per-ring hand deviation (scaled to radius via devPx)
+      var a = t + SHAPE.rot;
+      pts.push([cx + Math.cos(a) * r * aspect, cy + Math.sin(a) * r]);
+    }
+    return pts;
+  }
+  function smoothClosed(pts) {
+    var n = pts.length, P = function (i) { return pts[(i % n + n) % n]; };
+    var d = 'M' + P(0)[0].toFixed(1) + ' ' + P(0)[1].toFixed(1);
+    for (var i = 0; i < n; i++) {
+      var p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+      var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += 'C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1)
+         + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d + 'Z';
+  }
+
+  // build the whole drawing from the FULL parameter object (sliders + frozen) — reproducible from JSON alone
+  function build(q) {
+    var count = q.rings, step = q.spacingPx;
+    var Rmax = RMIN + (count - 1) * step;
+    var dStep = q.terrain * step * TERR_SHIFT;       // terrain centre shift
+    var half = dStep * (count - 1) / 2;
+    var fit = (Rmax + half) > 150 ? 150 / (Rmax + half) : 1;
+    var Mcoarse = Math.round(3 + q.wobbleScale * 19);
+    var baseFactor = q.baseForm * BASE_GAIN;
+    var aspect = 1 + q.baseForm * ASPECT_GAIN;
+    var devCap = DEV_CAP * step * (1 - TERR_SHIFT * q.terrain);   // keep deviation under the local gap
+    var devOuter = Math.min(q.amplitude * AMP_GAIN, devCap);
+    var regW = q.inkRegular * q.lineWeight, idxW = q.inkIndex * q.lineWeight;
+    var paths = '';
+    for (var i = 0; i < count; i++) {
+      var R = Rmax - i * step;
+      var off = dStep * i - half;
+      var devPx = devOuter * (R / Rmax);             // amplitude scaled to ring radius -> clean summit
+      var devNoise = makeNoise(Mcoarse, SEED * 131 + i * 17);   // independent per ring -> not parallel
+      var pts = ringPoints(R, CX + DIRX * off, CY + DIRY * off, baseFactor, aspect, devPx, devNoise);
+      var isIndex = i % q.indexEvery === 0;
+      paths += '<path d="' + smoothClosed(pts) + '" fill="none" stroke="' + q.ink
+             + '" stroke-width="' + (isIndex ? idxW : regW) + '" stroke-linejoin="round" stroke-linecap="round"/>';
+    }
+    var s = fit.toFixed(4);
+    var tx = (CX * (1 - fit)).toFixed(2), ty = (CY * (1 - fit)).toFixed(2);
+    return '<g transform="translate(' + tx + ',' + ty + ') scale(' + s + ')">' + paths + '</g>';
+  }
+
+  var els = {}, plate = document.getElementById('plate'), mini = document.getElementById('mini');
+  SLIDERS.forEach(function (id) { els[id] = document.getElementById(id); });
+  var jsonEl = document.getElementById('json');
+
+  function fmt(id, v) {
+    if (id === 'amplitude') return v.toFixed(1);
+    if (id === 'lineWeight') return v.toFixed(2) + '×';
+    return v.toFixed(2);
+  }
+  function round(v, n) { return Math.round(v * n) / n; }
+
+  // the full register: four slider values + every frozen constant
+  function params() {
+    return {
+      baseForm: round(parseFloat(els.baseForm.value), 100),
+      terrain: round(parseFloat(els.terrain.value), 100),
+      amplitude: round(parseFloat(els.amplitude.value), 10),
+      lineWeight: round(parseFloat(els.lineWeight.value), 100),
+      wobbleScale: FROZEN.wobbleScale,
+      jitter: FROZEN.jitter,
+      spacingPx: FROZEN.spacingPx,
+      rings: FROZEN.rings,
+      indexEvery: FROZEN.indexEvery,
+      indexRatio: FROZEN.indexRatio,
+      inkRegular: FROZEN.inkRegular,
+      inkIndex: FROZEN.inkIndex,
+      paper: FROZEN.paper,
+      ink: FROZEN.ink
+    };
+  }
+
+  function render() {
+    var q = params();
+    SLIDERS.forEach(function (id) { document.getElementById('v-' + id).textContent = fmt(id, q[id]); });
+    var svg = build(q);
+    plate.innerHTML = svg;
+    mini.innerHTML = svg;
+    jsonEl.textContent = JSON.stringify(q, null, 2);
+    try { localStorage.setItem('peakD_v2', JSON.stringify(q)); } catch (e) {}
+  }
+  function setAll(v) { SLIDERS.forEach(function (id) { els[id].value = v[id]; }); }
+
+  var saved = DEFAULTS;
+  try { var j = JSON.parse(localStorage.getItem('peakD_v2')); if (j) saved = Object.assign({}, DEFAULTS, j); } catch (e) {}
+  setAll(saved);
+  SLIDERS.forEach(function (id) { els[id].addEventListener('input', render); });
+  document.getElementById('reset').addEventListener('click', function () { setAll(DEFAULTS); render(); });
+
+  document.getElementById('copy').addEventListener('click', function () {
+    var btn = this, text = JSON.stringify(params(), null, 2), done = function () {
+      btn.textContent = 'Copied \u2713';
+      setTimeout(function () { btn.textContent = 'Copy parameters'; }, 1300);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+    } else { fallback(text); done(); }
+  });
+  function fallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

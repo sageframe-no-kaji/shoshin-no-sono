@@ -71,7 +71,25 @@
     </p>
 
     <h2>1 · The peak</h2>
-    <p class="status">Candidate — freeze pending the amplitude 0 vs 1.8 A/B. Updated 2026-06-12.</p>
+    <p class="status">
+      Candidate — freeze pending the amplitude 0 vs 1.8 A/B. Updated 2026-06-12. The instrument
+      itself lives in the repo:
+      <a href="claude-design/exports/session-1-peak/peak-d-explorer.html">peak-d-explorer.html</a>
+      (open via the local server; its sliders are the live register).
+    </p>
+    <p class="note">
+      <strong>The reference model</strong> (read from the Explorer source — this is what ho-05/06
+      reimplement): the silhouette is a shared low-order harmonic series (k = 2–5, seeded), scaled
+      by <code>baseForm</code> plus slight ellipticity — every ring nests as a parallel of it.
+      <strong>Terrain is a summit offset, not noise:</strong> each ring's center shifts
+      progressively along a fixed bearing (<code>terrain × spacing × 0.72</code>), producing the
+      steep-face/long-shoulder asymmetry — in field terms, a skewed radial falloff per peak.
+      <code>amplitude</code> is smooth per-ring value-noise (~6 control points), scaled to ring
+      radius (clean summit) and <strong>capped at a third of the local ring gap</strong> — the
+      no-crossing guarantee the heightfield will otherwise provide for free. Index contours count
+      every 5th <em>from the outermost ring</em>. Single ink #2B2B2B; index vs regular is weight
+      only (0.85/1.7 × lineWeight).
+    </p>
     <p class="note">
       Register finding: <strong>the hand lives in the form, not in the line.</strong> Strokes are
       smooth; all character comes from silhouette (baseForm) and slope variation (terrain). Stroke
