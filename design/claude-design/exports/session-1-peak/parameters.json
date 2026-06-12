@@ -1,0 +1,16 @@
+{
+  "baseForm": 0.77,
+  "terrain": 0.7,
+  "amplitude": 2.3,
+  "lineWeight": 1,
+  "wobbleScale": 0.15,
+  "jitter": 0,
+  "spacingPx": 19,
+  "rings": 11,
+  "indexEvery": 5,
+  "indexRatio": 2,
+  "inkRegular": 0.85,
+  "inkIndex": 1.7,
+  "paper": "#FDFCF9",
+  "ink": "#2B2B2B"
+}

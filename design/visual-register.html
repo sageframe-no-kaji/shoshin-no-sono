@@ -71,11 +71,15 @@
     </p>
 
     <h2>1 · The peak</h2>
-    <p class="status">
-      Candidate — freeze pending the amplitude 0 vs 1.8 A/B. Updated 2026-06-12. The instrument
-      itself lives in the repo:
-      <a href="claude-design/exports/session-1-peak/peak-d-explorer.html">peak-d-explorer.html</a>
-      (open via the local server; its sliders are the live register).
+    <p class="status committed">
+      FROZEN 2026-06-12. The instrument lives in the repo and opens on these values:
+      <a href="claude-design/exports/session-1-peak/peak-d-explorer.html">peak-d-explorer.html</a>.
+    </p>
+    <p class="note">
+      <strong>Practitioner reservation, parked for the assembled-register checkpoint:</strong> the
+      index-vs-regular contour distinction doesn't fully satisfy yet ("OK for now"). Re-decide it
+      when many peaks share a page — the levers are indexRatio, the absolute weight pair, or
+      revisiting the single-ink decision (a lighter regular gray was the pre-explorer look).
     </p>
     <p class="note">
       <strong>The reference model</strong> (read from the Explorer source — this is what ho-05/06
@@ -105,10 +109,10 @@
       authored per-peak); lineWeight/ink are renderer-side (ho-06).
     </p>
     <pre id="peak-parameters">{
-  "baseForm": 0.82,
-  "terrain": 0.55,
-  "amplitude": 1.8,
-  "lineWeight": 1.15,
+  "baseForm": 0.77,
+  "terrain": 0.7,
+  "amplitude": 2.3,
+  "lineWeight": 1,
   "wobbleScale": 0.15,
   "jitter": 0,
   "spacingPx": 19,
@@ -120,7 +124,6 @@
   "paper": "#FDFCF9",
   "ink": "#2B2B2B"
 }</pre>
-    <div class="slot">Paste the frozen peak SVG here (winner), with rejected variants below, marked rejected.</div>
     <p class="note">
       Multi-peak caution (for the ho-04 checkpoint): <code>lineWeight</code> and
       <code>indexRatio</code> were judged on a solo peak — first parameters to re-tune when the

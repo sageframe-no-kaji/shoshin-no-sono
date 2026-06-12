@@ -106,7 +106,8 @@
 (function () {
   // --- four live sliders ---
   var SLIDERS = ['baseForm', 'terrain', 'amplitude', 'lineWeight'];
-  var DEFAULTS = { baseForm: 0.50, terrain: 0.40, amplitude: 1.5, lineWeight: 1.00 };
+  // Frozen register, 2026-06-12 — the instrument opens on the committed look (see parameters.json)
+  var DEFAULTS = { baseForm: 0.77, terrain: 0.70, amplitude: 2.3, lineWeight: 1.00 };
 
   // --- frozen constants (also exported, so the drawing is reproducible from the JSON alone) ---
   var FROZEN = {
