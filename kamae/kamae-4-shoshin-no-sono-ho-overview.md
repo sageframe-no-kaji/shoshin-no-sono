@@ -199,6 +199,9 @@ The Cartographer's first two pipeline stages. Position assignment uses d3-force 
 **Decisions required:**
 - **Position assignment strategy**: pure procedural per render is the default (chosen). Anchored procedural (key works pinned at semantic positions) is available for free if needed. URL-seeded reproducibility is the third tier. Decision: confirm pure procedural in practice; enable anchored variant only if pure procedural doesn't produce recognizable Venices across renders. Criteria: (1) does the Venice remain recognizable across renders for the same filter, (2) does the variation read as deliberate or random, (3) does it render at acceptable performance for the body of work's current size.
 - **Heightfield function family**: Gaussian by default. If Gaussian produces terrain that reads as data-viz rather than architectural, prototype wave-interference variants (the Resonance Field family). Criteria: which produces contour patterns that read as topographic at the visual register from ho-04.
+- **Peaks vs towns convention** (surfaced in ho-01): a work's cartographic role is decided by its nature as work-versus-commentary, not by its `media` array. Peaks are works (a substantial piece of work is a peak regardless of whether its media includes writing — Pink Teaming is a peak even though it is website + writing). Towns are writings-about-works. The `media` array describes what a thing is made of, not whether it renders as a peak. Confirm and document this convention before the Cartographer makes the call silently.
+- **atmarcus.net as a non-peak landform** (surfaced in ho-01): atmarcus.net is not a work in the catalog — it is the home of Practice History, the pre-2024 work that lives below the visible post-2024 range. Render it as a landform you descend into rather than a peak you climb (a canyon or a mine), placed at an edge or low point of the terrain, linking out to atmarcus.net the way a peak links to its deployment. This is a rendering gesture only; it touches no data and no schema. Decide the exact landform and placement when the cartography exists.
+- **Itinerant-writing model** (surfaced in ho-01, parked): an alternative to the static-town model where writings are itinerant — venues are home bases (monasteries), individual writings travel the roads between the works they document (monks in motion). A richer grammar than static settlements, matching how writing actually moves between subjects. Revisit only if the static-town model proves too flat once towns are rendered in ho-07. Default: static towns as designed; this is the fallback if they don't read right.
 
 **Possible split:** If position assignment and heightfield generation each turn out larger than expected, split into ho-05.1 (positions + debug view) and ho-05.2 (heightfield + heat-map debug). The two are tightly coupled but addressable separately.
 
@@ -244,6 +247,8 @@ Writing-piece towns get placed at barycentric positions weighted by their `docum
 
 **What's out of scope:** Relationship features (ho-08). Click interactions (ho-09).
 
+**Finding from ho-01:** software `created` dates in `works.json` are estimates — the inventory carries no first-shipped dates. Verify them, or reframe the populate animation as intentional editorial order rather than chronology, before this ho renders.
+
 **Possible split:** If the chronological populate animation turns finicky (timing, easing, cancellation when filter changes mid-populate), split into ho-07.1 (placement and static rendering) and ho-07.2 (populate animation).
 
 ### ho-08 — Relationship features as terrain
@@ -265,6 +270,8 @@ The relationship grammar from the System Design becomes visible on the map. Ridg
 - Different filters produce different feature visibilities (filter to `theme=craft` → only craft-relevant ridges and roads render)
 
 **What's out of scope:** Click interactions (ho-09). Tooltips beyond basic hover.
+
+**Finding from ho-01:** `succeeded_by` grounds only one real instance in the corpus (Aspirational Intelligence → Ho System), so its cartographic feature may not be worth building for v1 — decide at this ho.
 
 **Possible split:** If feature rendering reveals six distinct rendering challenges, split into ho-08.1 (structural edges — ridges and twin peaks) and ho-08.2 (linear edges — trails, roads, paths). The visual register from ho-04 should clarify which split, if any, is natural.
 
@@ -522,6 +529,7 @@ The following are tracked for v1.5 or post-v1. Not part of the v1.0 release.
 - **Programmatic Venice export.** Build-time export of canonical Venices as PNG or SVG for social cards, print, or archive. The render pipeline is pure; the export is straightforward.
 - **Photography subsystem.** Deferred from the seed. `photography.sageframe.net` (subdomain) vs `sageframe.net/photography` (path). Decision waits until photography is meaningfully populated in the catalog.
 - **Resonance Field crosslink with atmarcus.net.** Permanently parked. The Resonance Field on atmarcus.net keeps its hardcoded `HERO_PROJECTS`. The two systems are aesthetic siblings (same wave-interference family) but not data siblings.
+- **Practice History cartography for atmarcus.net.** If atmarcus.net ever wants a map of its own — the pre-2024 architecture, education, and teaching work rendered as its own terrain, prior engagements clustered as regions of villages with associated portfolio pieces and writing — reuse the Shoshin cartography engine against a different corpus. Aesthetic sibling, separate data, separate project. Same relationship the Resonance Field has to Shoshin. Post-v1, and only if atmarcus warrants it.
 
 ---
 

@@ -74,38 +74,44 @@
       "intro": "The parallel intellectual project on how humans maintain identity, voice, and judgment in sustained AI collaboration. Includes the Pink Teaming manifesto, the Destructive Interference taxonomy, and a layered tool system."
     },
     {
-      "id": "knowledge-architecture",
+      "id": "writing",
       "number": 4,
+      "name": "Writing",
+      "intro": "The towns of the territory. Each essay settles near the works it documents — the writing practice that traces how the body of work relates to itself. Constructive Interference at sageframe.substack.com is the primary outlet; position papers live at atmarcus.net. The writing is the argument the work makes about itself, in public."
+    },
+    {
+      "id": "knowledge-architecture",
+      "number": 5,
       "name": "Knowledge Architecture",
       "intro": "*, Actually and SSH, Actually — restructuring how technical knowledge gets to humans."
     },
     {
       "id": "interactive-demonstrations",
-      "number": 5,
+      "number": 6,
       "name": "Interactive Demonstrations",
       "intro": "Working demonstrations, teaching artifacts, and research instruments at once. The Resonance Field and the Pink Teaming Reading Instrument embed real computational substrate and use it to teach a discipline by walking the reader through it."
     },
     {
       "id": "adaptive-tools",
-      "number": 6,
+      "number": 7,
       "name": "Adaptive Tools",
       "intro": "Built for a specific person, holding the design discipline that everything else also holds."
     },
     {
       "id": "infrastructure",
-      "number": 7,
+      "number": 8,
       "name": "Infrastructure (Kṣetra-Ops)",
       "intro": "Homelab tooling for the practitioner's own operating environment. The systems beneath the systems."
     },
     {
       "id": "personal-utilities",
-      "number": 8,
+      "number": 9,
       "name": "Personal Utilities",
       "intro": "Small daily-use tools that earned their place."
     },
     {
       "id": "archived",
-      "number": 9,
+      "number": 10,
       "name": "Archived",
       "intro": "Timeline markers. Work that preceded the current practice or has been superseded."
     }
@@ -1059,7 +1065,7 @@
       "color": null,
       "featured": false,
       "media": ["writing"],
-      "group": "constructive-interference",
+      "group": "writing",
       "themes": ["craft"],
       "status": "published",
       "tags": ["essay", "methodology-debut", "build-story", "computer-vision"],
@@ -1103,7 +1109,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 40
+      "sort_order_within_group": 10
     },
     {
       "id": "three-hours",
@@ -1115,7 +1121,7 @@
       "color": null,
       "featured": false,
       "media": ["writing"],
-      "group": "constructive-interference",
+      "group": "writing",
       "themes": ["craft", "continuity"],
       "status": "published",
       "tags": ["essay", "shu-ha-ri", "methodology", "shipping-story"],
@@ -1159,7 +1165,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 50
+      "sort_order_within_group": 20
     },
     {
       "id": "the-same-lever",
@@ -1171,7 +1177,7 @@
       "color": null,
       "featured": false,
       "media": ["writing"],
-      "group": "constructive-interference",
+      "group": "writing",
       "themes": ["agency", "knowledge"],
       "status": "published",
       "tags": ["manifesto", "education", "capability-amplification"],
@@ -1208,7 +1214,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 60
+      "sort_order_within_group": 30
     },
     {
       "id": "the-empty-container",
@@ -1220,7 +1226,7 @@
       "color": null,
       "featured": false,
       "media": ["writing"],
-      "group": "constructive-interference",
+      "group": "writing",
       "themes": ["knowledge", "agency"],
       "status": "published",
       "tags": ["position-paper", "educational-accountability", "empirical-audit"],
@@ -1264,7 +1270,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 70
+      "sort_order_within_group": 50
     },
     {
       "id": "the-fourth-boundary",
@@ -1276,7 +1282,7 @@
       "color": null,
       "featured": false,
       "media": ["writing"],
-      "group": "constructive-interference",
+      "group": "writing",
       "themes": ["relationship", "attention"],
       "status": "published",
       "tags": ["essay", "sycophancy", "safety", "sustained-collaboration"],
@@ -1320,7 +1326,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 80
+      "sort_order_within_group": 40
     },
     {
       "id": "judgment-at-scale",
@@ -1332,7 +1338,7 @@
       "color": null,
       "featured": false,
       "media": ["writing"],
-      "group": "constructive-interference",
+      "group": "writing",
       "themes": ["agency", "knowledge"],
       "status": "published",
       "tags": ["position-paper", "ai-governance", "civic-infrastructure"],
@@ -1376,7 +1382,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 90
+      "sort_order_within_group": 60
     }
   ]
 }

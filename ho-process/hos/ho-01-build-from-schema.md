@@ -1,6 +1,6 @@
 ---
 created: 2026-05-18
-status: ready
+status: complete
 type: ho-document
 project: shoshin-no-sono
 ho: "01"
@@ -119,21 +119,22 @@ Every 5-7 entries, the agent runs `git add works.json && git commit` with a mess
 
 ## Phase 3 — Reflect
 
-*To be filled in after execution. Prompts:*
+**Execution.** 24 entries added to the ho-00 skeleton in four batches on `labs` — 25 works total against the ~20 target. The overshoot bought required coverage: Forteller + Pālana for the second `paired_with`, Edelmore for the adaptive-tools group, Aspirational Intelligence for image media. The one-entry-per-turn loop was waived by explicit practitioner instruction and the session ran as a practitioner-directed autonomous batch — logged in the surfacings, not agent drift. No tooling was built; validation ran as ephemeral in-process checks, and the only files written were `works.json` and the surfacings log.
 
-- Schema gaps that surfaced; which need revision before ho-02
-- Theme vocabulary: missing themes, unused themes
-- Relationship grammar: types that ended up unused, relationships missing a type
-- Description registers: did short and substantive carry distinct voices?
-- Work group vocabulary: held up under real entries?
-- Importance distribution: shape of the actual histogram
-- `articulated_in`: obvious cases captured, false positives proposed
-- Discipline drift: did the one-entry-per-turn rule hold, or did the agent try to batch?
-- Tooling-drift moments: did the agent propose helpers? What did declining cost or save?
-- Prompt convention: what worked; what's promotable to the Scribe's future `prompts/ai-assist.md` in ho-11
-- Followups for ho-02: anything that changes the Indexer's design?
+**Coverage.** Media 5 of 6: methodology ×4, software ×12, website ×4, writing ×8, image ×1. Talk is unexercised because the Eureka 2010 talk isn't in the inventory — `embed_url` remains untested. The other ho-doc-named works missing from the inventory: *Everything I Own* (an unpublished draft) and *Precedential Thinking*. All three defer to ho-12.5. Relationship distribution: `documents` ×9 (strengths 3/2/1 = 3/5/1), `companion_to` ×4, `validates` ×3, `operationalizes` ×3, `descends_from` ×2, `paired_with` ×2, `uses_pedagogy_of` ×2, `argues_for` ×1, `succeeded_by` ×1. Unused: `personalizes`, `integrates`, `responds_to`, `illustrates` — the first two have obvious edges once Sutra and Voice DNA hydrate. `articulated_in` sits on three entries (Kanyō, Hōzō, Satori) — the obvious cases, no false positives proposed.
+
+**Importance.** Histogram spread 2–9 with no compression into the 7–9 band: the 5–6 band carries most of the body of work (13 of 25), Kanyō and Glassroom at 8, Ho System alone at 9, 10 reserved per the schema.
+
+**Schema.** Nothing requires revision before ho-02. Logged for later: status-vocabulary strains (Destructive Interference's dual taxonomy/white-paper status, Satori's "demonstrating", `shipped` defined as software-only), the `tech_stack` rule dropping website-work stacks, `outlet` straining for self-published web writing, and the websites-as-works tension (the four web properties live in `web_properties`; whether they also become works is a decision for before ho-12.5). The work-group vocabulary needed one addition, made at closeout: a **Writing** group now holds the six pure-writing essays. Pink Teaming and SSH Actually keep their program groups per the peaks-vs-towns convention — a work's group follows its nature as work-versus-commentary, not its media array. Theme vocabulary held; all eight themes were used without forcing.
+
+**Registers.** The inventory's Short/Substantive registers mapped near-verbatim onto `short_description`/`substantive_description` — the inventory was written in the schema's voice all along, which is what made this ho fast. Promotable to the Scribe's `prompts/ai-assist.md` in ho-11: ground every field in source material, carry unverifiable values as null rather than guesses, derive hero lines from the work's own language.
+
+**Propagated.** Cartography findings (peaks-vs-towns convention, atmarcus.net as non-peak landform, itinerant-writing fallback) → ho-05 in the overview. Created-dates-are-estimates → ho-07. `succeeded_by` single-instance → ho-08. The full observation set lives in `ho-01-surfacings.md`.
+
+**ho-02 unblocked.**
 
 ---
 
 _Authored: 2026-05-18 (Think phase decisions, Execute recipe for Claude Code)._
-_Execution and Reflect: pending._
+_Executed: 2026-06-11 (24 entries, four batches, practitioner-directed autonomous session)._
+_Closed: 2026-06-12 (Writing group, verify-sweep, Reflect; findings propagated to ho-05/ho-07/ho-08)._
