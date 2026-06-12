@@ -1,6 +1,6 @@
 ---
 created: 2026-06-12
-status: ready
+status: complete
 type: ho-document
 project: shoshin-no-sono
 ho: "02"
@@ -104,15 +104,19 @@ Sequence:
 
 ## Phase 3 — Reflect
 
-*To be filled in after execution. Prompts:*
+**The design held; one subtlety earned its test.** The succession normalization direction is easy to state and easy to invert: the first draft of the fixture suite expected a `succeeds` declaration to appear as an *incoming* edge on the predecessor, when canonically it is *outgoing* (`A succeeds B` ≡ `B succeeded_by A`, stored as B→A). The corrected test now documents the direction explicitly in a comment. Consumers in ho-05/ho-08 should read the Edge JSDoc before traversing succession edges.
 
-- **Did the design hold?** Where did the real corpus surface things the Think phase didn't anticipate?
-- **Decision review.** Eager construction, ln for settlement weight, throw-on-dangling — still right after implementation?
-- **Query ergonomics.** What did the test call sites want that the API didn't give cleanly? What does that imply for ho-03's grid work?
-- **Coverage.** What stayed legitimately uncovered, and is it documented as deliberate?
-- **Followups for ho-03.** Does the filter-composition combinator earn its existence?
+**Decision review.** All held. Eager construction is microseconds at 25 works. ln for settlement weight verified against the corpus (*Three Hours* = ln 5 ≈ 1.609; *The Same Lever* = 0 — the ho-01 surfacing is now a committed, tested behavior). Throw-on-dangling exercised by two tests, error messages name the edge. Symmetric mirroring answers Satori⇄Glassroom from both endpoints with `declaredOn` preserved.
+
+**Query ergonomics.** Flat `Edge[]` returns were sufficient at every test call site; no grouped-by-type need surfaced. One typing addition: exposing the instance on `window` needed `src/global.d.ts` (TypeScript 6 Window augmentation) — cleaner than an any-cast and it types the console surface.
+
+**Coverage.** `src/indexer.js`: 100% lines/statements/functions, 95.2% branches (suite-wide 100/97.2). Residual uncovered branches are defensive `??` fallbacks inside spread construction. `src/main.js` excluded as documented (browser wiring only).
+
+**Verification note.** Done-means queries were verified in tests *and* over HTTP — `loadWorks` against the locally served `works.json`, identical to the browser console path. Opening the served page and typing `indexer.getWork('kanyo')` is the remaining ten-second human check.
+
+**Followups for ho-03.** The membership accessors (`worksByGroup/Theme/Media/Status`) look sufficient for the grid's section + filter-chip needs; the `query({...})` combinator stays unbuilt unless the grid's composition logic gets awkward. `src/main.js` uses top-level await — fine per the README's modern-browser requirement, worth remembering when the Gate starts orchestrating renders.
 
 ---
 
 _Authored: 2026-06-12 (Think phase)._
-_Execution and Reflect: pending._
+_Executed: 2026-06-12, commit 3798b8b. Closed: 2026-06-12._
