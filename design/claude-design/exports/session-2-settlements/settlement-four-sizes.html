@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settlement — Four sizes, grown · Session 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FDFCF9; }
+  * { box-sizing: border-box; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; }
+  .colh { position: absolute; transform: translateX(-50%); font: 500 11px Spectral, Georgia, serif;
+          letter-spacing: 0.22em; text-transform: uppercase; color: #9A958B; white-space: nowrap; }
+  .scaletag { font: 500 11px Spectral, Georgia, serif; letter-spacing: 0.24em; text-transform: uppercase; color: #9A958B; white-space: nowrap; }
+
+  .ctl { display: flex; flex-direction: column; gap: 9px; }
+  .ctl-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .ctl-name { font: 400 15px Spectral, Georgia, serif; color: #3A3A3A; letter-spacing: 0.01em; }
+  .ctl-val { font: 500 14px Spectral, Georgia, serif; color: #2B2B2B; font-variant-numeric: tabular-nums;
+             background: #F3F0E8; border: 1px solid #E7E3DA; padding: 1px 9px; min-width: 52px; text-align: center; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; cursor: pointer; margin: 0; }
+  input[type=range]::-webkit-slider-runnable-track { height: 1px; background: #C7C1B4; }
+  input[type=range]::-moz-range-track { height: 1px; background: #C7C1B4; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; margin-top: -7px;
+    border-radius: 50%; background: #FDFCF9; border: 1.5px solid #2B2B2B; transition: background 0.12s ease; }
+  input[type=range]::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: #FDFCF9; border: 1.5px solid #2B2B2B; }
+  input[type=range]:hover::-webkit-slider-thumb { background: #2B2B2B; }
+  input[type=range]:hover::-moz-range-thumb { background: #2B2B2B; }
+  .grp-label { font: 500 11px Spectral, Georgia, serif; letter-spacing: 0.26em; text-transform: uppercase; color: #9A958B; margin-bottom: 2px; }
+  .btn { font: 400 13px Spectral, Georgia, serif; color: #6B6B6B; background: none; border: none; border-bottom: 1px solid #C7C1B4; cursor: pointer; padding: 0 0 1px; }
+  .btn:hover { color: #2B2B2B; border-color: #2B2B2B; }
+  pre.json { margin: 0; font: 400 11.5px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: #5C5C5C;
+             background: #F3F0E8; border: 1px solid #E7E3DA; padding: 12px 14px; white-space: pre; overflow-x: auto; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;padding:56px 40px 72px;">
+  <div style="max-width:1100px;margin:0 auto;">
+
+    <header style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;border-bottom:1px solid #E7E3DA;padding-bottom:24px;">
+      <div style="font:500 12px Spectral,Georgia,serif;letter-spacing:0.34em;text-transform:uppercase;color:#9A958B;">Session 2 · Settlement — Style A</div>
+      <h1 style="margin:0;font:300 34px/1.15 Spectral,Georgia,serif;color:#2B2B2B;letter-spacing:0.005em;">The four sizes, grown around the streets</h1>
+      <p style="margin:0;max-width:720px;font:400 15px/1.6 Spectral,Georgia,serif;color:#6B6B6B;">
+        Solid ink footprints, no shading. Each place is <em>grown, not laid out</em>: a few streets radiate from the centre and curve as they go — the city adds a partial ring — and chunky blocks line them, abutting like neighbours sharing party walls but <em>never overlapping</em>, so the street reads as the void its two walls leave. Rotation follows each curving street; only the city carries a terracotta tower-block. Tune the proportions; both the full row and the 50% row update.
+      </p>
+    </header>
+
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:46px;margin-top:32px;align-items:start;">
+
+      <!-- plate column -->
+      <div>
+        <div style="position:relative;height:20px;">
+          <span class="colh" id="ch0" style="left:11%;">Hamlet</span><span class="colh" id="ch1" style="left:28%;">Village</span>
+          <span class="colh" id="ch2" style="left:52.5%;">Town</span><span class="colh" id="ch3" style="left:83%;">City</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
+          <span class="scaletag">Full size</span><span style="flex:1;height:1px;background:#ECE8DF;"></span>
+        </div>
+        <div style="background:#FDFCF9;border:1px solid #E7E3DA;box-shadow:0 1px 0 rgba(0,0,0,0.03);">
+          <svg id="row100" viewBox="0 0 400 150" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;margin:30px 0 8px;">
+          <span class="scaletag">At 50%</span><span style="flex:1;height:1px;background:#ECE8DF;"></span>
+        </div>
+        <div style="width:50%;background:#FDFCF9;border:1px solid #E7E3DA;box-shadow:0 1px 0 rgba(0,0,0,0.03);">
+          <svg id="row50" viewBox="0 0 400 150" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+      </div>
+
+      <!-- controls -->
+      <div style="display:flex;flex-direction:column;gap:24px;padding-top:30px;">
+        <div class="grp-label">Block</div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Block size</span><span class="ctl-val" id="v-unit"></span></div>
+          <input type="range" id="unit" min="6" max="13" step="0.5">
+        </div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Packing <span style="color:#9A958B;font-style:italic;">· party-wall gap</span></span><span class="ctl-val" id="v-pack"></span></div>
+          <input type="range" id="pack" min="0" max="1" step="0.02">
+        </div>
+
+        <div class="grp-label" style="margin-top:8px;">Streets</div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">City corridors</span><span class="ctl-val" id="v-corridors"></span></div>
+          <input type="range" id="corridors" min="3" max="6" step="1">
+        </div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Street curve <span style="color:#9A958B;font-style:italic;">· max turn</span></span><span class="ctl-val" id="v-curve"></span></div>
+          <input type="range" id="curve" min="0" max="26" step="1">
+        </div>
+        <div class="ctl">
+          <div class="ctl-head"><span class="ctl-name">Edge ravel <span style="color:#9A958B;font-style:italic;">· outliers</span></span><span class="ctl-val" id="v-ravel"></span></div>
+          <input type="range" id="ravel" min="0" max="8" step="1">
+        </div>
+
+        <div style="display:flex;gap:20px;margin-top:6px;">
+          <button class="btn" id="reseed">Reseed</button>
+          <button class="btn" id="reset">Reset</button>
+          <button class="btn" id="copy">Copy parameters</button>
+        </div>
+        <pre class="json" id="json"></pre>
+      </div>
+    </div>
+
+    <div style="margin-top:40px;font:italic 400 13px/1.6 Spectral,Georgia,serif;color:#A8A39A;border-top:1px dashed #E7E3DA;padding-top:18px;max-width:1100px;">
+      parked — rivers and bridges (not developed); street directions could later bend to the terrain layer so corridors follow valleys and the ring hugs a contour; the landmark&rsquo;s footprint can vary per city without changing the grammar.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var INK='#2B2B2B', PAPER='#FDFCF9', TERRA='#9A5B3C', GOLD=2.399963229, R2D=180/Math.PI;
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function f(n){return (Math.round(n*100)/100);}
+  function rectSVG(b){
+    return '<rect x="'+f(-b.w/2)+'" y="'+f(-b.h/2)+'" width="'+f(b.w)+'" height="'+f(b.h)+'" transform="translate('+f(b.x)+','+f(b.y)+') rotate('+f(b.a||0)+')" fill="'+(b.terra?TERRA:INK)+'" stroke="'+PAPER+'" stroke-width="0.4"/>';
+  }
+  var D2R=Math.PI/180;
+  // curved corridor: a walk that trends outward but may deviate up to maxTurn (rad per unit) -> streets curve
+  function corridorWalk(unit, r0, heading0, length, maxTurn, pull, seed){
+    var rnd=mulberry32(seed), x=Math.cos(heading0)*r0, y=Math.sin(heading0)*r0, h=heading0;
+    var n=Math.max(5, Math.round(length/(unit*0.7))), dl=length/n, k=dl/unit, pts=[{x:x,y:y}];
+    for(var i=0;i<n;i++){
+      var target=Math.atan2(y,x), diff=Math.atan2(Math.sin(target-h),Math.cos(target-h));
+      h += (pull*diff + (rnd()-0.5)*2*maxTurn)*k;          // bounded deviation per unit length
+      x+=Math.cos(h)*dl; y+=Math.sin(h)*dl; pts.push({x:x,y:y});
+    }
+    return pts;
+  }
+  // oriented-rectangle overlap (SAT) so buildings never overlap, only share edges
+  function corners(b){
+    var ca=Math.cos((b.a||0)*D2R), sa=Math.sin((b.a||0)*D2R), hw=b.w/2, hh=b.h/2, o=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]], r=[];
+    for(var i=0;i<4;i++) r.push({x:b.x+o[i][0]*ca-o[i][1]*sa, y:b.y+o[i][0]*sa+o[i][1]*ca});
+    return r;
+  }
+  function satOverlap(A,B){
+    var P=[A,B];
+    for(var s=0;s<2;s++){ var poly=P[s];
+      for(var i=0;i<4;i++){ var j=(i+1)%4, nx=-(poly[j].y-poly[i].y), ny=poly[j].x-poly[i].x;
+        var a0=1e9,a1=-1e9,b0=1e9,b1=-1e9,kk,p;
+        for(kk=0;kk<4;kk++){p=A[kk].x*nx+A[kk].y*ny; if(p<a0)a0=p; if(p>a1)a1=p;}
+        for(kk=0;kk<4;kk++){p=B[kk].x*nx+B[kk].y*ny; if(p<b0)b0=p; if(p>b1)b1=p;}
+        if(a1<b0||b1<a0) return false; } }
+    return true;
+  }
+  function shrink(b,inset){ return {x:b.x,y:b.y,a:b.a,w:Math.max(0.2,b.w-2*inset),h:Math.max(0.2,b.h-2*inset)}; }
+  function fits(cand, placed, inset){
+    var cc=corners(shrink(cand,inset));
+    for(var i=0;i<placed.length;i++){ if(satOverlap(cc, corners(shrink(placed[i],inset)))) return false; }
+    return true;
+  }
+  function ringPoly(a0,a1,rR,wob,seed){
+    var rnd=mulberry32(seed), pts=[], steps=40, phase=rnd()*6.28;
+    for(var i=0;i<=steps;i++){ var u=i/steps, ang=a0+(a1-a0)*u, r=rR*(1+Math.sin(u*3.5+phase)*wob);
+      pts.push({x:Math.cos(ang)*r, y:Math.sin(ang)*r}); } return pts;
+  }
+  function resample(pts, ds){
+    var out=[], carry=0;
+    for(var i=1;i<pts.length;i++){ var ax=pts[i-1].x, ay=pts[i-1].y, dx=pts[i].x-ax, dy=pts[i].y-ay, d=Math.hypot(dx,dy);
+      if(d<1e-6) continue; var ux=dx/d, uy=dy/d, dist=carry;
+      while(dist<d){ out.push({x:ax+ux*dist, y:ay+uy*dist, tx:ux, ty:uy}); dist+=ds; } carry=dist-d; } return out;
+  }
+  // chunky blocks at evenly-spaced plots fronting the corridor; collision-checked -> walls abut, never overlap
+  function lineCorridor(poly, P, placed, rnd){
+    var ds=Math.max(0.5, P.unit*0.2), S=resample(poly, ds); if(S.length<2) return;
+    var L=(S.length-1)*ds; if(L<=0) return;
+    var nPlots=Math.max(1, Math.round(L/(P.unit*1.12))), spacing=L/nPlots;
+    for(var j=0;j<nPlots;j++){
+      var posLen=(j+0.5)*spacing, idx=Math.min(S.length-1, Math.round(posLen/ds)), s=S[idx];
+      var ang=Math.atan2(s.ty,s.tx)*R2D, nx=-s.ty, ny=s.tx;
+      for(var side=-1;side<=1;side+=2){
+        var w=(spacing-P.gap)*(0.92+rnd()*0.14);             // frontage ~ pitch minus party-wall gap
+        var h=P.unit*(0.8+rnd()*0.5);                        // depth, varied
+        var off=P.streetHalf + h/2;
+        var cand={x:s.x+nx*off*side, y:s.y+ny*off*side, w:w, h:h, a:ang+(rnd()-0.5)*5};
+        if(fits(cand, placed, P.inset)) placed.push(cand);  // skip if it would overlap a neighbour
+      }
+    }
+  }
+  function loosePack(count, unit, placed, seed){
+    var rnd=mulberry32(seed*131+5), rot=rnd()*6.28, pitch=unit*1.15, got=0, tries=0;
+    while(got<count && tries<count*10){ tries++;
+      var rr=pitch*Math.sqrt(got+0.3), th=got*GOLD+rot+(rnd()-0.5)*0.6;
+      var cand={x:Math.cos(th)*rr+(rnd()-0.5)*pitch*0.3, y:Math.sin(th)*rr+(rnd()-0.5)*pitch*0.3,
+        w:unit*(1.0+rnd()*0.5), h:unit*(0.85+rnd()*0.4), a:(rnd()-0.5)*30};
+      if(fits(cand, placed, unit*0.06)){ placed.push(cand); got++; } }
+  }
+  function addRavel(placed, Rmax, n, unit, rnd){
+    var got=0, tries=0;
+    while(got<n && tries<n*12){ tries++;
+      var ang=rnd()*6.28, r=Rmax*(1.02+rnd()*0.28);
+      var cand={x:Math.cos(ang)*r, y:Math.sin(ang)*r, w:unit*(0.9+rnd()*0.5), h:unit*(0.8+rnd()*0.4), a:(rnd()-0.5)*40};
+      if(fits(cand, placed, unit*0.06)){ placed.push(cand); got++; } }
+  }
+  function settlement(level, Q, seed){
+    var rnd=mulberry32(seed*101+7), unit=Q.unit, placed=[];
+    var gap=unit*(0.02+(1-Q.pack)*0.2), inset=unit*0.06, mt=Q.curve*D2R;   // mt = max angle deviation, rad/unit
+    var P0={unit:unit, streetHalf:unit*0.42, gap:gap, inset:inset};
+    if(level===0){ loosePack(2+(seed%2), unit, placed, seed); return placed; }
+    if(level===1){ var th=rnd()*6.28;            // village: one informal curving lane (~6)
+      lineCorridor(corridorWalk(unit, -unit*1.4, th, unit*4.0, mt, 0.5, (rnd()*1e6)|0), P0, placed, rnd);
+      addRavel(placed, unit*2.4, Math.round(Q.ravel*0.2), unit, rnd);
+      return placed; }
+    if(level===2){ var Rmax=unit*3.4, base=rnd()*6.28, nc=Math.min(3,Math.max(2,Q.corridors-2));  // town: 2-3 corridors (~14)
+      for(var k=0;k<nc;k++){ var th=base+k*(6.283/nc)+(rnd()-0.5)*0.5;
+        lineCorridor(corridorWalk(unit, unit*0.7, th, Rmax, mt, 0.5, (rnd()*1e6)|0), P0, placed, rnd); }
+      addRavel(placed, Rmax, Math.round(Q.ravel*0.35), unit, rnd);
+      return placed; }
+    // city: corridors + partial ring + landmark (~30)
+    var Rmax=unit*4.5, base=rnd()*6.28, P={unit:unit, streetHalf:unit*0.44, gap:gap, inset:inset};
+    placed.push({x:0,y:0,w:unit*1.3,h:unit*3.0,a:(rnd()-0.5)*7,terra:true});   // tower first -> piazza clears by collision
+    for(var k=0;k<Q.corridors;k++){ var th=base+k*(6.283/Q.corridors)+(rnd()-0.5)*0.35;
+      lineCorridor(corridorWalk(unit, unit*1.4, th, Rmax-unit*1.4, mt, 0.5, (rnd()*1e6)|0), P, placed, rnd); }
+    var ra=rnd()*6.28; lineCorridor(ringPoly(ra, ra+4.3, Rmax*0.5, 0.05, (rnd()*1e6)|0), P, placed, rnd);
+    addRavel(placed, Rmax, Q.ravel, unit, rnd);
+    return placed;
+  }
+  function rowInner(Q, seed){
+    var xs=[44,112,210,332], cy=78, inner='';
+    for(var L=0;L<4;L++){ var grot=(mulberry32(seed*17+L*3)()-0.5)*7;
+      var g='<g transform="translate('+xs[L]+','+cy+') rotate('+f(grot)+')">';
+      settlement(L, Q, seed+L*5).forEach(function(b){ g+=rectSVG(b); }); inner+=g+'</g>'; }
+    return inner;
+  }
+
+  // ---- controls ----
+  var SLIDERS=['unit','pack','curve','corridors','ravel'];
+  var DEFAULTS={unit:8.5, pack:0.24, curve:24, corridors:5, ravel:7};
+  var els={}, seed=2826;
+  SLIDERS.forEach(function(id){ els[id]=document.getElementById(id); });
+  var row100=document.getElementById('row100'), row50=document.getElementById('row50'), jsonEl=document.getElementById('json');
+  function round(v,n){return Math.round(v*n)/n;}
+  function fmt(id,v){ if(id==='unit')return v.toFixed(1)+'px'; if(id==='pack')return Math.round(v*100)+'%'; if(id==='curve')return v+'\u00b0'; return String(v); }
+  function params(){
+    var unit=round(parseFloat(els.unit.value),10), pack=round(parseFloat(els.pack.value),100);
+    return { unit:unit, pack:pack, curve:parseInt(els.curve.value,10), corridors:parseInt(els.corridors.value,10), ravel:parseInt(els.ravel.value,10),
+             seed:seed, paper:PAPER, ink:INK, accent:TERRA };
+  }
+  function render(){
+    var Q=params();
+    SLIDERS.forEach(function(id){ document.getElementById('v-'+id).textContent=fmt(id,Q[id]); });
+    var inner=rowInner(Q, seed);
+    row100.innerHTML=inner; row50.innerHTML=inner;
+    jsonEl.textContent=JSON.stringify(Q,null,2);
+    try{ localStorage.setItem('settlement_grown_v1', JSON.stringify(Object.assign({_seed:seed},Q))); }catch(e){}
+  }
+  function setAll(v){ els.unit.value=v.unit; els.pack.value=v.pack; els.curve.value=v.curve; els.corridors.value=v.corridors; els.ravel.value=v.ravel; }
+  var saved=DEFAULTS;
+  try{ var j=JSON.parse(localStorage.getItem('settlement_grown_v1')); if(j){ saved=Object.assign({},DEFAULTS,j); if(j._seed!=null) seed=j._seed; } }catch(e){}
+  setAll(saved);
+  SLIDERS.forEach(function(id){ els[id].addEventListener('input', render); });
+  document.getElementById('reset').addEventListener('click', function(){ setAll(DEFAULTS); seed=2826; render(); });
+  document.getElementById('reseed').addEventListener('click', function(){ seed=Math.floor(Math.random()*9999)+1; render(); });
+  document.getElementById('copy').addEventListener('click', function(){
+    var btn=this, text=JSON.stringify(params(),null,2), done=function(){ btn.textContent='Copied \u2713'; setTimeout(function(){ btn.textContent='Copy parameters'; },1300); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,function(){fb(text);done();}); } else { fb(text); done(); }
+  });
+  function fb(text){ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+  render();
+})();
+</script>
+</body>
+</html>

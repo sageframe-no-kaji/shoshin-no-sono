@@ -131,8 +131,48 @@
     </p>
 
     <h2>2 · Settlements (hamlet · village · town · city)</h2>
-    <p class="status">Not yet run — design/claude-design/session-2-settlements.md</p>
-    <div class="slot">Winner row + parameter notes land here.</div>
+    <p class="status committed">
+      FROZEN 2026-06-12. The instrument lives in the repo:
+      <a href="claude-design/exports/session-2-settlements/settlement-four-sizes.html">settlement-four-sizes.html</a>
+      (opens on the committed values).
+    </p>
+    <p class="note">
+      <strong>Settlements are grown, not laid out.</strong> A few streets radiate from the centre
+      and curve as they go (city adds one partial ring); chunky solid blocks line the streets,
+      each block rotated to its street's local tangent, so the street reads as the <em>void</em>
+      between two walls of buildings — no road stroke is drawn. Size is the progression: hamlet
+      (2–3 loose blocks) → village (one informal lane) → town (2–3 corridors) → city (full
+      corridors + ring + one terracotta tower-block in a cleared piazza). Terracotta is spent once
+      per city and nowhere else.
+    </p>
+    <p class="note">
+      <strong>Reference model</strong> (read from the explorer source — what ho-07 reimplements):
+      buildings are placed by collision detection (oriented-rectangle SAT test with a shrink-inset),
+      so they <em>abut but never overlap</em> — this is the fix for the overlap problem, and the
+      party-wall gap is the inset. The tower is placed first so the piazza clears by collision.
+      Each settlement is seeded; reseeding gives endless non-repeating towns in the style — which
+      is the fresh-render-per-visit architecture, confirmed by feel. The frozen parameters tune the
+      grammar; the seed is per-render.
+    </p>
+    <p class="note">
+      <strong>Promoted to ho-07 (place-then-deform):</strong> a settlement here is grown in the
+      abstract — terrain doesn't exist yet. At placement, the town warps to its slope (corridors
+      bending to follow contours, footprint elongating along the valley). The peak and the
+      settlement are revealed as the same kind of object — a seeded radial growth process with a
+      raveling edge — so ho-07's town placement shares the growth/warp machinery with the ho-05
+      field. (Register's recurring rule, third occurrence: character comes from process, not styling.)
+    </p>
+    <pre id="settlement-parameters">{
+  "unit": 8.5,
+  "pack": 0.24,
+  "curve": 24,
+  "corridors": 5,
+  "ravel": 7,
+  "seed": 2826,
+  "paper": "#FDFCF9",
+  "ink": "#2B2B2B",
+  "accent": "#9A5B3C"
+}</pre>
 
     <h2>3 · Typography</h2>
     <p class="status">Not yet run — design/claude-design/session-3-typography.md</p>

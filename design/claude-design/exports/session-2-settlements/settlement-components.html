@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settlement — Style A, mixed components · Session 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FDFCF9; }
+  * { box-sizing: border-box; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; }
+  .card { background: #FDFCF9; border: 1px solid #E7E3DA; box-shadow: 0 1px 0 rgba(0,0,0,0.03); position: relative; }
+  .onum { font: 600 20px Spectral, Georgia, serif; color: #2B2B2B; letter-spacing: 0.04em; }
+  .otitle { font: 500 17px Spectral, Georgia, serif; color: #2B2B2B; }
+  .ocap { font: 400 13.5px/1.55 Spectral, Georgia, serif; color: #5C5C5C; }
+  .tag { display:inline-block; font: 400 12px Spectral, Georgia, serif; color: #6B6B6B; border:1px solid #E0DBD0;
+         background:#F7F4EC; padding:1px 8px; border-radius:1px; margin:0 5px 5px 0; letter-spacing:0.01em; }
+  .tag.acc { color:#9A5B3C; border-color:#E3CFC2; background:#FAF1EB; }
+  .legcap { font: 400 11.5px Spectral, Georgia, serif; color: #6B6B6B; }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;padding:56px 40px 72px;">
+  <div style="max-width:1080px;margin:0 auto;">
+
+    <header style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;border-bottom:1px solid #E7E3DA;padding-bottom:24px;">
+      <div style="font:500 12px Spectral,Georgia,serif;letter-spacing:0.34em;text-transform:uppercase;color:#9A958B;">Session 2 · Settlement — Style A, extended</div>
+      <h1 style="margin:0;font:300 34px/1.15 Spectral,Georgia,serif;color:#2B2B2B;letter-spacing:0.005em;">Footprint cluster, mixed components</h1>
+      <p style="margin:0;max-width:700px;font:400 15px/1.6 Spectral,Georgia,serif;color:#6B6B6B;">
+        Four ways to dress the recommended settlement — drawing treatments (offset outlines, drop shadows, varied-length blocks) plus a light hand of map furniture (roads, river, cathedral, common). Each shown at city scale, where the furniture appears, with a town inset to show it stays quiet as the place shrinks. Pick a mix, or tell me which marks to keep.
+      </p>
+    </header>
+
+    <!-- component legend -->
+    <div id="legend" style="display:flex;flex-wrap:wrap;gap:26px;margin-top:26px;padding:16px 4px 4px;"></div>
+
+    <!-- 2x2 options -->
+    <div id="grid" style="display:grid;grid-template-columns:1fr 1fr;gap:34px 36px;margin-top:26px;"></div>
+
+    <div style="margin-top:46px;font:italic 400 13px/1.6 Spectral,Georgia,serif;color:#A8A39A;border-top:1px dashed #E7E3DA;padding-top:18px;">
+      parked — every mark is one toggle on the same generator, so any combination is reachable; river/road seeds can follow the terrain layer later so they actually meet ridges and valleys; the cathedral is the only terracotta here, which keeps the accent meaningful — one civic mark per settlement.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var INK='#2B2B2B', MID='#6B6B6B', GRAY='#7C7C78', SOFT='#C7C1B4', PAPER='#FDFCF9', TERRA='#9A5B3C', SHADOW='#CFC9BC';
+  var GOLD=2.399963229;
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function f(n){return (Math.round(n*100)/100);}
+
+  function wavy(x0,y0,x1,y1,amp,seed,segs){
+    var rnd=mulberry32(seed); segs=segs||6;
+    var dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,px=-uy,py=ux;
+    var d='M'+f(x0)+' '+f(y0);
+    for(var i=1;i<=segs;i++){ var t=i/segs; var a=(rnd()-0.5)*2*amp*Math.sin(t*Math.PI);
+      d+=' L'+f(x0+dx*t+px*a)+' '+f(y0+dy*t+py*a); }
+    return d;
+  }
+  function cluster(count, fp, spread, seed, voids){
+    var rnd=mulberry32(seed*977+13), pitch=fp*spread, rot=rnd()*Math.PI*2, out=[];
+    for(var i=0;i<count;i++){
+      var rr=pitch*Math.sqrt(i+0.35), th=i*GOLD+rot;
+      var jx=(rnd()-0.5)*pitch*0.4, jy=(rnd()-0.5)*pitch*0.4;
+      var x=Math.cos(th)*rr+jx, y=Math.sin(th)*rr+jy;
+      var w=fp*(0.75+rnd()*1.05), h=fp*(0.72+rnd()*0.5), a=(rnd()-0.5)*16, skip=false;
+      if(voids){ for(var v=0;v<voids.length;v++){ if(Math.hypot(x-voids[v][0],y-voids[v][1])<voids[v][2]){skip=true;break;} } }
+      if(skip) continue;
+      out.push({x:x,y:y,w:w,h:h,a:a});
+    }
+    return out;
+  }
+  function blockSVG(s, mode, offset, shadow){
+    var g='', tx='translate('+f(s.x)+','+f(s.y)+') rotate('+f(s.a)+')';
+    if(shadow) g+='<rect x="'+f(-s.w/2)+'" y="'+f(-s.h/2)+'" width="'+f(s.w)+'" height="'+f(s.h)+'" transform="translate('+f(s.x+0.9)+','+f(s.y+1.3)+') rotate('+f(s.a)+')" fill="'+SHADOW+'"/>';
+    if(mode==='solid'){
+      g+='<rect x="'+f(-s.w/2)+'" y="'+f(-s.h/2)+'" width="'+f(s.w)+'" height="'+f(s.h)+'" transform="'+tx+'" fill="'+INK+'" stroke="'+PAPER+'" stroke-width="0.5"/>';
+    } else {
+      if(offset) g+='<rect x="'+f(-s.w/2)+'" y="'+f(-s.h/2)+'" width="'+f(s.w)+'" height="'+f(s.h)+'" transform="translate('+f(s.x+0.7)+','+f(s.y+0.7)+') rotate('+f(s.a)+')" fill="none" stroke="'+SOFT+'" stroke-width="0.7"/>';
+      g+='<rect x="'+f(-s.w/2)+'" y="'+f(-s.h/2)+'" width="'+f(s.w)+'" height="'+f(s.h)+'" transform="'+tx+'" fill="'+PAPER+'" stroke="'+INK+'" stroke-width="0.85"/>';
+    }
+    return g;
+  }
+  function roadPaths(cx,cy,R,n,seed){
+    var rnd=mulberry32(seed*311+7), base=rnd()*Math.PI, paths=[];
+    for(var i=0;i<n;i++){
+      var ang=base+i*Math.PI/n + (rnd()-0.5)*0.5, off=(rnd()-0.5)*R*0.5;
+      var ox=Math.cos(ang+Math.PI/2)*off, oy=Math.sin(ang+Math.PI/2)*off;
+      var ex=Math.cos(ang)*R*1.7, ey=Math.sin(ang)*R*1.7;
+      paths.push(wavy(cx-ex+ox,cy-ey+oy,cx+ex+ox,cy+ey+oy,R*0.06,seed*7+i*13,6));
+    }
+    return paths;
+  }
+  function roads(cx,cy,R,n,seed){
+    var paths=roadPaths(cx,cy,R,n,seed), g='';
+    paths.forEach(function(d){ g+='<path d="'+d+'" fill="none" stroke="'+PAPER+'" stroke-width="3.4" stroke-linecap="round"/>'; });
+    paths.forEach(function(d){ g+='<path d="'+d+'" fill="none" stroke="'+MID+'" stroke-width="1.1" stroke-linecap="round"/>'; });
+    return g;
+  }
+  function river(cx,cy,R,seed){
+    var x=cx+R*0.95, d=wavy(x-R*0.3,cy-R*1.7, x+R*0.2,cy+R*1.7, R*0.5, seed*97+5, 7);
+    return '<path d="'+d+'" fill="none" stroke="'+GRAY+'" stroke-width="3" stroke-linecap="round" opacity="0.6"/>'+
+           '<path d="'+d+'" fill="none" stroke="'+PAPER+'" stroke-width="1" stroke-linecap="round"/>'+
+           '<path d="'+d+'" fill="none" stroke="'+GRAY+'" stroke-width="0.5" stroke-linecap="round" opacity="0.85"/>';
+  }
+  function cathedral(cx,cy,s0){
+    var s=s0*1.35, nl=s*2.6, nw=s*0.95, tl=s*1.9, tw=s*0.85, g='';
+    g+='<circle cx="'+f(cx)+'" cy="'+f(cy)+'" r="'+f(s*1.9)+'" fill="none" stroke="'+SOFT+'" stroke-width="0.7"/>';
+    g+='<rect x="'+f(cx-nw/2)+'" y="'+f(cy-nl/2)+'" width="'+f(nw)+'" height="'+f(nl)+'" fill="'+TERRA+'" stroke="'+INK+'" stroke-width="0.9" stroke-linejoin="round"/>';
+    g+='<rect x="'+f(cx-tl/2)+'" y="'+f(cy-tw/2-s*0.35)+'" width="'+f(tl)+'" height="'+f(tw)+'" fill="'+TERRA+'" stroke="'+INK+'" stroke-width="0.9" stroke-linejoin="round"/>';
+    g+='<circle cx="'+f(cx)+'" cy="'+f(cy-nl/2-s*0.28)+'" r="'+f(s*0.46)+'" fill="'+TERRA+'" stroke="'+INK+'" stroke-width="0.8"/>';
+    g+='<line x1="'+f(cx)+'" y1="'+f(cy-s*0.35)+'" x2="'+f(cx)+'" y2="'+f(cy-s*1.0)+'" stroke="'+INK+'" stroke-width="0.7"/>';
+    g+='<line x1="'+f(cx-s*0.28)+'" y1="'+f(cy-s*0.72)+'" x2="'+f(cx+s*0.28)+'" y2="'+f(cy-s*0.72)+'" stroke="'+INK+'" stroke-width="0.7"/>';
+    return g;
+  }
+  function common(cx,cy,r,seed){
+    var rnd=mulberry32(seed*53+9), g='';
+    g+='<ellipse cx="'+f(cx)+'" cy="'+f(cy)+'" rx="'+f(r)+'" ry="'+f(r*0.8)+'" fill="'+PAPER+'" stroke="'+INK+'" stroke-width="0.8"/>';
+    for(var i=0;i<5;i++){var a=rnd()*6.28,rr=rnd()*r*0.6;g+='<circle cx="'+f(cx+Math.cos(a)*rr)+'" cy="'+f(cy+Math.sin(a)*rr*0.8)+'" r="0.6" fill="'+MID+'"/>';}
+    return g;
+  }
+  function vignette(cx,cy,opts,seed){
+    var R=opts.fp*opts.spread*Math.sqrt(opts.count), commonC=null, voids=[];
+    if(opts.common){ var ca=2.1; commonC=[cx+Math.cos(ca)*R*0.9, cy+Math.sin(ca)*R*0.9, opts.fp*2.4]; voids.push([commonC[0]-cx,commonC[1]-cy,commonC[2]]); }
+    if(opts.cathedral) voids.push([0,0,opts.fp*2.6]);
+    var blocks=cluster(opts.count, opts.fp, opts.spread, seed, voids), g='<g>';
+    if(opts.river) g+=river(cx,cy,R,seed);
+    if(opts.roads) g+=roads(cx,cy,R,opts.roads,seed);
+    blocks.forEach(function(s){ g+=blockSVG({x:s.x+cx,y:s.y+cy,w:s.w,h:s.h,a:s.a},opts.mode,opts.offset,opts.shadow); });
+    if(opts.cathedral) g+=cathedral(cx,cy,opts.fp);
+    if(opts.common) g+=common(commonC[0],commonC[1],commonC[2]*0.9,seed);
+    return g+'</g>';
+  }
+
+  var OPTS={
+    1:{mode:'hollow',offset:true,shadow:false,roads:3,river:false,cathedral:false,common:false},
+    2:{mode:'solid',offset:false,shadow:true,roads:0,river:true,cathedral:false,common:true},
+    3:{mode:'hollow',offset:true,shadow:false,roads:3,river:false,cathedral:true,common:true},
+    4:{mode:'solid',offset:false,shadow:true,roads:3,river:true,cathedral:true,common:true}
+  };
+  var META={
+    1:{t:'Hand register',tags:[['Hollow blocks',0],['Offset outline',0],['Varied length',0],['Roads',0]]},
+    2:{t:'Letterpress',tags:[['Solid blocks',0],['Drop shadow',0],['Varied length',0],['River',0],['Common',0]]},
+    3:{t:'Cathedral town',tags:[['Hollow blocks',0],['Offset outline',0],['Roads',0],['Cathedral',1],['Common',0]]},
+    4:{t:'River city',tags:[['Solid blocks',0],['Drop shadow',0],['River',0],['Roads',0],['Cathedral',1],['Common',0]]}
+  };
+
+  function frame(k){
+    var o=Object.assign({fp:7,spread:1.2,count:30},OPTS[k]);
+    var ot=Object.assign({},o,{count:9,fp:5,roads:o.roads?2:0,river:false,cathedral:false,common:false});
+    return '<svg viewBox="0 0 360 244" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;">'+
+      vignette(146,120,o,7+k)+
+      '<line x1="248" y1="150" x2="248" y2="232" stroke="#ECE8DF" stroke-width="1"/>'+
+      '<text x="300" y="150" text-anchor="middle" font-family="Spectral,Georgia,serif" font-size="8" letter-spacing="2" fill="#B8B2A6">TOWN</text>'+
+      '<g transform="translate(300,192)">'+vignette(0,0,ot,30+k)+'</g>'+
+      '</svg>';
+  }
+
+  var grid=document.getElementById('grid'), html='';
+  [1,2,3,4].forEach(function(k){
+    var m=META[k];
+    var tags=m.tags.map(function(t){return '<span class="tag'+(t[1]?' acc':'')+'">'+t[0]+'</span>';}).join('');
+    html+='<figure class="card" style="margin:0;display:flex;flex-direction:column;">'+
+      '<div style="display:flex;align-items:baseline;gap:12px;padding:16px 18px 6px;">'+
+        '<span class="onum">'+k+'</span><span class="otitle">'+m.t+'</span>'+
+      '</div>'+
+      frame(k)+
+      '<figcaption style="padding:12px 18px 18px;border-top:1px solid #F0ECE3;margin-top:2px;">'+tags+'</figcaption>'+
+    '</figure>';
+  });
+  grid.innerHTML=html;
+
+  // legend swatches
+  function sw(inner){ return '<svg viewBox="-16 -14 32 28" width="40" height="34" style="display:block;">'+inner+'</svg>'; }
+  var L=[
+    ['Footprint', sw('<rect x="-7" y="-5" width="14" height="10" fill="'+INK+'" stroke="'+PAPER+'" stroke-width="0.5"/>')],
+    ['Offset outline', sw('<rect x="-6.3" y="-4.3" width="14" height="10" fill="none" stroke="'+SOFT+'" stroke-width="0.7"/><rect x="-7" y="-5" width="14" height="10" fill="'+PAPER+'" stroke="'+INK+'" stroke-width="0.85"/>')],
+    ['Drop shadow', sw('<rect x="-6.1" y="-3.7" width="14" height="10" fill="'+SHADOW+'"/><rect x="-7" y="-5" width="14" height="10" fill="'+INK+'" stroke="'+PAPER+'" stroke-width="0.5"/>')],
+    ['Varied length', sw('<rect x="-11" y="-4" width="9" height="7" transform="rotate(-6 -6 0)" fill="'+INK+'"/><rect x="0" y="-5" width="13" height="8" transform="rotate(5 6 0)" fill="'+INK+'"/>')],
+    ['Road', sw('<path d="M-13 4 Q0 -3 13 -4" fill="none" stroke="'+PAPER+'" stroke-width="3.4"/><path d="M-13 4 Q0 -3 13 -4" fill="none" stroke="'+MID+'" stroke-width="1.1"/>')],
+    ['River', sw('<path d="M-9 -12 Q5 -2 -4 12" fill="none" stroke="'+GRAY+'" stroke-width="3" opacity="0.6"/><path d="M-9 -12 Q5 -2 -4 12" fill="none" stroke="'+PAPER+'" stroke-width="1"/>')],
+    ['Cathedral', sw(cathedral(0,1,2.4))],
+    ['Common', sw('<ellipse cx="0" cy="0" rx="9" ry="7" fill="'+PAPER+'" stroke="'+INK+'" stroke-width="0.8"/><circle cx="-2" cy="1" r="0.7" fill="'+MID+'"/><circle cx="3" cy="-1" r="0.7" fill="'+MID+'"/><circle cx="1" cy="3" r="0.7" fill="'+MID+'"/>')]
+  ];
+  document.getElementById('legend').innerHTML=L.map(function(it){
+    return '<div style="display:flex;align-items:center;gap:9px;">'+it[1]+'<span class="legcap">'+it[0]+'</span></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

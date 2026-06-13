@@ -42,3 +42,6 @@ Out of scope, do not touch: JSON, data models, architecture, animation,
 interactivity, peaks, roads, ridges, typography, what settlements "mean."
 If you have ideas about those, put them in one line at the end under
 "parked" and stop.
+
+
+Provide sliders for parameters. Keep the parameters minimal; but of high impact.
