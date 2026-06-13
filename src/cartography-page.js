@@ -144,11 +144,11 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
 const townsSvg = (towns) =>
   towns
     .map((t) => {
-      const op = t.match ? 1 : 0.22; // non-matching towns recede, don't vanish (Decision 6)
-      return (
-        `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})" opacity="${op}">${settlementSvg(t.blocks)}</g>` +
-        `<g opacity="${op}">${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name)}</g>`
-      );
+      const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})"`;
+      // Receded (non-matching) towns dim hard and drop their label — a sunk town
+      // doesn't announce itself, and faint ghost-labels read as noise (Decision 6).
+      if (!t.match) return `${g} opacity="0.1">${settlementSvg(t.blocks)}</g>`;
+      return `${g}>${settlementSvg(t.blocks)}</g><g>${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name)}</g>`;
     })
     .join('');
 
