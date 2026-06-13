@@ -30,9 +30,7 @@
  * @property {number} [width] Field/viewBox width in px (positions live here).
  * @property {number} [height] Field/viewBox height in px.
  * @property {number} [margin] Keep-out border so peaks don't hug the edge.
- * @property {number} [iterations] Force-relaxation steps.
- * @property {number} [spread] Scales the ideal inter-peak distance.
- * @property {number} [gravity] Pull toward center that counters repulsion.
+ * @property {number} [candidates] Best-candidate darts thrown per peak (higher = more even).
  * @property {number} [cell] Heightfield grid resolution in px (smaller = finer).
  * @property {number} [summitExp] Falloff exponent; >1 sharpens the summit.
  * @property {number} [noiseWeight] Amplitude of low-elevation crenellation noise.
@@ -45,9 +43,7 @@ const DEFAULTS = {
   width: 1000,
   height: 620,
   margin: 70,
-  iterations: 140,
-  spread: 0.6,
-  gravity: 0.045,
+  candidates: 12,
   cell: 4,
   summitExp: 1.7,
   noiseWeight: 0.85,
@@ -92,10 +88,12 @@ function withDefaults(opts) {
 }
 
 /**
- * Scatter peaks across the field by seeded force relaxation
- * (Fruchterman-Reingold flavored: pairwise repulsion + center gravity, cooled
- * over a fixed iteration count). Deterministic from the seed; positions do not
- * depend on importance or filter state (Decision 1, Decision 2).
+ * Scatter peaks across the field by seeded best-candidate sampling (Mitchell):
+ * each peak is the farthest-from-its-neighbors of several random darts, which
+ * gives a blue-noise-like organic spread — even but not gridded — that fills
+ * the interior instead of pinning to the boundary the way a repulsion sim does.
+ * Deterministic from the seed; positions do not depend on importance or filter
+ * state (Decision 1, Decision 2).
  * @param {Peak[]} peaks
  * @param {number} seed
  * @param {FieldOpts} [opts]
@@ -106,61 +104,39 @@ export function computePositions(peaks, seed, opts) {
   const n = peaks.length;
   if (n === 0) return [];
 
-  const cx = o.width / 2;
-  const cy = o.height / 2;
   const minX = o.margin;
   const minY = o.margin;
-  const maxX = o.width - o.margin;
-  const maxY = o.height - o.margin;
-  const clamp = (/** @type {number} */ v, /** @type {number} */ lo, /** @type {number} */ hi) =>
-    Math.max(lo, Math.min(hi, v));
+  const spanX = o.width - 2 * o.margin;
+  const spanY = o.height - 2 * o.margin;
+  const tries = Math.max(1, o.candidates);
 
-  // Seeded initial placement.
   const rnd = mulberry32(seed >>> 0);
-  const xs = new Float64Array(n);
-  const ys = new Float64Array(n);
+  /** @type {number[]} */
+  const xs = [];
+  /** @type {number[]} */
+  const ys = [];
+
   for (let i = 0; i < n; i++) {
-    xs[i] = minX + rnd() * (maxX - minX);
-    ys[i] = minY + rnd() * (maxY - minY);
-  }
-
-  // Ideal separation: the FR constant k ~ sqrt(area / count).
-  const k = Math.sqrt(((maxX - minX) * (maxY - minY)) / n) * o.spread;
-  let temp = o.width * 0.1;
-  const cool = temp / (o.iterations + 1);
-  const dx = new Float64Array(n);
-  const dy = new Float64Array(n);
-
-  for (let step = 0; step < o.iterations; step++) {
-    dx.fill(0);
-    dy.fill(0);
-    // Pairwise repulsion k²/d.
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        let ddx = xs[i] - xs[j];
-        let ddy = ys[i] - ys[j];
-        let dist = Math.hypot(ddx, ddy) || 1e-4;
-        const f = (k * k) / dist;
-        const ux = ddx / dist;
-        const uy = ddy / dist;
-        dx[i] += ux * f;
-        dy[i] += uy * f;
-        dx[j] -= ux * f;
-        dy[j] -= uy * f;
+    let bx = minX;
+    let by = minY;
+    let best = -1;
+    for (let c = 0; c < tries; c++) {
+      const px = minX + rnd() * spanX;
+      const py = minY + rnd() * spanY;
+      // Distance to the nearest already-placed peak (Infinity for the first).
+      let nearest = Infinity;
+      for (let j = 0; j < xs.length; j++) {
+        const d = Math.hypot(px - xs[j], py - ys[j]);
+        if (d < nearest) nearest = d;
+      }
+      if (nearest > best) {
+        best = nearest;
+        bx = px;
+        by = py;
       }
     }
-    // Gravity toward center keeps the cluster on the paper.
-    for (let i = 0; i < n; i++) {
-      dx[i] += (cx - xs[i]) * o.gravity * k * 0.1;
-      dy[i] += (cy - ys[i]) * o.gravity * k * 0.1;
-    }
-    // Apply, capped by the cooling temperature, then clamp to bounds.
-    for (let i = 0; i < n; i++) {
-      const d = Math.hypot(dx[i], dy[i]) || 1e-4;
-      xs[i] = clamp(xs[i] + (dx[i] / d) * Math.min(d, temp), minX, maxX);
-      ys[i] = clamp(ys[i] + (dy[i] / d) * Math.min(d, temp), minY, maxY);
-    }
-    temp = Math.max(0, temp - cool);
+    xs.push(bx);
+    ys.push(by);
   }
 
   return peaks.map((p, i) => ({ ...p, x: xs[i], y: ys[i] }));

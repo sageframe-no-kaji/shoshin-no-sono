@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { rampColor, heatmapSvg, peakMarkersSvg } from '../src/heatmap.js';
 
 describe('rampColor', () => {
-  it('runs cream at the valleys to ink at the summits', () => {
-    expect(rampColor(0)).toBe('#fdfcf9');
-    expect(rampColor(1)).toBe('#2b2b2b');
+  it('runs blue at the valleys to red at the summits', () => {
+    expect(rampColor(0)).toBe('hsl(240 68% 80%)');
+    expect(rampColor(1)).toBe('hsl(0 68% 34%)');
   });
 
   it('clamps out-of-range input', () => {
-    expect(rampColor(-1)).toBe('#fdfcf9');
-    expect(rampColor(2)).toBe('#2b2b2b');
+    expect(rampColor(-1)).toBe(rampColor(0));
+    expect(rampColor(2)).toBe(rampColor(1));
   });
 });
 
@@ -65,6 +65,6 @@ describe('peakMarkersSvg', () => {
     const svg = peakMarkersSvg(/** @type {any} */ ([{ id: 'p', x: 1, y: 1, amplitude: 5 }]), {
       maxAmplitude: 10,
     });
-    expect(svg).toContain('opacity="0.6"'); // 0.25 + 0.75 * (5/10)
+    expect(svg).toContain('opacity="0.7"'); // 0.35 + 0.65 * (5/10) = 0.675 → 0.7
   });
 });

@@ -12,43 +12,44 @@
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 /** @typedef {import('./field.js').PositionedPeak} PositionedPeak */
 
-const PAPER = [253, 252, 249]; // #FDFCF9
-const INK = [43, 43, 43]; // #2B2B2B
-
 /**
- * Elevation ramp: cream at the valleys, ink at the summits.
+ * Elevation ramp for the debug view — a vivid hue sweep (blue valleys → red
+ * summits) with lightness falling as elevation rises. Deliberately NOT the
+ * cream/ink register: the goal here is maximum legibility of structure, not
+ * fidelity. ho-06's contour renderer is the one that honors the register.
  * @param {number} t normalized elevation in [0, 1]
- * @returns {string} #rrggbb
+ * @returns {string} an hsl() color
  */
 export function rampColor(t) {
   const c = Math.max(0, Math.min(1, t));
-  const ch = (/** @type {number} */ lo, /** @type {number} */ hi) =>
-    Math.round(lo + (hi - lo) * c)
-      .toString(16)
-      .padStart(2, '0');
-  return `#${ch(PAPER[0], INK[0])}${ch(PAPER[1], INK[1])}${ch(PAPER[2], INK[2])}`;
+  const hue = Math.round(240 - 240 * c); // 240 blue (low) → 0 red (high)
+  const light = Math.round(80 - 46 * c); // pale low → deep high
+  return `hsl(${hue} 68% ${light}%)`;
 }
 
 /** @param {number} n @returns {number} */
 const round1 = (n) => Math.round(n * 10) / 10;
 
 /**
- * Render the heightfield as a grid of filled cells. `step` coarsens the heat
- * map relative to the field grid (debug only — it doesn't need contour-grade
- * resolution); each rendered cell spans `step` grid samples.
+ * Render the heightfield as a grid of filled cells, elevation quantized into
+ * bands so structure reads as topographic terraces (a cheap contour preview
+ * before ho-06 extracts real iso-lines). `step` coarsens the grid relative to
+ * the field resolution; `bands` sets the number of elevation terraces.
  * @param {Heightfield} hf
- * @param {{ step?: number }} [opts]
+ * @param {{ step?: number, bands?: number }} [opts]
  * @returns {string} SVG fragment
  */
 export function heatmapSvg(hf, opts = {}) {
   const step = Math.max(1, Math.floor(opts.step ?? 2));
+  const bands = Math.max(1, Math.floor(opts.bands ?? 16));
   const size = hf.cell * step;
   const max = hf.max || 1;
+  /** @param {number} v @returns {string} */
+  const banded = (v) => rampColor(Math.round((v / max) * bands) / bands);
   let svg = `<rect x="0" y="0" width="${hf.width}" height="${hf.height}" fill="${rampColor(0)}"/>`;
   for (let j = 0; j < hf.rows; j += step) {
     for (let i = 0; i < hf.cols; i += step) {
-      const v = hf.field[j * hf.cols + i];
-      svg += `<rect x="${round1(i * hf.cell)}" y="${round1(j * hf.cell)}" width="${round1(size)}" height="${round1(size)}" fill="${rampColor(v / max)}"/>`;
+      svg += `<rect x="${round1(i * hf.cell)}" y="${round1(j * hf.cell)}" width="${round1(size)}" height="${round1(size)}" fill="${banded(hf.field[j * hf.cols + i])}"/>`;
     }
   }
   return svg;
@@ -66,11 +67,13 @@ export function peakMarkersSvg(peaks, opts = {}) {
   const maxAmp = opts.maxAmplitude ?? peaks.reduce((m, p) => Math.max(m, p.amplitude), 1);
   return peaks
     .map((p) => {
-      const o = round1(0.25 + 0.75 * (p.amplitude / (maxAmp || 1)));
+      const o = round1(0.35 + 0.65 * (p.amplitude / (maxAmp || 1)));
+      const x = round1(p.x);
+      const y = round1(p.y);
       return (
         `<g opacity="${o}">` +
-        `<circle cx="${round1(p.x)}" cy="${round1(p.y)}" r="3" fill="#9A5B3C"/>` +
-        `<text x="${round1(p.x + 6)}" y="${round1(p.y + 3)}" font-family="Spectral, Georgia, serif" font-size="10" fill="#9A5B3C">${p.id}</text>` +
+        `<circle cx="${x}" cy="${y}" r="3.5" fill="#fff" stroke="#000" stroke-width="1"/>` +
+        `<text x="${round1(p.x + 7)}" y="${round1(p.y + 3.5)}" font-family="Spectral, Georgia, serif" font-size="10.5" fill="#111" stroke="#fff" stroke-width="2.5" paint-order="stroke" style="paint-order:stroke">${p.id}</text>` +
         `</g>`
       );
     })
