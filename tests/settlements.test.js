@@ -176,4 +176,41 @@ describe('deform — place-then-deform', () => {
   it('is deterministic', () => {
     expect(deform(blocks, cone, { x: 60, y: 50 })).toEqual(deform(blocks, cone, { x: 60, y: 50 }));
   });
+
+  it('relaxes overlapping blocks apart', () => {
+    // two 8×8 blocks centred 3px apart overlap heavily; on a flat field the
+    // affine is identity, so the relaxation pass is what must separate them
+    const clashing = [
+      { x: 0, y: 0, w: 8, h: 8, a: 0 },
+      { x: 3, y: 0, w: 8, h: 8, a: 0 },
+    ];
+    const out = deform(clashing, flat, { x: 50, y: 50 });
+    const sep = Math.hypot(out[0].x - out[1].x, out[0].y - out[1].y);
+    expect(sep).toBeGreaterThan(3); // pushed further apart than they started
+  });
+
+  it('holds the terracotta landmark fixed while fabric relaxes around it', () => {
+    // landmark first, then landmark second — the terra block must not move either way
+    const terraFirst = deform(
+      [
+        { x: 0, y: 0, w: 12, h: 8, a: 0, terra: true },
+        { x: 2, y: 0, w: 8, h: 8, a: 0 },
+      ],
+      flat,
+      { x: 50, y: 50 },
+    );
+    expect([terraFirst[0].x, terraFirst[0].y]).toEqual([0, 0]);
+    expect(Math.abs(terraFirst[1].x)).toBeGreaterThan(2);
+
+    const terraSecond = deform(
+      [
+        { x: 2, y: 0, w: 8, h: 8, a: 0 },
+        { x: 0, y: 0, w: 12, h: 8, a: 0, terra: true },
+      ],
+      flat,
+      { x: 50, y: 50 },
+    );
+    expect([terraSecond[1].x, terraSecond[1].y]).toEqual([0, 0]);
+    expect(Math.abs(terraSecond[0].x)).toBeGreaterThan(2);
+  });
 });

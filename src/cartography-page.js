@@ -102,10 +102,43 @@ const peakDotsSvg = (peaks) =>
     )
     .join('');
 
-/** Town label — typography variant B (settlement): spaced caps below the extent. */
-const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name) =>
-  `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-  `font-size="11.5" fill="#6B6B6B" style="letter-spacing:0.22em;">${(name || '').toUpperCase()}</text>`;
+const LABEL_MAX_CHARS = 20; // wrap long titles to a carriage return at word boundaries
+const LABEL_LINE_HEIGHT = 14;
+
+/** Word-wrap an upper-cased label to lines of at most LABEL_MAX_CHARS. @param {string} name @returns {string[]} */
+const wrapLabel = (name) => {
+  const words = (name || '').toUpperCase().split(/\s+/).filter(Boolean);
+  /** @type {string[]} */
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    if (cur && cur.length + 1 + w.length > LABEL_MAX_CHARS) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = cur ? `${cur} ${w}` : w;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+};
+
+/**
+ * Town label — typography variant B (settlement): spaced caps below the extent,
+ * wrapped to a char limit, with a cream halo (paint-order stroke) so the glyphs
+ * read clear of the contour lines.
+ */
+const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name) => {
+  const lines = wrapLabel(name);
+  const tspans = lines
+    .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : LABEL_LINE_HEIGHT}">${ln}</tspan>`)
+    .join('');
+  return (
+    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+    `font-size="11.5" fill="#6B6B6B" style="letter-spacing:0.22em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="3" stroke-linejoin="round">${tspans}</text>`
+  );
+};
 
 /** @param {import('./cartographer.js').CartographyTown[]} towns */
 const townsSvg = (towns) =>

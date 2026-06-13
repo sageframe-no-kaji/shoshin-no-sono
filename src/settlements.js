@@ -21,6 +21,7 @@ const R2D = 180 / Math.PI;
 const GOLD = 2.399963229; // golden angle — the spike's loose-scatter pitch
 const DESCENT_STEPS = 8; // fall-line substeps the seat walks downhill (Decision 2)
 const CONTOUR_FOLLOW_CAP = 60; // px clamp on the per-block contour drape (keeps a town coherent)
+const RELAX_ITERS = 14; // overlap-relaxation passes after the deform (dense closes need more)
 
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 /** @typedef {{ x: number, y: number }} Point */
@@ -221,6 +222,48 @@ function loose(/** @type {number} */ ct, /** @type {number} */ unit, pl, /** @ty
       g++;
     }
   }
+}
+
+/**
+ * Push overlapping blocks apart along their centre-to-centre axis, a few
+ * iterations. Growth places blocks non-overlapping, but the deform (Decision 4)
+ * moves them independently and can collapse neighbours together — this relaxes
+ * the result back to abutting-not-overlapping. The terracotta landmark stays
+ * fixed; the fabric moves around it. @param {Block[]} blocks @param {number} inset @param {number} step @param {number} iters
+ */
+function relaxBlocks(blocks, inset, step, iters) {
+  for (let it = 0; it < iters; it++) {
+    let moved = false;
+    for (let i = 0; i < blocks.length; i++) {
+      for (let j = i + 1; j < blocks.length; j++) {
+        const bi = blocks[i];
+        const bj = blocks[j];
+        if (!sat(corn(shr(bi, inset)), corn(shr(bj, inset)))) continue;
+        const dx = bj.x - bi.x;
+        const dy = bj.y - bi.y;
+        const d = Math.hypot(dx, dy) || 1e-3;
+        const ux = dx / d;
+        const uy = dy / d;
+        const h = step / 2;
+        // a fixed landmark absorbs the whole push; otherwise split it
+        if (bi.terra) {
+          bj.x += ux * step;
+          bj.y += uy * step;
+        } else if (bj.terra) {
+          bi.x -= ux * step;
+          bi.y -= uy * step;
+        } else {
+          bi.x -= ux * h;
+          bi.y -= uy * h;
+          bj.x += ux * h;
+          bj.y += uy * h;
+        }
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return blocks;
 }
 
 /** Fringe `n` blocks beyond radius `Rmax` — the raveling edge. @param {Block[]} pl @param {() => number} rnd */
@@ -509,7 +552,7 @@ export function deform(blocks, hf, seat, opts = {}) {
   const ca = Math.cos(baseAngle);
   const sa = Math.sin(baseAngle);
   const seatElev = sampleField(hf, seat.x, seat.y);
-  return blocks.map((b) => {
+  const warped = blocks.map((b) => {
     const sx = b.x * elong; // elongate along the local growth axis
     const sy = b.y;
     let rx = sx * ca - sy * sa; // then rotate that axis onto the contour
@@ -529,4 +572,9 @@ export function deform(blocks, hf, seat, opts = {}) {
     }
     return { ...b, x: rx, y: ry, a: (b.a || 0) + baseAngle * R2D };
   });
+  // The drape moves blocks independently and can overlap them — relax apart.
+  let minDim = Infinity;
+  for (const b of warped) minDim = Math.min(minDim, b.w, b.h);
+  if (!Number.isFinite(minDim)) minDim = 0;
+  return relaxBlocks(warped, minDim * 0.12, minDim * 0.55, RELAX_ITERS);
 }
