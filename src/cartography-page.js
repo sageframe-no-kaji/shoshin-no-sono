@@ -102,6 +102,36 @@ const peakDotsSvg = (peaks) =>
     )
     .join('');
 
+const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
+
+/**
+ * Peak label — typography variant B (peak): wide-tracked roman caps with the
+ * native script set beside at near-equal optical size, a cream halo so it reads
+ * over the rings. A minimal static render pulled forward so the assembled map
+ * is legible during the by-feel pass; ho-09 owns the interactive label layer
+ * (cards, hover-dim, collision/leadering).
+ * @param {number} x @param {number} y @param {string} name @param {string|null} native
+ */
+const peakLabel = (x, y, name, native) => {
+  const nat = native
+    ? `<tspan dx="8" font-family="${NATIVE_STACK}" font-size="14" fill="#5C5C5C" style="letter-spacing:0.10em;">${native}</tspan>`
+    : '';
+  return (
+    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+    `font-size="16.5" fill="#2B2B2B" style="letter-spacing:0.16em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="3.5" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+  );
+};
+
+/** @param {import('./field.js').PositionedPeak[]} peaks */
+const peakLabelsSvg = (peaks) =>
+  peaks
+    .map((p) => {
+      const w = indexer.getWork(p.id);
+      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script) : '';
+    })
+    .join('');
+
 const LABEL_MAX_CHARS = 20; // wrap long titles to a carriage return at word boundaries
 const LABEL_LINE_HEIGHT = 14;
 
@@ -166,7 +196,8 @@ const render = () => {
     weightIndex: tuners.weightIndex,
   });
   svg += townsSvg(towns);
-  if (showPeaks) svg += peakDotsSvg(field.peaks);
+  svg += peakLabelsSvg(field.peaks); // real peak labels (variant B), always on
+  if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
   pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';
