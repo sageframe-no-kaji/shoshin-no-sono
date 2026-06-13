@@ -1,6 +1,6 @@
 # 初心の園 — Shoshin no Sono — Ho Overview
 
-Five phases. Nineteen hos including ho-00, ho-01.5, and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
+Five phases. Twenty hos including ho-00, ho-01.5, ho-06.5, and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
 
 ## What this is, and what it is not
 
@@ -16,7 +16,7 @@ It is also not a per-ho document. Each ho gets its own scope at session time via
 |---|---|---|
 | 0. Foundation | ho-00 | The repo exists; the framing documents are committed; schema is finalized; a preview URL serves an empty page |
 | 1. Data and visible catalog | ho-01, ho-01.5, ho-02, ho-03 | A shareable MVP catalog: grid view, filter URLs, the MVP sample (~20 entries) of the body of work in `works.json` |
-| 2. Cartography | ho-04, ho-05, ho-06, ho-07, ho-08, ho-09 | The procedural interference cartography rendering on desktop with full interaction |
+| 2. Cartography | ho-04, ho-05, ho-06, ho-06.5, ho-07, ho-08, ho-09 | The procedural interference cartography rendering on desktop with full interaction |
 | 3. Authoring | ho-10, ho-11, ho-12, ho-12.5 | A live, fully-populated catalog: the Steward edits existing works; the Founder adds new ones with AI-assist via the Scribe; ho-12.5 completes the hydration as the Founder's first real stress test |
 | 4. Polish and ship | ho-13, ho-14, ho-15, ho-16 | Mobile experience, accessibility, the companion essay, retirement of the prototype, v1.0 |
 
@@ -234,6 +234,18 @@ Marching squares takes the heightfield from ho-05 and extracts iso-elevation con
 - The visual register from ho-04 is now procedurally generated
 
 **What's out of scope:** Towns (ho-07). Relationship features (ho-08). Interactions (ho-09).
+
+**Resolved in ho-06:** Marching squares reimplemented cleanly as `src/contours.js` (pure geometry) + `src/contour-map.js` (register render), replacing ho-05's transient heat map. The silhouette verdict deferred from ho-05 **passed** — the Gaussian-family field reproduces the frozen session-1 peak's character (faces/shoulders spacing, crenellation decay, lobed silhouette) on real iso-lines, so wave-interference stays the unbuilt fallback. Register weights confirmed at map scale on the real corpus (0.25 regular / 0.7 index, index every fifth). The by-feel tuner pass deferred here landed in ho-06.5.
+
+### ho-06.5 — Tuner landing (inserted)
+
+Inserted 2026-06-13, after ho-06. ho-06 closed declaring the field tuners held on the implementing model's eye; the practitioner's own by-feel pass on the live debug instrument moved every field default — ring spacing, crenellation, summit sharpness, base radius, radius × importance, and the filter sink floor. Forward-only response: ho-06 stays closed with its premature verdict; ho-06.5 records the landing and locks the values across the three files that own them (`contours.js`, `field.js`, `cartographer.js`). A `base radius` slider was added to the debug panel during the pass — the importance-spread lever wasn't reachable. The blessed register: a dense field of individuated hills, importance reading as prominence, softer summits, non-matching works receding under a filter to legible small hills rather than naked dots.
+
+**Depends on:** ho-06.
+
+**What's in scope / what "done" means:** carried by the per-ho document — `ho-process/hos/ho-06.5-tuner-landing.md`.
+
+**What's out of scope:** Any new contour or field capability — this is a values landing, not new behavior. Towns (ho-07).
 
 ### ho-07 — Town placement and chronological populate
 
@@ -578,6 +590,7 @@ The overview is updated when splits or insertions happen. New hos are added to t
 **Planned insertions:**
 
 - **ho-01.5 — Environment scaffold.** Inserted (2026-06-12, at ho-02 authoring). The technical scaffold ho-00 didn't produce — test harness, lint/type stack, validator, placeholder page, project CLAUDE.md — landed as its own ho before the first code ho rather than folded into ho-02. See the Phase 1 entry.
+- **ho-06.5 — Tuner landing.** Inserted (2026-06-13, after ho-06). The by-feel tuner pass on the field `opts` — deferred through ho-05 and ho-06 — landed in the practitioner's hand and moved every field default; ho-06.5 locks them across `contours.js`, `field.js`, and `cartographer.js`. The forward-only response to ho-06 having closed its tuner verdict on the model's eye. See the Phase 2 entry.
 - **ho-12.5 — Complete the hydration via the Founder.** Now a planned ho, not a contingency. ho-01 produces an MVP sample of ~20 entries; the remaining works in the body of work (estimated 20-30 more) hydrate through the Founder UI in ho-12.5. This makes the Founder's first real-world test a bulk operation against the production workflow, which is a much stronger validation than adding a single hypothetical new work. Surfacings from ho-12.5 may also drive prompt-template iteration for the Scribe.
 
 **Conditional insertions:**
@@ -624,6 +637,9 @@ ho-05 (positions + heightfield)
   │
   ▼
 ho-06 (contours)
+  │
+  ▼
+ho-06.5 (tuner landing)
   │
   ▼
 ho-07 (towns + populate)
