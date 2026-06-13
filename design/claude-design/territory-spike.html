@@ -145,7 +145,32 @@
     if(level===0){ loose(2+(seed%2),unit,pl,seed); Rext=unit*1.8; }
     else if(level===1){ var th=rnd()*6.28; line(walk(unit,-unit*1.4,th,unit*4,mt,0.5,(rnd()*1e6)|0),P0,pl,rnd); ravel(pl,unit*2.4,Math.round(ST.ravel*0.2),unit,rnd); Rext=unit*3; }
     else if(level===2){ var Rmax=unit*3.4,base=rnd()*6.28,nc=Math.min(3,Math.max(2,ST.corridors-2)); for(var k=0;k<nc;k++){var t2=base+k*(6.283/nc)+(rnd()-0.5)*0.5; line(walk(unit,unit*0.7,t2,Rmax,mt,0.5,(rnd()*1e6)|0),P0,pl,rnd);} ravel(pl,Rmax,Math.round(ST.ravel*0.35),unit,rnd); Rext=Rmax*1.3; }
-    else { var Rx=unit*4.5,b2=rnd()*6.28,P={unit:unit,streetHalf:unit*0.44,gap:gap,inset:inset}; pl.push({x:0,y:0,w:unit*1.3,h:unit*3,a:(rnd()-0.5)*7,terra:true}); for(var k2=0;k2<ST.corridors;k2++){var t3=b2+k2*(6.283/ST.corridors)+(rnd()-0.5)*0.35; line(walk(unit,unit*1.4,t3,Rx-unit*1.4,mt,0.5,(rnd()*1e6)|0),P,pl,rnd);} var ra=rnd()*6.28; line(ringPoly(ra,ra+4.3,Rx*0.5,0.05,(rnd()*1e6)|0),P,pl,rnd); ravel(pl,Rx,ST.ravel,unit,rnd); Rx*=1.3; Rext=Rx; }
+    else {
+      // CITY = cathedral close. Built in a local frame with the nave along X; rotated to A at the end.
+      // The landmark dominates; a large forecourt plaza sits at one short end, a small plaza behind
+      // (apse); the close flanks the long sides in PARALLEL rows; organic fabric only beyond it.
+      var A=rnd()*Math.PI*2, cw=unit*3.4, ch=unit*1.4, halfLen=cw/2, halfWid=ch/2;
+      var P={unit:unit,streetHalf:unit*0.44,gap:gap,inset:inset}, Rx=unit*5.2;
+      pl.push({x:0,y:0,w:cw,h:ch,a:0,terra:true});                       // cathedral, nave along X
+      var streetOff=halfWid+unit*0.9;
+      for(var side=-1;side<=1;side+=2){                                  // two parallel rows each long side
+        for(var row=0;row<2;row++){ var yy=side*(streetOff+row*unit*1.25), x=-halfLen;
+          while(x<halfLen){ var fw=unit*(0.9+rnd()*0.5), dep=unit*(0.8+rnd()*0.4),
+            c={x:x+fw/2, y:yy, w:fw, h:dep, a:(rnd()-0.5)*4};            // ~parallel to the nave
+            if(fits(c,pl,inset)) pl.push(c); x+=fw+gap*0.5; } } }
+      var nc=3, base=rnd()*6.28;                                        // organic outskirts beyond the close
+      for(var k2=0;k2<nc;k2++){ var t3=base+k2*(6.283/nc)+(rnd()-0.5)*0.4;
+        line(walk(unit, unit*2.6, t3, Rx-unit*2.6, mt, 0.5,(rnd()*1e6)|0), P, pl, rnd); }
+      ravel(pl, Rx, ST.ravel, unit, rnd);
+      var fx0=halfLen+unit*0.4, fx1=fx0+unit*2.6, ax1=-(halfLen+unit*0.3), ax0=ax1-unit*1.3;
+      pl=pl.filter(function(b){ if(b.terra) return true;
+        if(b.x>=fx0 && b.x<=fx1 && Math.abs(b.y)<=halfWid+unit*1.5) return false;   // forecourt plaza (large)
+        if(b.x<=ax1 && b.x>=ax0 && Math.abs(b.y)<=halfWid+unit*0.5) return false;   // apse plaza (small)
+        return true; });
+      var ca=Math.cos(A), sa=Math.sin(A), dg=A*R2D;                     // rotate the whole close to axis A
+      pl.forEach(function(b){ var nx=b.x*ca-b.y*sa, ny=b.x*sa+b.y*ca; b.x=nx; b.y=ny; b.a=(b.a||0)+dg; });
+      Rext=Rx*1.3;
+    }
     // true extent from placed blocks (for clean label offset)
     var maxR=0; pl.forEach(function(b){ corn(b).forEach(function(c){ maxR=Math.max(maxR,Math.hypot(c.x,c.y)); }); });
     var svg=''; pl.forEach(function(b){ svg+=rect(b); });
