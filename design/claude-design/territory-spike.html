@@ -32,6 +32,8 @@
     sit on the terrain; type is variant B.
   </p>
 
+  <div style="margin-top:20px;"><button id="reseed" style="font:400 13px Spectral,Georgia,serif;color:#6B6B6B;background:none;border:none;border-bottom:1px solid #C7C1B4;cursor:pointer;padding:0 0 1px;">Reseed settlements</button></div>
+
   <div class="scaletag">Full size</div>
   <div class="plate"><svg id="full" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg></div>
 
@@ -146,30 +148,35 @@
     else if(level===1){ var th=rnd()*6.28; line(walk(unit,-unit*1.4,th,unit*4,mt,0.5,(rnd()*1e6)|0),P0,pl,rnd); ravel(pl,unit*2.4,Math.round(ST.ravel*0.2),unit,rnd); Rext=unit*3; }
     else if(level===2){ var Rmax=unit*3.4,base=rnd()*6.28,nc=Math.min(3,Math.max(2,ST.corridors-2)); for(var k=0;k<nc;k++){var t2=base+k*(6.283/nc)+(rnd()-0.5)*0.5; line(walk(unit,unit*0.7,t2,Rmax,mt,0.5,(rnd()*1e6)|0),P0,pl,rnd);} ravel(pl,Rmax,Math.round(ST.ravel*0.35),unit,rnd); Rext=Rmax*1.3; }
     else {
-      // CITY = cathedral close. Built in a local frame with the nave along X; rotated to A at the end.
-      // The landmark dominates; a large forecourt plaza sits at one short end, a small plaza behind
-      // (apse); the close flanks the long sides in PARALLEL rows; organic fabric only beyond it.
+      // CITY = cathedral close, built nave-along-X then rotated to axis A. The cathedral is SURROUNDED:
+      // tight parallel rows down both long sides, a façade across the forecourt and a wall behind the
+      // apse so each plaza is an enclosed void (not an open edge), then organic fabric beyond.
       var A=rnd()*Math.PI*2, cw=unit*3.4, ch=unit*1.4, halfLen=cw/2, halfWid=ch/2;
-      var P={unit:unit,streetHalf:unit*0.44,gap:gap,inset:inset}, Rx=unit*5.2;
-      pl.push({x:0,y:0,w:cw,h:ch,a:0,terra:true});                       // cathedral, nave along X
-      var streetOff=halfWid+unit*0.9;
-      for(var side=-1;side<=1;side+=2){                                  // two parallel rows each long side
-        for(var row=0;row<2;row++){ var yy=side*(streetOff+row*unit*1.25), x=-halfLen;
-          while(x<halfLen){ var fw=unit*(0.9+rnd()*0.5), dep=unit*(0.8+rnd()*0.4),
-            c={x:x+fw/2, y:yy, w:fw, h:dep, a:(rnd()-0.5)*4};            // ~parallel to the nave
-            if(fits(c,pl,inset)) pl.push(c); x+=fw+gap*0.5; } } }
-      var nc=3, base=rnd()*6.28;                                        // organic outskirts beyond the close
-      for(var k2=0;k2<nc;k2++){ var t3=base+k2*(6.283/nc)+(rnd()-0.5)*0.4;
-        line(walk(unit, unit*2.6, t3, Rx-unit*2.6, mt, 0.5,(rnd()*1e6)|0), P, pl, rnd); }
+      var streetOff=halfWid+unit*0.95, Rx=unit*5.6;
+      var fx0=halfLen+unit*0.4, fx1=fx0+unit*2.4, apX=-(halfLen+unit*1.2);
+      pl.push({x:0,y:0,w:cw,h:ch,a:0,terra:true});                       // cathedral, nave along local X
+      function rowLine(x0,y0,x1,y1,fa){ var dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy)||1,n=Math.max(1,Math.round(len/(unit*1.05)));
+        for(var i=0;i<n;i++){ var t=(i+0.5)/n, c={x:x0+dx*t,y:y0+dy*t,w:unit*(0.9+rnd()*0.4),h:unit*(0.8+rnd()*0.4),a:fa+(rnd()-0.5)*4}; if(fits(c,pl,inset)) pl.push(c); } }
+      // long-side close: two parallel rows each side, running from behind the apse to the forecourt façade
+      for(var sd=-1;sd<=1;sd+=2){ for(var row=0;row<2;row++){ var yy=sd*(streetOff+row*unit*1.2); rowLine(apX, yy, fx1, yy, 0); } }
+      // forecourt façade — the building line across the front that encloses the parvis
+      rowLine(fx1+unit*0.6, -(streetOff+unit*0.4), fx1+unit*0.6, streetOff+unit*0.4, 90);
+      // apse wall behind, split to leave a small central plaza
+      rowLine(apX-unit*0.4, -(streetOff), apX-unit*0.4, -unit*0.8, 90);
+      rowLine(apX-unit*0.4,  unit*0.8, apX-unit*0.4,  streetOff, 90);
+      // organic outskirts beyond the close, all around
+      var nc=4, base=rnd()*6.28;
+      for(var k2=0;k2<nc;k2++){ var t3=base+k2*(6.283/nc)+(rnd()-0.5)*0.5;
+        line(walk(unit, Rx*0.6, t3, Rx*0.5, mt, 0.4,(rnd()*1e6)|0), {unit:unit,streetHalf:unit*0.44,gap:gap,inset:inset}, pl, rnd); }
       ravel(pl, Rx, ST.ravel, unit, rnd);
-      var fx0=halfLen+unit*0.4, fx1=fx0+unit*2.6, ax1=-(halfLen+unit*0.3), ax0=ax1-unit*1.3;
+      // carve the two plazas: clear strays from the forecourt and the small apse plaza
       pl=pl.filter(function(b){ if(b.terra) return true;
-        if(b.x>=fx0 && b.x<=fx1 && Math.abs(b.y)<=halfWid+unit*1.5) return false;   // forecourt plaza (large)
-        if(b.x<=ax1 && b.x>=ax0 && Math.abs(b.y)<=halfWid+unit*0.5) return false;   // apse plaza (small)
+        if(b.x>=fx0 && b.x<=fx1 && Math.abs(b.y)<=streetOff-unit*0.15) return false;          // forecourt
+        if(b.x<=-halfLen-unit*0.2 && b.x>=apX && Math.abs(b.y)<=unit*0.85) return false;       // apse plaza
         return true; });
       var ca=Math.cos(A), sa=Math.sin(A), dg=A*R2D;                     // rotate the whole close to axis A
       pl.forEach(function(b){ var nx=b.x*ca-b.y*sa, ny=b.x*sa+b.y*ca; b.x=nx; b.y=ny; b.a=(b.a||0)+dg; });
-      Rext=Rx*1.3;
+      Rext=Rx*1.35;
     }
     // true extent from placed blocks (for clean label offset)
     var maxR=0; pl.forEach(function(b){ corn(b).forEach(function(c){ maxR=Math.max(maxR,Math.hypot(c.x,c.y)); }); });
@@ -183,11 +190,13 @@
   function townLabel(x,y,latin){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="11.5" fill="#6B6B6B" style="letter-spacing:0.22em;">'+latin.toUpperCase()+'</text>'; }
   function elevLabel(x,y,n){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="11" font-style="italic" fill="#8A857C" style="letter-spacing:0.04em;">'+n+'</text>'; }
 
+  var SEED0=0, TERRAIN_SVG=null;
   function scene(){
     var s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="'+PAPER+'"/>';
-    s+=terrain();                                  // contours everywhere
+    if(TERRAIN_SVG===null) TERRAIN_SVG=terrain();  // contours everywhere — field is fixed, cache it
+    s+=TERRAIN_SVG;
     // settlements ON the terrain: a city near Hōzō's foot, a town in the Kanyō–Ho System valley
-    var c1=settle(3,2826), c2=settle(2,118);
+    var c1=settle(3,2826+SEED0), c2=settle(2,118+SEED0);
     var t1={x:705,y:475}, t2={x:380,y:455};
     s+='<g transform="translate('+t1.x+','+t1.y+')">'+c1.svg+'</g>'+townLabel(t1.x, t1.y+c1.extent+14, 'Three Hours');
     s+='<g transform="translate('+t2.x+','+t2.y+')">'+c2.svg+'</g>'+townLabel(t2.x, t2.y+c2.extent+14, 'The Empty Container');
@@ -195,9 +204,10 @@
     PEAKS.forEach(function(p){ var ly=p.y - p.r*0.32; s+=peakLabel(p.x, ly, p.name, p.native); s+=elevLabel(p.x + p.r*0.34, ly+4, p.elev); });
     return s;
   }
-  var svg=scene();
-  document.getElementById('full').innerHTML=svg;
-  document.getElementById('mini').innerHTML=svg;
+  function render(){ var svg=scene(); document.getElementById('full').innerHTML=svg; document.getElementById('mini').innerHTML=svg; }
+  var rb=document.getElementById('reseed');
+  if(rb) rb.addEventListener('click', function(){ SEED0=Math.floor(Math.random()*9999)+1; render(); });
+  render();
 })();
 </script>
 </body>
