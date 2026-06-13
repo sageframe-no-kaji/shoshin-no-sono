@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map Typography — Session 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FDFCF9; }
+  * { box-sizing: border-box; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; }
+  .panel { position: relative; background: #FDFCF9; border: 1px solid #E7E3DA; box-shadow: 0 1px 0 rgba(0,0,0,0.03); }
+  .panel .corner { position: absolute; top: 13px; left: 15px; font: 600 22px Spectral, Georgia, serif; color: #2B2B2B; letter-spacing: 0.04em; }
+  .cap { font: 400 13.5px/1.5 Spectral, Georgia, serif; color: #5C5C5C; letter-spacing: 0.01em; padding: 0 2px; }
+  .meta { font: 500 12px Spectral, Georgia, serif; letter-spacing: 0.30em; text-transform: uppercase; color: #9A958B; }
+  figure { margin: 0; }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;padding:56px 40px 72px;">
+  <div style="max-width:1100px;margin:0 auto;">
+
+    <header style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;border-bottom:1px solid #E7E3DA;padding-bottom:24px;">
+      <div class="meta" style="letter-spacing:0.34em;">Session 3 · Typography</div>
+      <h1 style="margin:0;font:300 34px/1.15 Spectral,Georgia,serif;color:#2B2B2B;letter-spacing:0.005em;">What does the map&rsquo;s lettering look like?</h1>
+      <p style="margin:0;max-width:720px;font:400 15px/1.6 Spectral,Georgia,serif;color:#6B6B6B;">
+        One face only — <em>Spectral</em>, the register&rsquo;s established serif, with Georgia as the honest fallback; the native gloss rides a CJK mincho stack chosen to sit with it. No new typeface is introduced. Each panel applies the same three label classes &mdash; <em>peak</em> (latin&nbsp;+&nbsp;native gloss), <em>settlement</em> (latin, smaller), and <em>elevation figure</em> &mdash; to the real content, varying only the serif character, the latin/native pairing, and how the hierarchy is built. Everything is procedural: one rule per class, applied by a pipeline.
+      </p>
+    </header>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:40px;">
+      <figure style="display:flex;flex-direction:column;gap:13px;">
+        <div class="panel"><span class="corner">A</span>
+          <svg id="pA" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <figcaption class="cap" id="cA"></figcaption>
+      </figure>
+      <figure style="display:flex;flex-direction:column;gap:13px;">
+        <div class="panel"><span class="corner">B</span>
+          <svg id="pB" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <figcaption class="cap" id="cB"></figcaption>
+      </figure>
+      <figure style="display:flex;flex-direction:column;gap:13px;">
+        <div class="panel"><span class="corner">C</span>
+          <svg id="pC" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <figcaption class="cap" id="cC"></figcaption>
+      </figure>
+    </div>
+
+    <!-- recommendation -->
+    <section style="margin-top:56px;border-top:1px solid #E7E3DA;padding-top:28px;display:flex;gap:40px;flex-wrap:wrap;">
+      <div style="flex:0 0 auto;">
+        <div class="meta" style="letter-spacing:0.28em;margin-bottom:14px;">Recommendation</div>
+        <div style="display:flex;align-items:baseline;gap:14px;">
+          <span style="font:300 64px Spectral,Georgia,serif;color:#2B2B2B;line-height:0.8;">B</span>
+          <span style="font:italic 400 15px Spectral,Georgia,serif;color:#6B6B6B;max-width:150px;">Engraved spaced caps · native beside</span>
+        </div>
+      </div>
+      <p style="flex:1;min-width:340px;margin:0;font:400 16px/1.7 Spectral,Georgia,serif;color:#3A3A3A;max-width:560px;">
+        <strong style="font-weight:500;">B reads most like an old survey plate.</strong> Wide-tracked roman caps are the engraver&rsquo;s long-standing convention for a named summit, and setting the native gloss beside the latin at near-equal optical size keeps it a co-equal name rather than a footnote. It also carries the whole hierarchy without boxes or colour &mdash; peaks own the cap-height and tracking, settlements step down to a tighter, smaller cap, and the elevation stays a quiet italic figure &mdash; and the settlement caps still hold at 60%, as the check below confirms.
+      </p>
+    </section>
+
+    <!-- legibility check -->
+    <section style="margin-top:44px;border-top:1px solid #E7E3DA;padding-top:24px;">
+      <div class="meta" style="letter-spacing:0.28em;margin-bottom:6px;">Legibility check · variant B</div>
+      <p style="margin:0 0 22px;max-width:720px;font:400 14px/1.6 Spectral,Georgia,serif;color:#8A857C;">
+        Not a redesign &mdash; the marks below are faint stand-ins. Only the type is under test: a peak label sitting over a contour-line fragment, a settlement label beside a solid ink block, and the settlement class shrunk to 60%.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:760px;">
+        <figure style="display:flex;flex-direction:column;gap:11px;">
+          <div class="panel">
+            <svg id="lc1" viewBox="0 0 240 150" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+          </div>
+          <figcaption class="cap" style="font-size:12.5px;color:#8A857C;">Peak over contour fragment</figcaption>
+        </figure>
+        <figure style="display:flex;flex-direction:column;gap:11px;">
+          <div class="panel">
+            <svg id="lc2" viewBox="0 0 240 150" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+          </div>
+          <figcaption class="cap" style="font-size:12.5px;color:#8A857C;">Settlement beside ink block</figcaption>
+        </figure>
+        <figure style="display:flex;flex-direction:column;gap:11px;">
+          <div class="panel">
+            <svg id="lc3" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+          </div>
+          <figcaption class="cap" style="font-size:12.5px;color:#8A857C;">Settlement at 100% / 60%</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <div style="margin-top:46px;font:italic 400 13px/1.6 Spectral,Georgia,serif;color:#A8A39A;border-top:1px dashed #E7E3DA;padding-top:18px;max-width:1100px;">
+      parked &mdash; a label-collision / leadering rule (when a name must dodge its own contour), terracotta reserved as the settlement tier&rsquo;s optional emphasis, and a curved-baseline option for ridge-following peak names; the cartouche lettering remains a later session.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var LATIN = 'Spectral, Georgia, serif';
+  var CJK   = '\u0027Hiragino Mincho ProN\u0027,\u0027Yu Mincho\u0027,\u0027Songti SC\u0027,\u0027Noto Serif JP\u0027,serif';
+
+  // shared label field — identical positions across A/B/C so only the type treatment differs
+  var LABELS = [
+    {role:'peak', latin:'Kany\u014d',    native:'\u89b3\u9df9',          x:112, y:74},
+    {role:'elev', latin:'8',                                              x:236, y:66},
+    {role:'peak', latin:'Ho System', native:'\u6b69',                     x:292, y:120},
+    {role:'peak', latin:'H\u014dz\u014d', native:'\u5b9d\u8535',          x:118, y:164},
+    {role:'peak', latin:'Glassroom',                                      x:300, y:212},
+    {role:'peak', latin:'Dandori',   native:'\u6bb5\u53d6\u308a',         x:112, y:256},
+    {role:'town', latin:'The Empty Container',                            x:198, y:318},
+    {role:'town', latin:'Three Hours',                                    x:308, y:352}
+  ];
+
+  var CONFIGS = {
+    A: {
+      caption:'Bookish \u00b7 native set below, centred \u00b7 hierarchy by size & weight',
+      pairing:'below',
+      peak:{size:21,   weight:600, tracking:0.01, upper:false, fill:'#2B2B2B'},
+      native:{ratio:0.60, tracking:0.10, fill:'#6B6B6B', dy:16},
+      town:{size:13,   weight:400, tracking:0.03, upper:false, italic:false, fill:'#6B6B6B'},
+      elev:{size:10.5, weight:400, italic:false, fill:'#8A857C'}
+    },
+    B: {
+      caption:'Engraved \u00b7 spaced caps, native set beside \u00b7 hierarchy by case & tracking',
+      pairing:'beside',
+      peak:{size:16.5, weight:400, tracking:0.16, upper:true, fill:'#2B2B2B'},
+      native:{ratio:0.85, tracking:0.10, fill:'#5C5C5C', dx:9},
+      town:{size:11.5, weight:400, tracking:0.22, upper:true, italic:false, fill:'#6B6B6B'},
+      elev:{size:11,   weight:400, italic:true, fill:'#8A857C'}
+    },
+    C: {
+      caption:'Quiet modern \u00b7 tight gloss below \u00b7 settlements earn terracotta',
+      pairing:'below',
+      peak:{size:20,   weight:500, tracking:0.0,  upper:false, fill:'#2B2B2B'},
+      native:{ratio:0.52, tracking:0.06, fill:'#7A7A7A', dy:13},
+      town:{size:13,   weight:400, tracking:0.04, upper:false, italic:false, fill:'#9A5B3C'},
+      elev:{size:11,   weight:300, italic:false, fill:'#8A857C'}
+    }
+  };
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+  function labelSVG(l, c){
+    if(l.role === 'elev'){
+      var e = c.elev;
+      return '<text x="'+l.x+'" y="'+l.y+'" text-anchor="middle" font-family="'+LATIN+'" '+
+        'font-size="'+e.size+'" font-weight="'+e.weight+'"'+(e.italic?' font-style="italic"':'')+
+        ' fill="'+e.fill+'" style="letter-spacing:0.04em;font-variant-numeric:tabular-nums;">'+esc(l.latin)+'</text>';
+    }
+    var isTown = (l.role === 'town');
+    var cc = isTown ? c.town : c.peak;
+    var str = cc.upper ? l.latin.toUpperCase() : l.latin;
+    var t = '<text x="'+l.x+'" y="'+l.y+'" text-anchor="middle" font-family="'+LATIN+'" '+
+      'font-size="'+cc.size+'" font-weight="'+cc.weight+'"'+((isTown&&cc.italic)?' font-style="italic"':'')+
+      ' fill="'+cc.fill+'" style="letter-spacing:'+cc.tracking+'em;">'+esc(str);
+    if(!isTown && l.native){
+      var ns = +(c.peak.size * c.native.ratio).toFixed(1);
+      if(c.pairing === 'beside'){
+        t += '<tspan dx="'+c.native.dx+'" font-family="'+CJK+'" font-size="'+ns+'" font-weight="400" '+
+             'fill="'+c.native.fill+'" style="letter-spacing:'+c.native.tracking+'em;">'+l.native+'</tspan>';
+      } else {
+        t += '<tspan x="'+l.x+'" dy="'+c.native.dy+'" font-family="'+CJK+'" font-size="'+ns+'" font-weight="400" '+
+             'fill="'+c.native.fill+'" style="letter-spacing:'+c.native.tracking+'em;">'+l.native+'</tspan>';
+      }
+    }
+    return t + '</text>';
+  }
+
+  function renderPanel(id, key){
+    var c = CONFIGS[key];
+    var s = '<rect x="0" y="0" width="400" height="400" fill="#FDFCF9"/>';
+    LABELS.forEach(function(l){ s += labelSVG(l, c); });
+    document.getElementById(id).innerHTML = s;
+    document.getElementById('c'+key).textContent = c.caption;
+  }
+  renderPanel('pA','A'); renderPanel('pB','B'); renderPanel('pC','C');
+
+  // ---- legibility check, variant B ----
+  var B = CONFIGS.B;
+
+  // 1 — peak over a faint contour-line fragment (stand-in linework, not styled)
+  (function(){
+    var rings = '';
+    var cx = 120, cy = 70;
+    for(var i=0;i<4;i++){
+      var rx = 36 + i*22, ry = 22 + i*15;
+      rings += '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="none" stroke="#D6D0C3" stroke-width="1"/>';
+    }
+    var lab = labelSVG({role:'peak', latin:'H\u014dz\u014d', native:'\u5b9d\u8535', x:120, y:74}, B);
+    document.getElementById('lc1').innerHTML =
+      '<rect x="0" y="0" width="240" height="150" fill="#FDFCF9"/>' + rings + lab;
+  })();
+
+  // 2 — settlement beside a small solid ink block
+  (function(){
+    var block = '<rect x="26" y="62" width="13" height="13" fill="#2B2B2B"/>';
+    var t = '<text x="50" y="74" text-anchor="start" font-family="'+LATIN+'" font-size="'+B.town.size+'" '+
+            'font-weight="'+B.town.weight+'" fill="'+B.town.fill+'" style="letter-spacing:'+B.town.tracking+'em;">'+
+            'THREE HOURS</text>';
+    document.getElementById('lc2').innerHTML =
+      '<rect x="0" y="0" width="240" height="150" fill="#FDFCF9"/>' + block + t;
+  })();
+
+  // 3 — settlement class at 100% and 60%
+  (function(){
+    function town(x,y,size,label){
+      return '<text x="'+x+'" y="'+y+'" text-anchor="start" font-family="'+LATIN+'" font-size="'+size+'" '+
+             'font-weight="'+B.town.weight+'" fill="'+B.town.fill+'" style="letter-spacing:'+B.town.tracking+'em;">'+label+'</text>';
+    }
+    var s = '<rect x="0" y="0" width="300" height="150" fill="#FDFCF9"/>';
+    s += '<text x="16" y="40" font-family="'+LATIN+'" font-size="9" fill="#B5AFA2" style="letter-spacing:0.18em;">100%</text>';
+    s += town(16, 60, B.town.size, 'THE EMPTY CONTAINER');
+    s += '<text x="16" y="98" font-family="'+LATIN+'" font-size="9" fill="#B5AFA2" style="letter-spacing:0.18em;">60%</text>';
+    s += town(16, 115, +(B.town.size*0.6).toFixed(1), 'THE EMPTY CONTAINER');
+    document.getElementById('lc3').innerHTML = s;
+  })();
+})();
+</script>
+</body>
+</html>

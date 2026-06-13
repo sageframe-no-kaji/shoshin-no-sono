@@ -1,0 +1,20 @@
+{
+  "_note": "Type spec, not a tuner — variant B (engraved spaced caps, native beside). The committed type system for the map. Consumed by ho-07 (town labels) and ho-09 (peak labels, interaction cards).",
+  "fonts": {
+    "latin": "Spectral, Georgia, serif",
+    "native": "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif"
+  },
+  "classes": {
+    "peak": { "size": 16.5, "weight": 400, "tracking": "0.16em", "case": "upper", "fill": "#2B2B2B" },
+    "peakNative": { "sizeRatio": 0.85, "tracking": "0.10em", "fill": "#5C5C5C", "placement": "beside", "dx": 9 },
+    "settlement": { "size": 11.5, "weight": 400, "tracking": "0.22em", "case": "upper", "fill": "#6B6B6B" },
+    "elevation": { "size": 11, "weight": 400, "italic": true, "fill": "#8A857C", "tabularNums": true }
+  },
+  "rules": {
+    "hierarchy": "by case + tracking + size, not boxes or colour: peak owns cap-height and tracking; settlement steps down to a tighter, smaller cap; elevation is a quiet italic figure",
+    "nativeGloss": "set beside the latin at near-equal optical size (0.85) — a co-equal name, not a footnote",
+    "terracotta": "NOT used by type in B — accent stays reserved for the city tower-block (session 2). Settlement-name terracotta was variant C, rejected.",
+    "verified": "settlement caps hold at 60%; peak holds over a contour fragment"
+  },
+  "paper": "#FDFCF9"
+}

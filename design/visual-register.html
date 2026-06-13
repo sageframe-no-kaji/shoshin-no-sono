@@ -175,8 +175,36 @@
 }</pre>
 
     <h2>3 · Typography</h2>
-    <p class="status">Not yet run — design/claude-design/session-3-typography.md</p>
-    <div class="slot">Type system panel + font stacks land here.</div>
+    <p class="status committed">
+      FROZEN 2026-06-12 — variant B (engraved spaced caps, native beside). Instrument:
+      <a href="claude-design/exports/session-3-typography/map-typography.html">map-typography.html</a>.
+    </p>
+    <p class="note">
+      One face: <strong>Spectral</strong> (Georgia fallback); native gloss on a CJK mincho stack.
+      Hierarchy is carried by <strong>case + tracking + size, never by boxes or colour</strong>.
+      Peak = wide-tracked roman caps (16.5px, 0.16em, all-caps) with the native script set
+      <em>beside</em> at near-equal optical size (0.85×) — a co-equal name, not a footnote.
+      Settlement = a tighter, smaller cap (11.5px, 0.22em). Elevation = a quiet italic figure.
+      Verified: settlement caps hold at 60%, peak label holds over a contour fragment.
+    </p>
+    <p class="note">
+      <strong>Coherence win:</strong> B spends <em>no</em> terracotta on type — the rejected
+      variant C colored settlement names. So the only terracotta on the finished map remains the
+      city's tower-block (session 2): one accent, one mark, one meaning. The full spec (stacks,
+      per-class sizes/tracking/fills) is in
+      <a href="claude-design/exports/session-3-typography/parameters.json">parameters.json</a> —
+      consumed by ho-07 (town labels) and ho-09 (peak labels, cards).
+    </p>
+    <pre id="type-spec">peak        Spectral 16.5px / 400 / 0.16em / UPPER / #2B2B2B
+peak·native CJK mincho · 0.85× peak / 0.10em / #5C5C5C / beside +9
+settlement  Spectral 11.5px / 400 / 0.22em / UPPER / #6B6B6B
+elevation   Spectral 11px / 400 / italic / #8A857C / tabular
+native stack 'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif</pre>
+    <p class="note">
+      <strong>Parked to later sessions/hos:</strong> a label-collision/leadering rule (when a name
+      must dodge its own contour) and a curved-baseline option for ridge-following peak names —
+      both ho-09 (interaction/label layer). Cartouche lettering is session 6.
+    </p>
 
     <h2>4 · The ridge</h2>
     <p class="status">Not yet run — design/claude-design/session-4-ridge.md</p>
