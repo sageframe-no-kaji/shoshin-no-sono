@@ -23,8 +23,12 @@ import { computePositions, buildHeightfield } from './field.js';
 /** Works in this group are commentary (towns, ho-07); everything else is a peak. */
 export const TOWN_GROUP = 'writing';
 
-/** Default sink depth for works that don't match the active filter (Decision 2/8). */
-const DEFAULT_RELEVANCE_FLOOR = 0.15;
+/**
+ * Default sink depth for works that don't match the active filter (Decision 2/8).
+ * Landed at 0.45 in ho-06.5: with the low base radius, non-matching works need a
+ * higher floor to recede to legible small hills rather than collapse to dots.
+ */
+const DEFAULT_RELEVANCE_FLOOR = 0.45;
 
 /**
  * Cartographic role: a work is a peak unless it is commentary-about-works. The

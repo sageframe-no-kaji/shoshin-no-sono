@@ -28,8 +28,8 @@
  * @property {number} [indexEvery] Every Nth level (from the outermost) is an index contour.
  */
 
-/** Provisional values carried from the territory spike; tune by feel (ho-06). */
-const CONTOUR_DEFAULTS = { interval: 0.62, indexEvery: 5 };
+/** `interval` (ring spacing) landed by the practitioner's by-feel pass in ho-06.5; `indexEvery` is register. */
+const CONTOUR_DEFAULTS = { interval: 0.32, indexEvery: 5 };
 
 /** @param {number} n @returns {number} 2-decimal round, matching the spike's path precision */
 const round2 = (n) => Math.round(n * 100) / 100;

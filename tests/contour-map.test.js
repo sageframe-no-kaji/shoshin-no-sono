@@ -42,7 +42,7 @@ describe('contourMapSvg — register conformance', () => {
   });
 
   it('draws one path per crossing level', () => {
-    const paths = contourMapSvg(ramp).match(/<path /g) ?? [];
+    const paths = contourMapSvg(ramp, { interval: 0.62 }).match(/<path /g) ?? [];
     // 8 levels over a 0→5 ramp at interval 0.62, all crossed.
     expect(paths).toHaveLength(8);
   });

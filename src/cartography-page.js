@@ -30,15 +30,23 @@ const chipsEl = /** @type {HTMLElement} */ (document.getElementById('chips'));
 const pinned = /** @type {HTMLElement} */ (document.getElementById('pinned'));
 const tunersEl = /** @type {HTMLElement} */ (document.getElementById('tuners'));
 
-/** Live tuner values for the by-feel pass — seeded with the field/contour defaults. */
+/** Live tuner values — opened on the field/contour defaults (the ho-06.5 landing). */
 /** @type {Record<string, number>} */
-const tuners = { interval: 0.62, summitExp: 1.7, noiseWeight: 0.85, radiusScale: 16, relevanceFloor: 0.15 };
+const tuners = {
+  interval: 0.32,
+  summitExp: 1.15,
+  noiseWeight: 0.3,
+  radiusBase: 12,
+  radiusScale: 8,
+  relevanceFloor: 0.45,
+};
 
 /** @type {{ key: string, label: string, min: number, max: number, step: number }[]} */
 const TUNER_SPECS = [
   { key: 'interval', label: 'ring spacing', min: 0.3, max: 1.5, step: 0.02 },
   { key: 'summitExp', label: 'summit sharpness', min: 1.0, max: 3.0, step: 0.05 },
   { key: 'noiseWeight', label: 'crenellation', min: 0, max: 2.0, step: 0.05 },
+  { key: 'radiusBase', label: 'base radius', min: 12, max: 60, step: 2 },
   { key: 'radiusScale', label: 'radius × importance', min: 4, max: 40, step: 1 },
   { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01 },
 ];

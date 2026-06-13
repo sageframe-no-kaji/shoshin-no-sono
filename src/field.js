@@ -38,17 +38,22 @@
  * @property {number} [radiusScale] Added radius per importance point.
  */
 
-/** Provisional values carried from the territory spike; tune by feel (Decision 8). */
+/**
+ * Field defaults. Geometry (width/height/margin/cell/candidates) carried from
+ * the spike; the feel parameters (summitExp/noiseWeight/radiusBase/radiusScale)
+ * landed by the practitioner's by-feel pass in ho-06.5 — a dense field of
+ * individuated hills, importance reading as prominence, softer summits.
+ */
 const DEFAULTS = {
   width: 1000,
   height: 620,
   margin: 70,
   candidates: 12,
   cell: 4,
-  summitExp: 1.7,
-  noiseWeight: 0.85,
-  radiusBase: 40,
-  radiusScale: 16,
+  summitExp: 1.15,
+  noiseWeight: 0.3,
+  radiusBase: 12,
+  radiusScale: 8,
 };
 
 /**

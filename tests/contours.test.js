@@ -122,7 +122,7 @@ describe('contourGeometry', () => {
 
   it('carries the level value through and is deterministic', () => {
     expect(contourGeometry(ramp)).toEqual(contourGeometry(ramp));
-    expect(contourGeometry(ramp)[0].level).toBeCloseTo(0.62);
+    expect(contourGeometry(ramp, { interval: 0.62 })[0].level).toBeCloseTo(0.62);
   });
 
   it('honors a custom interval (wider spacing → fewer rings)', () => {
