@@ -1,22 +1,25 @@
 /**
- * Debug page entry for the cartography (ho-06) — browser-only wiring, no logic,
- * excluded from coverage (vitest.config.mjs) like src/main.js. Boots the
- * Indexer + Gate + Cartographer and renders the contour map (src/contour-map.js)
- * — the cartographic register, which replaces ho-05's transient heat map.
+ * Debug page entry for the cartography (ho-06 contours + ho-07 towns) —
+ * browser-only wiring, no logic, excluded from coverage (vitest.config.mjs) like
+ * src/main.js. Boots the Indexer + Gate + Cartographer and renders, in register
+ * order: paper → contour map (src/contour-map.js) → settlements
+ * (src/settlement-map.js) → labels.
  *
- * It carries the instruments for ho-06's two deferred questions: live tuner
- * controls (the by-feel pass on the field opts — interval, summit sharpness,
- * crenellation, radius scaling, sink floor), a reseed control and seed readout,
- * the theme chips to watch the terrain re-weight, and an off-by-default peak-id
- * overlay to check positions without disturbing the silhouette read. `?seed=N`
- * reproduces a layout; `?theme=...` flows through the Gate.
+ * It carries the by-feel tuner instruments: the ho-06 field controls (interval,
+ * summit sharpness, crenellation, radius scaling, sink floor) and the ho-07 town
+ * controls (seat blend, foot offset, deform, density, size thresholds), each
+ * re-rendering the map on input so the values are dialed against the register.
+ * A reseed control and seed readout, the theme chips to watch the terrain
+ * re-weight and non-matching towns recede, and an off-by-default peak-id overlay.
+ * `?seed=N` reproduces a layout; `?theme=...` flows through the Gate.
  *
  * This page persists and grows into the real cartography surface through ho-09.
  */
 import { createIndexer, loadWorks } from './indexer.js';
 import { createGate } from './gate.js';
-import { createCartographer, computeField } from './cartographer.js';
+import { createCartographer, computeField, computeTowns } from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
+import { settlementSvg } from './settlement-map.js';
 import { chipVocabulary } from './grid.js';
 
 const indexer = createIndexer(await loadWorks('./works.json'));
@@ -30,15 +33,27 @@ const chipsEl = /** @type {HTMLElement} */ (document.getElementById('chips'));
 const pinned = /** @type {HTMLElement} */ (document.getElementById('pinned'));
 const tunersEl = /** @type {HTMLElement} */ (document.getElementById('tuners'));
 
-/** Live tuner values — opened on the field/contour defaults (the ho-06.5 landing). */
+/** Live tuner values — opened on the field (ho-06.5) and town (ho-07) defaults. */
 /** @type {Record<string, number>} */
 const tuners = {
+  // ho-06 field
   interval: 0.32,
   summitExp: 1.15,
   noiseWeight: 0.3,
   radiusBase: 12,
   radiusScale: 8,
   relevanceFloor: 0.45,
+  // ho-07 towns
+  anchorBias: 4,
+  strengthFull: 3,
+  footOffset: 20,
+  elongK: 4,
+  contourFollow: 40,
+  density: 1.4,
+  extentScale: 0.3,
+  t1: 0.7,
+  t2: 1.5,
+  t3: 1.7,
 };
 
 /** @type {{ key: string, label: string, min: number, max: number, step: number }[]} */
@@ -49,6 +64,16 @@ const TUNER_SPECS = [
   { key: 'radiusBase', label: 'base radius', min: 12, max: 60, step: 2 },
   { key: 'radiusScale', label: 'radius × importance', min: 4, max: 40, step: 1 },
   { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01 },
+  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 3, step: 0.1 },
+  { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5 },
+  { key: 'footOffset', label: 'foot offset', min: 0, max: 80, step: 2 },
+  { key: 'elongK', label: 'valley elongation', min: 0, max: 10, step: 0.5 },
+  { key: 'contourFollow', label: 'contour follow', min: 0, max: 120, step: 5 },
+  { key: 'density', label: 'town density', min: 0.5, max: 3, step: 0.1 },
+  { key: 'extentScale', label: 'density × weight', min: 0, max: 1, step: 0.05 },
+  { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05 },
+  { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05 },
+  { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05 },
 ];
 
 let showPeaks = false;
@@ -72,11 +97,34 @@ const peakDotsSvg = (peaks) =>
     )
     .join('');
 
+/** Town label — typography variant B (settlement): spaced caps below the extent. */
+const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name) =>
+  `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+  `font-size="11.5" fill="#6B6B6B" style="letter-spacing:0.22em;">${(name || '').toUpperCase()}</text>`;
+
+/** @param {import('./cartographer.js').CartographyTown[]} towns */
+const townsSvg = (towns) =>
+  towns
+    .map((t) => {
+      const op = t.match ? 1 : 0.22; // non-matching towns recede, don't vanish (Decision 6)
+      return (
+        `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})" opacity="${op}">${settlementSvg(t.blocks)}</g>` +
+        `<g opacity="${op}">${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name)}</g>`
+      );
+    })
+    .join('');
+
 const render = () => {
   const seed = carto.activeSeed();
-  const { peaks, heightfield } = computeField(indexer, gate.currentState(), seed, tuners);
-  let svg = contourMapSvg(heightfield, { interval: tuners.interval });
-  if (showPeaks) svg += peakDotsSvg(peaks);
+  const state = gate.currentState();
+  const field = computeField(indexer, state, seed, tuners);
+  const towns = computeTowns(indexer, state, field, {
+    ...tuners,
+    thresholds: [tuners.t1, tuners.t2, tuners.t3],
+  });
+  let svg = contourMapSvg(field.heightfield, { interval: tuners.interval });
+  svg += townsSvg(towns);
+  if (showPeaks) svg += peakDotsSvg(field.peaks);
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
   pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';

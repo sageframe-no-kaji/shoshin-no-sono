@@ -127,16 +127,17 @@
   </head>
   <body>
     <div class="wrap">
-      <div class="meta">Shoshin · ho-06 — contour extraction</div>
-      <h1>Cartography debug — contour map</h1>
+      <div class="meta">Shoshin · ho-07 — town placement on the terrain</div>
+      <h1>Cartography debug — contours and towns</h1>
       <p class="lede">
-        The cartographic register: iso-elevation <strong>contours</strong> extracted from ho-05's
-        heightfield by marching squares, drawn in warm ink on cream — regular strokes at 0.25, index
-        strokes at 0.7, index every fifth ring. Peaks are nested rings; saddles and valleys carry
-        their own lines. Toggle a theme to watch the terrain re-weight — matching works stand,
-        non-matching sink toward fewer, lower rings. The sliders are the by-feel tuner pass: dial the
-        field against the register live. Reload for a novel layout; add <code>?seed=N</code> to
-        reproduce one.
+        The cartographic register: iso-elevation <strong>contours</strong> from the heightfield, with
+        the six writing-piece <strong>towns</strong> seated on the terrain — each grown in the frozen
+        settlement morphology (hamlet → village → town → cathedral-close city), sized by its
+        documents weight, warped to the slope it lands on so the contours wrap it. Toggle a theme to
+        watch the terrain re-weight and non-matching towns recede. The sliders are the by-feel tuner
+        pass — the field controls and the town controls (seat blend, foot offset, deform, density,
+        size thresholds) — dial against the register live. Reload for a novel layout; add
+        <code>?seed=N</code> to reproduce one.
       </p>
 
       <div class="controls">

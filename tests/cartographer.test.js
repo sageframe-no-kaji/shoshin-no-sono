@@ -3,8 +3,10 @@ import { createIndexer } from '../src/indexer.js';
 import {
   isPeak,
   peakWorks,
+  townWorks,
   relevance,
   computeField,
+  computeTowns,
   createCartographer,
   TOWN_GROUP,
 } from '../src/cartographer.js';
@@ -43,13 +45,26 @@ const data = {
     },
     {
       id: 'three-hours',
+      name: 'Three Hours',
       group: 'writing',
       importance: 6,
       themes: ['craft'],
       media: ['writing'],
       status: 'published',
       sort_order_within_group: 10,
-      relationships: [],
+      relationships: [{ target: 'ho-system', type: 'documents', strength: 3 }],
+    },
+    {
+      // a town with no documents edge — leans on its argues_for fallback anchor
+      id: 'the-same-lever',
+      name: 'The Same Lever',
+      group: 'writing',
+      importance: 6,
+      themes: ['agency'],
+      media: ['writing'],
+      status: 'published',
+      sort_order_within_group: 20,
+      relationships: [{ target: 'kanyo', type: 'argues_for' }],
     },
   ],
 };
@@ -73,6 +88,10 @@ describe('cartographic role', () => {
 
   it('peakWorks excludes commentary', () => {
     expect(peakWorks(indexer).map((w) => w.id)).toEqual(['ho-system', 'kanyo']);
+  });
+
+  it('townWorks is the writing group', () => {
+    expect(townWorks(indexer).map((w) => w.id)).toEqual(['three-hours', 'the-same-lever']);
   });
 });
 
@@ -112,6 +131,60 @@ describe('computeField', () => {
     const open = computeField(indexer, empty, 42);
     const filtered = computeField(indexer, { ...empty, themes: ['agency'] }, 42);
     expect(filtered.peaks.map((p) => [p.x, p.y])).toEqual(open.peaks.map((p) => [p.x, p.y]));
+  });
+});
+
+describe('computeTowns', () => {
+  const dist = (/** @type {{x:number,y:number}} */ a, /** @type {{x:number,y:number}} */ b) =>
+    Math.hypot(a.x - b.x, a.y - b.y);
+  const centroidOf = (/** @type {{x:number,y:number}[]} */ pts) => ({
+    x: pts.reduce((s, p) => s + p.x, 0) / pts.length,
+    y: pts.reduce((s, p) => s + p.y, 0) / pts.length,
+  });
+
+  it('places one town per writing work, deterministically', () => {
+    const field = computeField(indexer, empty, 42);
+    const towns = computeTowns(indexer, empty, field);
+    expect(towns.map((t) => t.id)).toEqual(['three-hours', 'the-same-lever']);
+    expect(computeTowns(indexer, empty, field)).toEqual(towns);
+    towns.forEach((t) => {
+      expect(Number.isFinite(t.seat.x) && Number.isFinite(t.seat.y)).toBe(true);
+      expect(t.blocks.length).toBeGreaterThan(0);
+      expect(t.extent).toBeGreaterThan(0);
+    });
+  });
+
+  it('sizes the town from its settlement weight', () => {
+    const field = computeField(indexer, empty, 42);
+    const towns = computeTowns(indexer, empty, field);
+    const threeHours = towns.find((t) => t.id === 'three-hours');
+    const sameLever = towns.find((t) => t.id === 'the-same-lever');
+    // three-hours documents ho-system@3 → ln(1+3) ≈ 1.386 → village (≥0.7, <1.5)
+    expect(threeHours?.level).toBe(1);
+    // the-same-lever documents nothing → weight 0 → hamlet
+    expect(sameLever?.level).toBe(0);
+  });
+
+  it('seats a documented town toward its peak, off the centroid', () => {
+    const field = computeField(indexer, empty, 42);
+    const hoPos = field.peaks.find((p) => p.id === 'ho-system');
+    const threeHours = computeTowns(indexer, empty, field).find((t) => t.id === 'three-hours');
+    if (!hoPos || !threeHours) throw new Error('fixture missing ho-system peak or three-hours town');
+    const centroid = centroidOf(field.peaks.map((p) => ({ x: p.x, y: p.y })));
+    // anchored to ho-system → seat is pulled off the centroid toward the peak's foot
+    expect(dist(threeHours.seat, hoPos)).toBeLessThan(dist(centroid, hoPos));
+  });
+
+  it('flags filter recession without moving the seat', () => {
+    const field = computeField(indexer, empty, 42);
+    const open = computeTowns(indexer, empty, field);
+    const filtered = computeTowns(indexer, { ...empty, themes: ['craft'] }, field);
+    const t = (/** @type {any[]} */ ts, /** @type {string} */ id) => ts.find((x) => x.id === id);
+    // three-hours is craft → matches; the-same-lever is agency → recedes
+    expect(t(filtered, 'three-hours').match).toBe(true);
+    expect(t(filtered, 'the-same-lever').match).toBe(false);
+    // seats are filter-independent (positions are seed-only)
+    expect(t(filtered, 'three-hours').seat).toEqual(t(open, 'three-hours').seat);
   });
 });
 
