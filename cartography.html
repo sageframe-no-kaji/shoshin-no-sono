@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Shoshin no Sono — Cartography (ho-05 debug heat map)</title>
+    <title>Shoshin no Sono — Cartography (ho-06 contour map)</title>
     <style>
       html,
       body {
@@ -76,6 +76,44 @@
         flex-wrap: wrap;
         margin-bottom: 0.5rem;
       }
+      .tuners {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.5rem;
+        margin: 0.25rem 0 0.9rem;
+        padding: 0.75rem 0.9rem;
+        border: 1px solid #e7e3da;
+        border-radius: 2px;
+        background: #f7f5f0;
+      }
+      .tuner {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.78rem;
+        color: #6b6b6b;
+      }
+      .tuner .tname {
+        min-width: 9.5rem;
+        text-align: right;
+      }
+      .tuner input[type='range'] {
+        width: 9rem;
+        accent-color: #9a5b3c;
+      }
+      .tuner .tval {
+        min-width: 2.5rem;
+        font-variant-numeric: tabular-nums;
+        color: #2b2b2b;
+      }
+      label.toggle {
+        font-size: 0.85rem;
+        color: #6b6b6b;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+      }
       .plate {
         border: 1px solid #e7e3da;
         background: #fdfcf9;
@@ -89,22 +127,24 @@
   </head>
   <body>
     <div class="wrap">
-      <div class="meta">Shoshin · ho-05 — position computer + heightfield</div>
-      <h1>Cartography debug — heat map</h1>
+      <div class="meta">Shoshin · ho-06 — contour extraction</div>
+      <h1>Cartography debug — contour map</h1>
       <p class="lede">
-        Transient verification surface: this is the raw <strong>heightfield</strong> — the 2D grid
-        of elevation values, colored low→high (blue valleys → red summits) and banded into terraces.
-        It's the same elevation surface ho-06 will trace iso-lines through; here it's shown as colored
-        cells so you can confirm peaks land where the position computer scattered them and rise to the
-        heights the heightfield assigns. Toggle a theme to watch the terrain re-weight — matching
-        works stand, non-matching sink. Reload for a novel layout; add <code>?seed=N</code> to
-        reproduce one. Contours (the cartographic register) replace this in ho-06.
+        The cartographic register: iso-elevation <strong>contours</strong> extracted from ho-05's
+        heightfield by marching squares, drawn in warm ink on cream — regular strokes at 0.25, index
+        strokes at 0.7, index every fifth ring. Peaks are nested rings; saddles and valleys carry
+        their own lines. Toggle a theme to watch the terrain re-weight — matching works stand,
+        non-matching sink toward fewer, lower rings. The sliders are the by-feel tuner pass: dial the
+        field against the register live. Reload for a novel layout; add <code>?seed=N</code> to
+        reproduce one.
       </p>
 
       <div class="controls">
         <button id="reseed">Reseed (novel layout)</button>
         <span class="seedline">seed <code id="seed">—</code> <span id="pinned"></span></span>
+        <label class="toggle"><input type="checkbox" id="togglePeaks" /> peak ids</label>
       </div>
+      <div class="tuners" id="tuners"></div>
       <div class="chips" id="chips"></div>
 
       <div class="plate">
