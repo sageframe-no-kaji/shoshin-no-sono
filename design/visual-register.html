@@ -218,6 +218,39 @@ native stack 'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',seri
     <p class="status">Not yet run — design/claude-design/session-6-cartouche.md</p>
     <div class="slot">Cartouche winner lands here.</div>
 
+    <h2>Territory spike — the procedural reference (ho-05/06/07)</h2>
+    <p class="status committed">
+      VALIDATED 2026-06-13 — <a href="claude-design/territory-spike.html">territory-spike.html</a>.
+      The whole pipeline rendered and blessed by eye before any <code>src/</code> code.
+    </p>
+    <p class="note">
+      The map is <strong>one continuous heightfield</strong>, not isolated peaks: contours are
+      extracted across the whole field by marching squares, so saddles and valleys carry their own
+      lines and the lowest rings enclose the cluster. This file is the reference algorithm ho-05
+      (heightfield) and ho-06 (contour extraction) reimplement in <code>src/</code> with tests.
+      Confirmed in it: the heightfield is a sum of elliptical/rotated/harmonic radial peak functions
+      (amplitude = importance) + 2-octave value noise weighted by <code>(1 − summitProximity)</code>
+      so crenellation decays with elevation; a sharper-than-Gaussian summit profile
+      <code>exp(−(d/r)^1.7)</code> avoids the flat-top; and <strong>contours render at 0.25 regular /
+      0.7 index, index every 5th</strong> — the map-scale weights, which resolve the session-1
+      index/topo reservation (the solo-peak weights were always going to be re-tuned at map scale).
+    </p>
+    <p class="note">
+      <strong>Cathedral close (supersedes the session-2 city morphology):</strong> the city is a
+      cathedral close — an elongated terracotta landmark with a long axis, a large forecourt plaza
+      at one short end and a small apse plaza behind, both <em>enclosed</em> (a façade across the
+      forecourt, a wall behind the apse), parallel flanking rows down the long sides, organic fabric
+      beyond. Settlement <strong>density scales continuously with weight</strong>
+      (<code>ln(1+Σ documents-strengths)</code>) — the four size names are bands on that continuum;
+      the band sets the style, the weight sets the count. ho-07 owns weight→density at placement.
+    </p>
+    <p class="note">
+      <strong>Still open in ho-04</strong> (relationship grammar — design sessions, can interleave
+      before ho-08): session 4 ridge (descends_from), session 5 road + trail
+      (documents / validates), session 6 cartouche. Plus the parked grammar question: succession as
+      a directional river with a bridge (decide at ho-08).
+    </p>
+
     <h2>Palette — ratified at session 1</h2>
     <pre>paper      #FDFCF9   (cream — ratified, closed)
 ink        #2B2B2B → #6B6B6B   (warm grays)
