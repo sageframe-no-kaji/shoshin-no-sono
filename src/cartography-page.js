@@ -43,12 +43,15 @@ const tuners = {
   radiusBase: 12,
   radiusScale: 8,
   relevanceFloor: 0.45,
+  // register line weights — frozen defaults; exposed for the by-feel pass only
+  weightRegular: 0.25,
+  weightIndex: 0.7,
   // ho-07 towns
   anchorBias: 4,
   strengthFull: 3,
   footOffset: 20,
   elongK: 4,
-  contourFollow: 40,
+  contourFollow: 0.6,
   density: 1.4,
   extentScale: 0.3,
   t1: 0.7,
@@ -64,11 +67,13 @@ const TUNER_SPECS = [
   { key: 'radiusBase', label: 'base radius', min: 12, max: 60, step: 2 },
   { key: 'radiusScale', label: 'radius × importance', min: 4, max: 40, step: 1 },
   { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01 },
-  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 3, step: 0.1 },
+  { key: 'weightRegular', label: 'line weight (regular)', min: 0.05, max: 1.0, step: 0.05 },
+  { key: 'weightIndex', label: 'line weight (index)', min: 0.1, max: 2.0, step: 0.05 },
+  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 6, step: 0.1 },
   { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5 },
-  { key: 'footOffset', label: 'foot offset', min: 0, max: 80, step: 2 },
-  { key: 'elongK', label: 'valley elongation', min: 0, max: 10, step: 0.5 },
-  { key: 'contourFollow', label: 'contour follow', min: 0, max: 120, step: 5 },
+  { key: 'footOffset', label: 'foot offset', min: 0, max: 160, step: 4 },
+  { key: 'elongK', label: 'valley elongation', min: 0, max: 12, step: 0.5 },
+  { key: 'contourFollow', label: 'contour follow', min: 0, max: 1, step: 0.05 },
   { key: 'density', label: 'town density', min: 0.5, max: 3, step: 0.1 },
   { key: 'extentScale', label: 'density × weight', min: 0, max: 1, step: 0.05 },
   { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05 },
@@ -122,7 +127,11 @@ const render = () => {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
-  let svg = contourMapSvg(field.heightfield, { interval: tuners.interval });
+  let svg = contourMapSvg(field.heightfield, {
+    interval: tuners.interval,
+    weightRegular: tuners.weightRegular,
+    weightIndex: tuners.weightIndex,
+  });
   svg += townsSvg(towns);
   if (showPeaks) svg += peakDotsSvg(field.peaks);
   map.innerHTML = svg;

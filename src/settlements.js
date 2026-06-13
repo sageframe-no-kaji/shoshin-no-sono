@@ -19,6 +19,8 @@ import { mulberry32 } from './field.js';
 const D2R = Math.PI / 180;
 const R2D = 180 / Math.PI;
 const GOLD = 2.399963229; // golden angle — the spike's loose-scatter pitch
+const DESCENT_STEPS = 8; // fall-line substeps the seat walks downhill (Decision 2)
+const CONTOUR_FOLLOW_CAP = 60; // px clamp on the per-block contour drape (keeps a town coherent)
 
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 /** @typedef {{ x: number, y: number }} Point */
@@ -44,10 +46,10 @@ export const TOWN_DEFAULTS = {
   anchorBias: 4, // strength^p in the barycenter — pulls hard toward the strength-3 anchor
   strengthFull: 3, // documents-strength sum at which a town fully seats at its barycenter
   secondaryStrength: 0.5, // synthetic strength of a fallback (argues_for) anchor — a light lean, not a seat
-  footOffset: 20, // px nudged downhill off the summit toward the foot
+  footOffset: 20, // total px descended down the fall line off the summit toward the foot
   elongK: 4, // along-contour stretch per unit slope
-  elongCap: 2.0, // max elongation factor
-  contourFollow: 40, // px per-block downhill nudge so corridors bend with the rings
+  elongCap: 3.0, // max elongation factor
+  contourFollow: 0.6, // 0–1: how strongly each block drapes onto the seat's contour band
   density: 1.4, // base within-band count multiplier (>1 = more buildings — "populated enough")
   extentScale: 0.3, // added density per unit weight (within-band count grows with weight)
   thresholds: [0.7, 1.5, 1.7], // weight → hamlet / village / town / city band edges
@@ -446,19 +448,26 @@ export function gradient(hf, x, y) {
 }
 
 /**
- * Nudge a seat downhill off the summit toward the foot, by `footOffset` px
- * along the negative gradient — so a single-anchor town sits at its peak's foot
- * rather than on the summit (Decision 2). Clamped to the field bounds.
+ * Walk a seat downhill off the summit toward the foot (Decision 2). A single
+ * step can't clear a broad peak, so the seat descends the fall line in
+ * `DESCENT_STEPS` substeps, re-sampling the gradient each step — it curves down
+ * the terrain into low ground rather than stepping blindly. `footOffset` is the
+ * total descent budget; raise it to push a town further into the valley. A flat
+ * field leaves the seat put. Clamped to the field bounds.
  * @param {Point} seat @param {Heightfield} hf @param {number} footOffset @returns {Point}
  */
 export function seatDownhill(seat, hf, footOffset) {
-  const g = gradient(hf, seat.x, seat.y);
-  const m = Math.hypot(g.x, g.y);
-  if (m < 1e-6) return { x: seat.x, y: seat.y };
-  return {
-    x: Math.max(0, Math.min(hf.width, seat.x - (g.x / m) * footOffset)),
-    y: Math.max(0, Math.min(hf.height, seat.y - (g.y / m) * footOffset)),
-  };
+  let x = seat.x;
+  let y = seat.y;
+  const step = footOffset / DESCENT_STEPS;
+  for (let i = 0; i < DESCENT_STEPS; i++) {
+    const g = gradient(hf, x, y);
+    const m = Math.hypot(g.x, g.y);
+    if (m < 1e-6) break; // reached a basin — nothing left to descend
+    x = Math.max(0, Math.min(hf.width, x - (g.x / m) * step));
+    y = Math.max(0, Math.min(hf.height, y - (g.y / m) * step));
+  }
+  return { x, y };
 }
 
 /**
@@ -476,9 +485,12 @@ export function sizeBand(weight, thresholds = TOWN_DEFAULTS.thresholds) {
  * Place-then-deform (Decision 4): warp an abstract settlement to the slope it
  * lands on. Affine base — orient the growth axis along the local contour
  * (perpendicular to the gradient) and elongate along it by the slope — plus a
- * bounded per-block downhill nudge so corridors bend with the rings. Returns
- * blocks still settlement-local (the render translates by the seat). A flat
- * field leaves the town unchanged.
+ * per-block drape onto the seat's contour band: each block slides downhill (or
+ * up) toward the seat's elevation, so the footprint hugs the rings instead of
+ * straddling them. `contourFollow` is 0–1 (0 = pure affine, 1 = each block
+ * snapped to the seat's contour level), clamped so the town stays coherent.
+ * Returns blocks still settlement-local (the render translates by the seat). A
+ * flat field leaves the town unchanged.
  * @param {Block[]} blocks
  * @param {Heightfield} hf
  * @param {Point} seat
@@ -496,15 +508,24 @@ export function deform(blocks, hf, seat, opts = {}) {
   const elong = Math.min(elongCap, 1 + elongK * gm);
   const ca = Math.cos(baseAngle);
   const sa = Math.sin(baseAngle);
+  const seatElev = sampleField(hf, seat.x, seat.y);
   return blocks.map((b) => {
     const sx = b.x * elong; // elongate along the local growth axis
     const sy = b.y;
     let rx = sx * ca - sy * sa; // then rotate that axis onto the contour
     let ry = sx * sa + sy * ca;
-    if (contourFollow > 0 && gm > 1e-6) {
-      const wg = gradient(hf, seat.x + rx, seat.y + ry); // bend downhill at the block's spot
-      rx -= wg.x * contourFollow;
-      ry -= wg.y * contourFollow;
+    if (contourFollow > 0) {
+      const wg = gradient(hf, seat.x + rx, seat.y + ry);
+      const wm = Math.hypot(wg.x, wg.y);
+      if (wm > 1e-6) {
+        // (block elevation − seat elevation) / slope ≈ px downhill to the seat's
+        // contour; scale by strength and clamp so a steep block can't fly off.
+        const elev = sampleField(hf, seat.x + rx, seat.y + ry);
+        let d = ((elev - seatElev) / wm) * contourFollow;
+        d = Math.max(-CONTOUR_FOLLOW_CAP, Math.min(CONTOUR_FOLLOW_CAP, d));
+        rx -= (wg.x / wm) * d;
+        ry -= (wg.y / wm) * d;
+      }
     }
     return { ...b, x: rx, y: ry, a: (b.a || 0) + baseAngle * R2D };
   });
