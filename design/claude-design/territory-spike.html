@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shoshin — Territory spike (continuous heightfield + marching squares)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; background: #FDFCF9; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; padding: 48px 40px 80px; }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  .meta { font: 500 12px Spectral, Georgia, serif; letter-spacing: 0.34em; text-transform: uppercase; color: #9A958B; }
+  h1 { font: 300 32px/1.15 Spectral, Georgia, serif; margin: 8px 0 4px; }
+  p.lede { max-width: 660px; font: 400 15px/1.6 Spectral, Georgia, serif; color: #6B6B6B; }
+  .plate { background: #FDFCF9; border: 1px solid #E7E3DA; box-shadow: 0 1px 0 rgba(0,0,0,0.03); margin-top: 28px; }
+  .scaletag { font: 500 11px Spectral, Georgia, serif; letter-spacing: 0.24em; text-transform: uppercase; color: #9A958B; margin: 30px 0 8px; }
+  svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">Shoshin · Territory spike — ho-05/06 preview</div>
+  <h1>One field, contours everywhere</h1>
+  <p class="lede">
+    Not isolated peaks on blank paper: a single continuous heightfield (sum of radial peak
+    functions + elevation-attenuated noise), with iso-elevation contours extracted across the whole
+    territory by marching squares. Peaks are local maxima; saddles and valleys carry their own
+    contours; the lowest rings enclose the whole cluster. This is the ho-05 (heightfield) + ho-06
+    (contour extraction) pipeline as a design spike — it validates that the frozen register
+    (weights 0.5 / 0.95, index every 5th) reads correctly when the map is a real field. Settlements
+    sit on the terrain; type is variant B.
+  </p>
+
+  <div class="scaletag">Full size</div>
+  <div class="plate"><svg id="full" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+  <div class="scaletag">At 45% — small-scale legibility</div>
+  <div class="plate" style="width:45%;"><svg id="mini" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg></div>
+</div>
+
+<script>
+(function () {
+  var PAPER='#FDFCF9', INK='#2B2B2B', TERRA='#9A5B3C';
+  var LATIN='Spectral, Georgia, serif', CJK="'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
+  var W=1000, H=620;
+
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function f(n){ return Math.round(n*100)/100; }
+
+  /* ---------------- ho-05 — the heightfield ---------------- */
+  // peaks: importance -> amplitude; each gets an elliptical, rotated, harmonically-irregular falloff.
+  // crenellation decays with elevation (noise weight falls toward the summit) — the session-1 rule.
+  var PEAKS=[
+    { name:'Ho System', native:'歩',     x:500, y:300, amp:9, r:185, ell:0.86, rot:0.30, seed:31,   elev:9 },
+    { name:'Kanyō',     native:'観鷹',   x:250, y:250, amp:8, r:150, ell:0.92, rot:-0.4, seed:2826, elev:8 },
+    { name:'Hōzō',      native:'宝蔵',   x:762, y:360, amp:7, r:128, ell:1.06, rot:0.62, seed:7,    elev:7 }
+  ];
+  // per-peak low-order angular harmonics -> non-circular contours (the silhouette character)
+  PEAKS.forEach(function(p){ var rnd=mulberry32(p.seed); p.harm=[]; for(var k=2;k<=5;k++) p.harm.push({k:k,a:0.04+rnd()*0.10,phi:rnd()*6.283}); });
+
+  // 2-octave value noise for low-elevation crenellation
+  function noiseField(seed,cols,rows){ var rnd=mulberry32(seed), g=[]; for(var i=0;i<cols*rows;i++) g.push(rnd()*2-1);
+    return function(u,v){ // u,v in [0,1]
+      var x=u*(cols-1), y=v*(rows-1), i0=Math.floor(x), j0=Math.floor(y), fx=x-i0, fy=y-j0;
+      i0=Math.max(0,Math.min(cols-2,i0)); j0=Math.max(0,Math.min(rows-2,j0));
+      var a=g[j0*cols+i0], b=g[j0*cols+i0+1], c=g[(j0+1)*cols+i0], d=g[(j0+1)*cols+i0+1];
+      var sx=fx*fx*(3-2*fx), sy=fy*fy*(3-2*fy);
+      return (a*(1-sx)+b*sx)*(1-sy)+(c*(1-sx)+d*sx)*sy; }; }
+  var noiseA=noiseField(99,9,6), noiseB=noiseField(241,17,11);
+
+  function heightAt(x,y){
+    var h=0, summitW=0;
+    for(var i=0;i<PEAKS.length;i++){ var p=PEAKS[i];
+      var dx=x-p.x, dy=y-p.y, ca=Math.cos(-p.rot), sa=Math.sin(-p.rot);
+      var lx=dx*ca-dy*sa, ly=(dx*sa+dy*ca)/p.ell;       // rotate + un-squash
+      var d=Math.hypot(lx,ly), ang=Math.atan2(ly,lx);
+      var wob=0; for(var k=0;k<p.harm.length;k++) wob+=p.harm[k].a*Math.sin(p.harm[k].k*ang+p.harm[k].phi);
+      var rEff=p.r*(1+wob);                              // irregular radius -> wavy contours
+      var prof=p.amp*Math.exp(-Math.pow(Math.max(0,d)/rEff,1.7));  // sharper-than-Gaussian summit
+      h+=prof; summitW=Math.max(summitW, prof/p.amp);    // ~1 at a summit, ~0 far away
+    }
+    var n=noiseA(x/W,y/H)*0.9 + noiseB(x/W,y/H)*0.4;
+    h += n * 0.85 * (1-summitW);                          // crenellation decays with elevation
+    return h;
+  }
+
+  /* ---------------- ho-06 — marching squares ---------------- */
+  function buildGrid(cell){ var cols=Math.ceil(W/cell)+1, rows=Math.ceil(H/cell)+1, fld=new Float64Array(cols*rows), mx=0;
+    for(var j=0;j<rows;j++) for(var i=0;i<cols;i++){ var v=heightAt(i*cell,j*cell); fld[j*cols+i]=v; if(v>mx) mx=v; }
+    return {fld:fld,cols:cols,rows:rows,cell:cell,max:mx}; }
+  function contourPaths(G, level){
+    var c=G.cell, cols=G.cols, fld=G.fld, out=[];
+    function lp(a,b,va,vb){ var t=(level-va)/(vb-va); return a+(b-a)*t; }
+    for(var j=0;j<G.rows-1;j++) for(var i=0;i<cols-1;i++){
+      var tl=fld[j*cols+i], tr=fld[j*cols+i+1], br=fld[(j+1)*cols+i+1], bl=fld[(j+1)*cols+i];
+      var idx=(tl>level?8:0)|(tr>level?4:0)|(br>level?2:0)|(bl>level?1:0);
+      if(idx===0||idx===15) continue;
+      var x=i*c, y=j*c;
+      var T={x:lp(x,x+c,tl,tr),y:y}, R={x:x+c,y:lp(y,y+c,tr,br)}, B={x:lp(x,x+c,bl,br),y:y+c}, L={x:x,y:lp(y,y+c,tl,bl)};
+      switch(idx){
+        case 1: case 14: out.push([L,B]); break;
+        case 2: case 13: out.push([B,R]); break;
+        case 3: case 12: out.push([L,R]); break;
+        case 4: case 11: out.push([T,R]); break;
+        case 6: case 9:  out.push([T,B]); break;
+        case 7: case 8:  out.push([L,T]); break;
+        case 5:  out.push([L,T]); out.push([B,R]); break;
+        case 10: out.push([T,R]); out.push([L,B]); break;
+      }
+    }
+    return out;
+  }
+  function segsToPath(segs){ var d=''; for(var i=0;i<segs.length;i++){ var s=segs[i]; d+='M'+f(s[0].x)+' '+f(s[0].y)+'L'+f(s[1].x)+' '+f(s[1].y); } return d; }
+
+  function terrain(){
+    var G=buildGrid(4), interval=0.62, levels=[], L=interval;
+    while(L<G.max){ levels.push(L); L+=interval; }
+    var svg='';
+    for(var k=0;k<levels.length;k++){
+      var isIndex=(k%5===0), w=isIndex?0.95:0.5;
+      var d=segsToPath(contourPaths(G, levels[k]));
+      if(d) svg+='<path d="'+d+'" fill="none" stroke="'+INK+'" stroke-width="'+w+'" stroke-linecap="round"/>';
+    }
+    return svg;
+  }
+
+  /* ---------------- session 2 — settlements (frozen unit 8.5/pack .24/curve24/corr5/ravel7) ---------- */
+  var ST={unit:8.5,pack:0.24,curve:24,corridors:5,ravel:7}, GOLD=2.399963229, D2R=Math.PI/180, R2D=180/Math.PI;
+  function rect(b){ return '<rect x="'+f(-b.w/2)+'" y="'+f(-b.h/2)+'" width="'+f(b.w)+'" height="'+f(b.h)+'" transform="translate('+f(b.x)+','+f(b.y)+') rotate('+f(b.a||0)+')" fill="'+(b.terra?TERRA:INK)+'" stroke="'+PAPER+'" stroke-width="0.4"/>'; }
+  function walk(unit,r0,h0,len,mt,pull,seed){ var rnd=mulberry32(seed),x=Math.cos(h0)*r0,y=Math.sin(h0)*r0,h=h0,n=Math.max(5,Math.round(len/(unit*0.7))),dl=len/n,k=dl/unit,p=[{x:x,y:y}];
+    for(var i=0;i<n;i++){ var tg=Math.atan2(y,x),df=Math.atan2(Math.sin(tg-h),Math.cos(tg-h)); h+=(pull*df+(rnd()-0.5)*2*mt)*k; x+=Math.cos(h)*dl; y+=Math.sin(h)*dl; p.push({x:x,y:y}); } return p; }
+  function corn(b){ var ca=Math.cos((b.a||0)*D2R),sa=Math.sin((b.a||0)*D2R),hw=b.w/2,hh=b.h/2,o=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]],r=[]; for(var i=0;i<4;i++) r.push({x:b.x+o[i][0]*ca-o[i][1]*sa,y:b.y+o[i][0]*sa+o[i][1]*ca}); return r; }
+  function sat(A,B){ var P=[A,B]; for(var s=0;s<2;s++){var pl=P[s]; for(var i=0;i<4;i++){var j=(i+1)%4,nx=-(pl[j].y-pl[i].y),ny=pl[j].x-pl[i].x,a0=1e9,a1=-1e9,b0=1e9,b1=-1e9,kk,p; for(kk=0;kk<4;kk++){p=A[kk].x*nx+A[kk].y*ny;if(p<a0)a0=p;if(p>a1)a1=p;} for(kk=0;kk<4;kk++){p=B[kk].x*nx+B[kk].y*ny;if(p<b0)b0=p;if(p>b1)b1=p;} if(a1<b0||b1<a0)return false;}} return true; }
+  function shr(b,n){ return {x:b.x,y:b.y,a:b.a,w:Math.max(0.2,b.w-2*n),h:Math.max(0.2,b.h-2*n)}; }
+  function fits(c,pl,n){ var cc=corn(shr(c,n)); for(var i=0;i<pl.length;i++) if(sat(cc,corn(shr(pl[i],n)))) return false; return true; }
+  function resamp(pts,ds){ var o=[],car=0; for(var i=1;i<pts.length;i++){var ax=pts[i-1].x,ay=pts[i-1].y,dx=pts[i].x-ax,dy=pts[i].y-ay,d=Math.hypot(dx,dy); if(d<1e-6)continue; var ux=dx/d,uy=dy/d,di=car; while(di<d){o.push({x:ax+ux*di,y:ay+uy*di,tx:ux,ty:uy});di+=ds;} car=di-d;} return o; }
+  function ringPoly(a0,a1,rR,wob,seed){ var rnd=mulberry32(seed),p=[],st=40,ph=rnd()*6.28; for(var i=0;i<=st;i++){var u=i/st,an=a0+(a1-a0)*u,r=rR*(1+Math.sin(u*3.5+ph)*wob); p.push({x:Math.cos(an)*r,y:Math.sin(an)*r});} return p; }
+  function line(poly,P,pl,rnd){ var ds=Math.max(0.5,P.unit*0.2),S=resamp(poly,ds); if(S.length<2)return; var L=(S.length-1)*ds; if(L<=0)return; var np=Math.max(1,Math.round(L/(P.unit*1.12))),sp=L/np;
+    for(var j=0;j<np;j++){var pl2=(j+0.5)*sp,idx=Math.min(S.length-1,Math.round(pl2/ds)),s=S[idx],ang=Math.atan2(s.ty,s.tx)*R2D,nx=-s.ty,ny=s.tx;
+      for(var sd=-1;sd<=1;sd+=2){var w=(sp-P.gap)*(0.92+rnd()*0.14),h=P.unit*(0.8+rnd()*0.5),of=P.streetHalf+h/2,c={x:s.x+nx*of*sd,y:s.y+ny*of*sd,w:w,h:h,a:ang+(rnd()-0.5)*5}; if(fits(c,pl,P.inset)) pl.push(c);}} }
+  function loose(ct,unit,pl,seed){ var rnd=mulberry32(seed*131+5),rot=rnd()*6.28,pit=unit*1.15,g=0,tr=0; while(g<ct&&tr<ct*10){tr++;var rr=pit*Math.sqrt(g+0.3),th=g*GOLD+rot+(rnd()-0.5)*0.6,c={x:Math.cos(th)*rr+(rnd()-0.5)*pit*0.3,y:Math.sin(th)*rr+(rnd()-0.5)*pit*0.3,w:unit*(1+rnd()*0.5),h:unit*(0.85+rnd()*0.4),a:(rnd()-0.5)*30}; if(fits(c,pl,unit*0.06)){pl.push(c);g++;}} }
+  function ravel(pl,Rmax,n,unit,rnd){ var g=0,tr=0; while(g<n&&tr<n*12){tr++;var an=rnd()*6.28,r=Rmax*(1.02+rnd()*0.28),c={x:Math.cos(an)*r,y:Math.sin(an)*r,w:unit*(0.9+rnd()*0.5),h:unit*(0.8+rnd()*0.4),a:(rnd()-0.5)*40}; if(fits(c,pl,unit*0.06)){pl.push(c);g++;}} }
+  function settle(level,seed){ var rnd=mulberry32(seed*101+7),unit=ST.unit,pl=[],gap=unit*(0.02+(1-ST.pack)*0.2),inset=unit*0.06,mt=ST.curve*D2R,P0={unit:unit,streetHalf:unit*0.42,gap:gap,inset:inset},Rext;
+    if(level===0){ loose(2+(seed%2),unit,pl,seed); Rext=unit*1.8; }
+    else if(level===1){ var th=rnd()*6.28; line(walk(unit,-unit*1.4,th,unit*4,mt,0.5,(rnd()*1e6)|0),P0,pl,rnd); ravel(pl,unit*2.4,Math.round(ST.ravel*0.2),unit,rnd); Rext=unit*3; }
+    else if(level===2){ var Rmax=unit*3.4,base=rnd()*6.28,nc=Math.min(3,Math.max(2,ST.corridors-2)); for(var k=0;k<nc;k++){var t2=base+k*(6.283/nc)+(rnd()-0.5)*0.5; line(walk(unit,unit*0.7,t2,Rmax,mt,0.5,(rnd()*1e6)|0),P0,pl,rnd);} ravel(pl,Rmax,Math.round(ST.ravel*0.35),unit,rnd); Rext=Rmax*1.3; }
+    else { var Rx=unit*4.5,b2=rnd()*6.28,P={unit:unit,streetHalf:unit*0.44,gap:gap,inset:inset}; pl.push({x:0,y:0,w:unit*1.3,h:unit*3,a:(rnd()-0.5)*7,terra:true}); for(var k2=0;k2<ST.corridors;k2++){var t3=b2+k2*(6.283/ST.corridors)+(rnd()-0.5)*0.35; line(walk(unit,unit*1.4,t3,Rx-unit*1.4,mt,0.5,(rnd()*1e6)|0),P,pl,rnd);} var ra=rnd()*6.28; line(ringPoly(ra,ra+4.3,Rx*0.5,0.05,(rnd()*1e6)|0),P,pl,rnd); ravel(pl,Rx,ST.ravel,unit,rnd); Rx*=1.3; Rext=Rx; }
+    // true extent from placed blocks (for clean label offset)
+    var maxR=0; pl.forEach(function(b){ corn(b).forEach(function(c){ maxR=Math.max(maxR,Math.hypot(c.x,c.y)); }); });
+    var svg=''; pl.forEach(function(b){ svg+=rect(b); });
+    return {svg:svg, extent:maxR};
+  }
+
+  /* ---------------- session 3 — type, variant B ---------------- */
+  function peakLabel(x,y,latin,native){ var t='<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="16.5" fill="#2B2B2B" style="letter-spacing:0.16em;">'+latin.toUpperCase();
+    if(native){ t+='<tspan dx="9" font-family="'+CJK+'" font-size="14" fill="#5C5C5C" style="letter-spacing:0.10em;">'+native+'</tspan>'; } return t+'</text>'; }
+  function townLabel(x,y,latin){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="11.5" fill="#6B6B6B" style="letter-spacing:0.22em;">'+latin.toUpperCase()+'</text>'; }
+  function elevLabel(x,y,n){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="11" font-style="italic" fill="#8A857C" style="letter-spacing:0.04em;">'+n+'</text>'; }
+
+  function scene(){
+    var s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="'+PAPER+'"/>';
+    s+=terrain();                                  // contours everywhere
+    // settlements ON the terrain: a city near Hōzō's foot, a town in the Kanyō–Ho System valley
+    var c1=settle(3,2826), c2=settle(2,118);
+    var t1={x:705,y:475}, t2={x:380,y:455};
+    s+='<g transform="translate('+t1.x+','+t1.y+')">'+c1.svg+'</g>'+townLabel(t1.x, t1.y+c1.extent+14, 'Three Hours');
+    s+='<g transform="translate('+t2.x+','+t2.y+')">'+c2.svg+'</g>'+townLabel(t2.x, t2.y+c2.extent+14, 'The Empty Container');
+    // peak labels at the summit (close to the peak, above the innermost rings)
+    PEAKS.forEach(function(p){ var ly=p.y - p.r*0.32; s+=peakLabel(p.x, ly, p.name, p.native); s+=elevLabel(p.x + p.r*0.34, ly+4, p.elev); });
+    return s;
+  }
+  var svg=scene();
+  document.getElementById('full').innerHTML=svg;
+  document.getElementById('mini').innerHTML=svg;
+})();
+</script>
+</body>
+</html>
