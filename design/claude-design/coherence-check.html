@@ -47,7 +47,9 @@
   function f(n){ return Math.round(n*100)/100; }
 
   /* ---------- SESSION 1 — peak (frozen: baseForm .77, terrain .70, amplitude 2.3, lineWeight 1) ---------- */
-  var PK = { baseForm:0.77, terrain:0.70, amplitude:2.3, lineWeight:1, wobbleScale:0.15, spacingPx:19, indexEvery:5, inkRegular:0.85, inkIndex:1.7 };
+  // inkRegular/inkIndex lightened from the solo-peak freeze (0.85/1.7) — the assembled-register
+  // re-tuning the session-1 reservation predicted. Candidate new register weights.
+  var PK = { baseForm:0.77, terrain:0.70, amplitude:2.3, lineWeight:1, wobbleScale:0.15, spacingPx:19, indexEvery:5, inkRegular:0.5, inkIndex:0.95 };
   var NPTS=120, D2R=Math.PI/180, R2D=180/Math.PI;
   var BASE_GAIN=2.0, ASPECT_GAIN=0.18, AMP_GAIN=1.4, DEV_CAP=0.33, TERR_SHIFT=0.72;
   function makeShape(seed){ var rnd=mulberry32(seed), harm=[]; for(var k=2;k<=5;k++) harm.push({k:k,a:0.03+rnd()*0.06,phi:rnd()*Math.PI*2}); return {harm:harm, rot:(rnd()-0.5)*0.5}; }
@@ -113,17 +115,21 @@
   function townLabel(x,y,latin){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="'+TY.town.size+'" font-weight="400" fill="'+TY.town.fill+'" style="letter-spacing:'+TY.town.tracking+'em;">'+latin.toUpperCase()+'</text>'; }
   function elevLabel(x,y,n){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="11" font-style="italic" fill="#8A857C" style="letter-spacing:0.04em;font-variant-numeric:tabular-nums;">'+n+'</text>'; }
 
-  // a peak placed at (cx,cy) at a given scale, with its label and elevation
+  // a peak placed at (cx,cy) at a given scale, with its label sitting just above the summit
   function placePeak(cx,cy,scale,rings,seed,latin,native,elev){
     var pk=peak(rings,seed);
     var g='<g transform="translate('+cx+','+cy+') scale('+scale+')">'+pk.svg+'</g>';
-    var top=cy - pk.Rmax*scale;
-    g+=peakLabel(cx, top-8, latin, native);
-    if(elev!=null) g+=elevLabel(cx + pk.Rmax*scale*0.5, top+6, elev);
+    // label baseline just above the highest contour — close to the peak, not floating, not over it
+    var labelY=cy - pk.Rmax*scale - 4;
+    g+=peakLabel(cx, labelY, latin, native);
+    if(elev!=null) g+=elevLabel(cx + pk.Rmax*scale*0.42, labelY+4, elev);
     return g;
   }
+  // settlement label sits clear BELOW the built extent (radius grows with level)
+  var TOWN_EXTENT={0:1.6,1:2.6,2:3.6,3:5.0};  // × unit, generous of the ravel
   function placeTown(cx,cy,scale,level,seed,latin){
-    return '<g transform="translate('+cx+','+cy+') scale('+scale+')">'+settlement(level,seed)+'</g>'+townLabel(cx, cy+30, latin);
+    var extent=ST.unit*(TOWN_EXTENT[level]||3)*scale;
+    return '<g transform="translate('+cx+','+cy+') scale('+scale+')">'+settlement(level,seed)+'</g>'+townLabel(cx, cy+extent+15, latin);
   }
 
   function scene(){
