@@ -120,7 +120,7 @@
     while(L<G.max){ levels.push(L); L+=interval; }
     var svg='';
     for(var k=0;k<levels.length;k++){
-      var isIndex=(k%5===0), w=isIndex?0.8:0.3;
+      var isIndex=(k%5===0), w=isIndex?0.7:0.25;
       var d=segsToPath(contourPaths(G, levels[k]));
       if(d) svg+='<path d="'+d+'" fill="none" stroke="'+INK+'" stroke-width="'+w+'" stroke-linecap="round"/>';
     }
