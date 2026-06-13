@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shoshin — Register coherence check (sessions 1–3 together)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; background: #FDFCF9; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; padding: 48px 40px 80px; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  .meta { font: 500 12px Spectral, Georgia, serif; letter-spacing: 0.34em; text-transform: uppercase; color: #9A958B; }
+  h1 { font: 300 32px/1.15 Spectral, Georgia, serif; margin: 8px 0 4px; }
+  p.lede { max-width: 640px; font: 400 15px/1.6 Spectral, Georgia, serif; color: #6B6B6B; }
+  .plate { background: #FDFCF9; border: 1px solid #E7E3DA; box-shadow: 0 1px 0 rgba(0,0,0,0.03); margin-top: 28px; }
+  .scaletag { font: 500 11px Spectral, Georgia, serif; letter-spacing: 0.24em; text-transform: uppercase; color: #9A958B; margin: 30px 0 8px; }
+  svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">Shoshin · Register coherence check</div>
+  <h1>Sessions 1–3, in one scene</h1>
+  <p class="lede">
+    The frozen peak (session 1), settlement (session 2), and type system (session 3), drawn together
+    from their committed parameters — the pause-and-look before the relationship features. Peaks are
+    held apart as separate massifs on purpose: merging their contours into one continuous terrain is
+    ho-05/06's job (a single heightfield), not this check. What this tests is whether the three read
+    as one mapmaker's hand, and whether a peak label and a town label are still distinct when close.
+  </p>
+
+  <div class="scaletag">Full size</div>
+  <div class="plate"><svg id="full" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+  <div class="scaletag">At 45% — the small-scale legibility test</div>
+  <div class="plate" style="width:45%;"><svg id="mini" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"></svg></div>
+</div>
+
+<script>
+(function () {
+  var PAPER = '#FDFCF9', INK = '#2B2B2B', TERRA = '#9A5B3C';
+  var LATIN = 'Spectral, Georgia, serif';
+  var CJK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
+
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function f(n){ return Math.round(n*100)/100; }
+
+  /* ---------- SESSION 1 — peak (frozen: baseForm .77, terrain .70, amplitude 2.3, lineWeight 1) ---------- */
+  var PK = { baseForm:0.77, terrain:0.70, amplitude:2.3, lineWeight:1, wobbleScale:0.15, spacingPx:19, indexEvery:5, inkRegular:0.85, inkIndex:1.7 };
+  var NPTS=120, D2R=Math.PI/180, R2D=180/Math.PI;
+  var BASE_GAIN=2.0, ASPECT_GAIN=0.18, AMP_GAIN=1.4, DEV_CAP=0.33, TERR_SHIFT=0.72;
+  function makeShape(seed){ var rnd=mulberry32(seed), harm=[]; for(var k=2;k<=5;k++) harm.push({k:k,a:0.03+rnd()*0.06,phi:rnd()*Math.PI*2}); return {harm:harm, rot:(rnd()-0.5)*0.5}; }
+  function makeNoise(M,seed){ var rnd=mulberry32(seed), vals=[]; for(var i=0;i<M;i++) vals.push(rnd()*2-1);
+    return function(t){ var x=t/(Math.PI*2)*M, i0=Math.floor(x), fr=x-i0; i0=((i0%M)+M)%M; var i1=(i0+1)%M, u=fr*fr*(3-2*fr); return vals[i0]*(1-u)+vals[i1]*u; }; }
+  function silhouette(shape,t){ var s=0; for(var h=0;h<shape.harm.length;h++) s+=shape.harm[h].a*Math.sin(shape.harm[h].k*t+shape.harm[h].phi); return s; }
+  function smoothClosed(pts){ var n=pts.length, P=function(i){return pts[(i%n+n)%n];};
+    var d='M'+P(0)[0].toFixed(1)+' '+P(0)[1].toFixed(1);
+    for(var i=0;i<n;i++){ var p0=P(i-1),p1=P(i),p2=P(i+1),p3=P(i+2);
+      var c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;
+      d+='C'+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+p2[0].toFixed(1)+' '+p2[1].toFixed(1); }
+    return d+'Z'; }
+  // a peak drawn around (0,0); rings count scales with importance
+  function peak(rings, seed){
+    var shape=makeShape(seed), step=PK.spacingPx, Rmax=12+(rings-1)*step;
+    var dStep=PK.terrain*step*TERR_SHIFT, Mcoarse=Math.round(3+PK.wobbleScale*19);
+    var baseFactor=PK.baseForm*BASE_GAIN, aspect=1+PK.baseForm*ASPECT_GAIN;
+    var devCap=DEV_CAP*step*(1-TERR_SHIFT*PK.terrain), devOuter=Math.min(PK.amplitude*AMP_GAIN, devCap);
+    var regW=PK.inkRegular*PK.lineWeight, idxW=PK.inkIndex*PK.lineWeight, paths='';
+    var TA=125*D2R, DIRX=Math.cos(TA), DIRY=Math.sin(TA), half=dStep*(rings-1)/2;
+    for(var i=0;i<rings;i++){
+      var R=Rmax-i*step, off=dStep*i-half, devPx=devOuter*(R/Rmax), devNoise=makeNoise(Mcoarse, seed*131+i*17), pts=[];
+      for(var p=0;p<NPTS;p++){ var t=p/NPTS*Math.PI*2, rad=1+baseFactor*silhouette(shape,t), r=R*rad+devPx*devNoise(t), a=t+shape.rot;
+        pts.push([DIRX*off+Math.cos(a)*r*aspect, DIRY*off+Math.sin(a)*r]); }
+      paths+='<path d="'+smoothClosed(pts)+'" fill="none" stroke="'+INK+'" stroke-width="'+((i%PK.indexEvery===0)?idxW:regW)+'" stroke-linejoin="round"/>';
+    }
+    return { svg:paths, Rmax:Rmax };
+  }
+
+  /* ---------- SESSION 2 — settlement (frozen: unit 8.5, pack .24, curve 24, corridors 5, ravel 7) ---------- */
+  var ST = { unit:8.5, pack:0.24, curve:24, corridors:5, ravel:7 };
+  var GOLD=2.399963229;
+  function rectSVG(b){ return '<rect x="'+f(-b.w/2)+'" y="'+f(-b.h/2)+'" width="'+f(b.w)+'" height="'+f(b.h)+'" transform="translate('+f(b.x)+','+f(b.y)+') rotate('+f(b.a||0)+')" fill="'+(b.terra?TERRA:INK)+'" stroke="'+PAPER+'" stroke-width="0.4"/>'; }
+  function corridorWalk(unit,r0,h0,length,maxTurn,pull,seed){ var rnd=mulberry32(seed),x=Math.cos(h0)*r0,y=Math.sin(h0)*r0,h=h0,n=Math.max(5,Math.round(length/(unit*0.7))),dl=length/n,k=dl/unit,pts=[{x:x,y:y}];
+    for(var i=0;i<n;i++){ var tgt=Math.atan2(y,x),diff=Math.atan2(Math.sin(tgt-h),Math.cos(tgt-h)); h+=(pull*diff+(rnd()-0.5)*2*maxTurn)*k; x+=Math.cos(h)*dl; y+=Math.sin(h)*dl; pts.push({x:x,y:y}); } return pts; }
+  function corners(b){ var ca=Math.cos((b.a||0)*D2R),sa=Math.sin((b.a||0)*D2R),hw=b.w/2,hh=b.h/2,o=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]],r=[]; for(var i=0;i<4;i++) r.push({x:b.x+o[i][0]*ca-o[i][1]*sa,y:b.y+o[i][0]*sa+o[i][1]*ca}); return r; }
+  function satOverlap(A,B){ var P=[A,B]; for(var s=0;s<2;s++){ var poly=P[s]; for(var i=0;i<4;i++){ var j=(i+1)%4,nx=-(poly[j].y-poly[i].y),ny=poly[j].x-poly[i].x,a0=1e9,a1=-1e9,b0=1e9,b1=-1e9,kk,p;
+    for(kk=0;kk<4;kk++){p=A[kk].x*nx+A[kk].y*ny;if(p<a0)a0=p;if(p>a1)a1=p;} for(kk=0;kk<4;kk++){p=B[kk].x*nx+B[kk].y*ny;if(p<b0)b0=p;if(p>b1)b1=p;} if(a1<b0||b1<a0) return false; } } return true; }
+  function shrink(b,inset){ return {x:b.x,y:b.y,a:b.a,w:Math.max(0.2,b.w-2*inset),h:Math.max(0.2,b.h-2*inset)}; }
+  function fits(cand,placed,inset){ var cc=corners(shrink(cand,inset)); for(var i=0;i<placed.length;i++){ if(satOverlap(cc,corners(shrink(placed[i],inset)))) return false; } return true; }
+  function ringPoly(a0,a1,rR,wob,seed){ var rnd=mulberry32(seed),pts=[],steps=40,phase=rnd()*6.28; for(var i=0;i<=steps;i++){ var u=i/steps,ang=a0+(a1-a0)*u,r=rR*(1+Math.sin(u*3.5+phase)*wob); pts.push({x:Math.cos(ang)*r,y:Math.sin(ang)*r}); } return pts; }
+  function resample(pts,ds){ var out=[],carry=0; for(var i=1;i<pts.length;i++){ var ax=pts[i-1].x,ay=pts[i-1].y,dx=pts[i].x-ax,dy=pts[i].y-ay,d=Math.hypot(dx,dy); if(d<1e-6) continue; var ux=dx/d,uy=dy/d,dist=carry; while(dist<d){ out.push({x:ax+ux*dist,y:ay+uy*dist,tx:ux,ty:uy}); dist+=ds; } carry=dist-d; } return out; }
+  function lineCorridor(poly,P,placed,rnd){ var ds=Math.max(0.5,P.unit*0.2),S=resample(poly,ds); if(S.length<2) return; var L=(S.length-1)*ds; if(L<=0) return; var nPlots=Math.max(1,Math.round(L/(P.unit*1.12))),spacing=L/nPlots;
+    for(var j=0;j<nPlots;j++){ var posLen=(j+0.5)*spacing,idx=Math.min(S.length-1,Math.round(posLen/ds)),s=S[idx],ang=Math.atan2(s.ty,s.tx)*R2D,nx=-s.ty,ny=s.tx;
+      for(var side=-1;side<=1;side+=2){ var w=(spacing-P.gap)*(0.92+rnd()*0.14),h=P.unit*(0.8+rnd()*0.5),off=P.streetHalf+h/2,cand={x:s.x+nx*off*side,y:s.y+ny*off*side,w:w,h:h,a:ang+(rnd()-0.5)*5}; if(fits(cand,placed,P.inset)) placed.push(cand); } } }
+  function loosePack(count,unit,placed,seed){ var rnd=mulberry32(seed*131+5),rot=rnd()*6.28,pitch=unit*1.15,got=0,tries=0; while(got<count&&tries<count*10){ tries++; var rr=pitch*Math.sqrt(got+0.3),th=got*GOLD+rot+(rnd()-0.5)*0.6,cand={x:Math.cos(th)*rr+(rnd()-0.5)*pitch*0.3,y:Math.sin(th)*rr+(rnd()-0.5)*pitch*0.3,w:unit*(1.0+rnd()*0.5),h:unit*(0.85+rnd()*0.4),a:(rnd()-0.5)*30}; if(fits(cand,placed,unit*0.06)){ placed.push(cand); got++; } } }
+  function addRavel(placed,Rmax,n,unit,rnd){ var got=0,tries=0; while(got<n&&tries<n*12){ tries++; var ang=rnd()*6.28,r=Rmax*(1.02+rnd()*0.28),cand={x:Math.cos(ang)*r,y:Math.sin(ang)*r,w:unit*(0.9+rnd()*0.5),h:unit*(0.8+rnd()*0.4),a:(rnd()-0.5)*40}; if(fits(cand,placed,unit*0.06)){ placed.push(cand); got++; } } }
+  function settlement(level,seed){ var rnd=mulberry32(seed*101+7),unit=ST.unit,placed=[],gap=unit*(0.02+(1-ST.pack)*0.2),inset=unit*0.06,mt=ST.curve*D2R,P0={unit:unit,streetHalf:unit*0.42,gap:gap,inset:inset};
+    if(level===0){ loosePack(2+(seed%2),unit,placed,seed); }
+    else if(level===1){ var th=rnd()*6.28; lineCorridor(corridorWalk(unit,-unit*1.4,th,unit*4.0,mt,0.5,(rnd()*1e6)|0),P0,placed,rnd); addRavel(placed,unit*2.4,Math.round(ST.ravel*0.2),unit,rnd); }
+    else if(level===2){ var Rmax=unit*3.4,base=rnd()*6.28,nc=Math.min(3,Math.max(2,ST.corridors-2)); for(var k=0;k<nc;k++){ var th2=base+k*(6.283/nc)+(rnd()-0.5)*0.5; lineCorridor(corridorWalk(unit,unit*0.7,th2,Rmax,mt,0.5,(rnd()*1e6)|0),P0,placed,rnd); } addRavel(placed,Rmax,Math.round(ST.ravel*0.35),unit,rnd); }
+    else { var Rx=unit*4.5,base2=rnd()*6.28,P={unit:unit,streetHalf:unit*0.44,gap:gap,inset:inset}; placed.push({x:0,y:0,w:unit*1.3,h:unit*3.0,a:(rnd()-0.5)*7,terra:true}); for(var k2=0;k2<ST.corridors;k2++){ var th3=base2+k2*(6.283/ST.corridors)+(rnd()-0.5)*0.35; lineCorridor(corridorWalk(unit,unit*1.4,th3,Rx-unit*1.4,mt,0.5,(rnd()*1e6)|0),P,placed,rnd); } var ra=rnd()*6.28; lineCorridor(ringPoly(ra,ra+4.3,Rx*0.5,0.05,(rnd()*1e6)|0),P,placed,rnd); addRavel(placed,Rx,ST.ravel,unit,rnd); }
+    var svg=''; placed.forEach(function(b){ svg+=rectSVG(b); }); return svg;
+  }
+
+  /* ---------- SESSION 3 — type, variant B ---------- */
+  var TY = { peak:{size:16.5,tracking:0.16,fill:'#2B2B2B'}, native:{ratio:0.85,tracking:0.10,fill:'#5C5C5C',dx:9}, town:{size:11.5,tracking:0.22,fill:'#6B6B6B'} };
+  function peakLabel(x,y,latin,native){
+    var t='<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="'+TY.peak.size+'" font-weight="400" fill="'+TY.peak.fill+'" style="letter-spacing:'+TY.peak.tracking+'em;">'+latin.toUpperCase();
+    if(native){ var ns=+(TY.peak.size*TY.native.ratio).toFixed(1); t+='<tspan dx="'+TY.native.dx+'" font-family="'+CJK+'" font-size="'+ns+'" fill="'+TY.native.fill+'" style="letter-spacing:'+TY.native.tracking+'em;">'+native+'</tspan>'; }
+    return t+'</text>';
+  }
+  function townLabel(x,y,latin){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="'+TY.town.size+'" font-weight="400" fill="'+TY.town.fill+'" style="letter-spacing:'+TY.town.tracking+'em;">'+latin.toUpperCase()+'</text>'; }
+  function elevLabel(x,y,n){ return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+LATIN+'" font-size="11" font-style="italic" fill="#8A857C" style="letter-spacing:0.04em;font-variant-numeric:tabular-nums;">'+n+'</text>'; }
+
+  // a peak placed at (cx,cy) at a given scale, with its label and elevation
+  function placePeak(cx,cy,scale,rings,seed,latin,native,elev){
+    var pk=peak(rings,seed);
+    var g='<g transform="translate('+cx+','+cy+') scale('+scale+')">'+pk.svg+'</g>';
+    var top=cy - pk.Rmax*scale;
+    g+=peakLabel(cx, top-8, latin, native);
+    if(elev!=null) g+=elevLabel(cx + pk.Rmax*scale*0.5, top+6, elev);
+    return g;
+  }
+  function placeTown(cx,cy,scale,level,seed,latin){
+    return '<g transform="translate('+cx+','+cy+') scale('+scale+')">'+settlement(level,seed)+'</g>'+townLabel(cx, cy+30, latin);
+  }
+
+  function scene(){
+    var s='<rect x="0" y="0" width="1000" height="600" fill="'+PAPER+'"/>';
+    // three massifs, held apart; importance -> ring count (Ho System 9, Kanyō 8, Hōzō 7)
+    s+=placePeak(500,300,0.62,13,31,'Ho System','歩',9);
+    s+=placePeak(230,250,0.5,11,2826,'Kanyō','観鷹',8);
+    s+=placePeak(770,360,0.5,10,7,'Hōzō','宝蔵',7);
+    // settlements at the feet — town near Hōzō, a smaller village mid-map; the city carries the terracotta tower
+    s+=placeTown(740,470,1.0,3,2826,'Three Hours');         // city-scale, terracotta tower
+    s+=placeTown(360,430,1.0,2,118,'The Empty Container');  // town
+    return s;
+  }
+  var svg=scene();
+  document.getElementById('full').innerHTML=svg;
+  document.getElementById('mini').innerHTML=svg;
+})();
+</script>
+</body>
+</html>
