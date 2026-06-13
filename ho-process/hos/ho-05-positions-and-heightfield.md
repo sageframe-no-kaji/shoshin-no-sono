@@ -1,6 +1,6 @@
 ---
 created: 2026-06-13
-status: draft
+status: complete
 type: ho-document
 project: shoshin-no-sono
 ho: "05"
@@ -126,19 +126,27 @@ Per-piece unit tests at each step (the field math is the heavy surface — deter
 
 ## Phase 3 — Reflect
 
-*To be filled in after execution. Prompts:*
+**Positions: the force sim was wrong; best-candidate is right.** Decision 1 chose hand-rolled over d3-force, and that held — but the *first* hand-rolled algorithm (Fruchterman-Reingold-style repulsion + center gravity, cooled) pinned every peak to the boundary box. Repulsion shoved peaks outward, the bound-clamp parked them on the walls, and gravity couldn't pull them back from the margin — so 19 peaks formed a rectangle around the perimeter and the heat-map summits sat at the edges. Replaced mid-execution with **best-candidate sampling** (Mitchell): throw `candidates` darts per peak, keep the one farthest from already-placed peaks. Blue-noise-like interior spread, no edge pinning — 1 of 19 near the margin (was all 19), min spacing ~108px on the real corpus. The decision to hand-roll was sound; the algorithm choice inside it was the real surfacing. `opts` lost `iterations`/`spread`/`gravity`, gained `candidates` (default 12).
 
-- **Did the Gaussian family hold?** Did the silhouette read against the frozen peak, or did the wave-interference fallback get called? What were the silhouette tells on a real field of 19 peaks vs the spike's 3?
-- **Tuner landings.** What did `cell`, noise weight, summit exponent, radius-scaling, and the relevance floor settle to by feel? Which carried from the spike unchanged?
-- **Positions on a real corpus.** Did the seeded force relaxation produce recognizable, deliberate-looking layouts at 19 peaks? Any clumping/edge problems the spike's hand-placed three didn't reveal?
-- **Filter feel.** Does "one terrain, non-matches sink" read right, or does it want the each-Venice-recompute alternative after all?
-- **Boundary.** Did the field/cartographer/filter split hold? Did `matchesFilter` extraction stay clean?
-- **What broke that the tests didn't catch?**
-- **Followups** for ho-06 (contours over this field), ho-07 (towns on this terrain, place-then-deform), and any overview refresh (the d3-force deviation).
+**The Gaussian family ported cleanly and behaves on the real corpus.** 19 peaks (towns excluded), heights track `importance`, the filter re-weights the field (max 14.06 open → 9.98 under `theme=craft`), positions stay fixed across filter changes, `?seed=N` reproduces. The silhouette verdict against the frozen session-1 peak is **deferred to ho-06**, on purpose: a heat map can't settle whether the contour *spacing* reads as faces/shoulders — that's a contour question. The spike already says the family is close; ho-06 confirms it on real iso-lines. Wave-interference remains the unbuilt fallback.
+
+**Filter feel: "one terrain, non-matches sink" reads as intended** on the heat map — matching massifs stand, non-matching sink toward foothills at the `0.15` floor, the territory stays put. No pull toward the each-Venice-recompute alternative.
+
+**Boundary held.** The field/cartographer/filter split is clean: `field.js` is pure math (no Indexer, no Gate), `cartographer.js` is the only place the peak/town rule and relevance live, and `matchesFilter` extracted from `grid.js` with the grid suite staying green — one filter rule, two consumers. The Gate's seed channel sits beside the filter grammar without disturbing it (ho-03's exact-shape tests untouched).
+
+**What broke that the tests didn't catch.** Both ho-05 defects were "looks-right" properties unit tests structurally can't assert: (1) the perimeter pinning — the bounds test and the min-pairwise-distance test both *passed* on a boundary ring (points on the perimeter are in-bounds and well-separated), so the suite was blind to the clumping; (2) the cream→ink heat map washing into the page background (the test checked that rects were emitted, not that they were visible). The headless-Chrome screenshot loop caught both. Lesson for the cartography hos: pair the unit suite with a rendered-image check — geometry correctness and visual legibility are different bars, and only the second catches "blank."
+
+**Tuner landings.** Everything carried from the spike/defaults unchanged — `cell` 4, `summitExp` 1.7, `noiseWeight` 0.85, `radiusBase` 40 / `radiusScale` 16, `relevanceFloor` 0.15, `candidates` 12. None were tuned by feel yet because the surface to tune against is contours, not a heat map; the real tuning pass lands in ho-06 (per the design-parameters-want-tuners discipline). The heat-map ramp/bands are debug-only and not register commitments.
+
+**Followups.**
+- **ho-06 (contours):** extract iso-lines over this exact heightfield; settle the silhouette verdict against the frozen peak; do the by-feel tuning pass on the field `opts` with the register visible.
+- **ho-07 (towns):** place the 6 `writing`-group towns on this terrain (place-then-deform); the weight→density mapping; reuse the seeded growth posture.
+- **ho-08 (relationship features):** needs the still-open ho-04 design sessions (ridge, road+trail, cartouche) finished first.
+- **Overview refresh (flag, not edit):** the ho-overview's ho-05 entry says "Position assignment uses d3-force." That's now inaccurate — hand-rolled best-candidate, dropped d3-force for self-containment + seedability. The overview is a living document but its revision is `ho-kamae-4-overview-collaborator`'s territory; flagged for the practitioner.
 
 ---
 
-_Authored: 2026-06-13 (Think phase)._
-_Execution and Reflect: pending._
+_Authored: 2026-06-13 (Think phase). Executed and closed: 2026-06-13._
+_Surfacing: hand-rolled positions started as a force sim (perimeter-pinning), landed on best-candidate sampling. Silhouette verdict carried to ho-06._
 </content>
 </invoke>
