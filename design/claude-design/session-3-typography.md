@@ -18,11 +18,13 @@ Real content to design with (use exactly these):
 - One elevation figure: 8
 
 Hard constraints:
-- Output is inline SVG only. Self-contained, no external font files. Specify
-  every font as a CSS font-stack of widely available system fonts (e.g.
-  Georgia, 'Times New Roman', serif — your choice, but it must degrade
-  honestly). If you believe a webfont is genuinely needed, name it as a
-  flagged dependency in one line — do not embed it.
+- The typeface is already chosen: Spectral (with Georgia, serif as the honest
+  fallback) — it is the register's established face, used in sessions 1 and 2.
+  Do NOT pick or explore a new typeface. Design the type SYSTEM within Spectral:
+  sizes, weights, italics, letter-spacing, case, and the latin/native-script
+  pairing. The latin uses Spectral; the native script uses a CJK system stack
+  (e.g. "Hiragino Mincho ProN", "Yu Mincho", serif) chosen to sit with Spectral.
+- Output is inline SVG only, self-contained, no embedded font files.
 - Palette: ink in warm grays (#6B6B6B to #2B2B2B) on cream #FDFCF9. Terracotta
   #9A5B3C permitted for settlement names only if it earns it. No other color.
 - Native script sits beside or below the latin name — design the pairing
@@ -41,6 +43,11 @@ Explore and deliver:
   settlement names, and elevation figures differ in size/case/weight).
 - Then your recommendation: which variant reads as an old survey map's
   lettering while keeping the native script dignified, and why, 3 sentences.
+- Legibility check only (do not redesign anything): in the recommended variant,
+  show one peak label over a faint gray contour-line fragment and one settlement
+  label beside a small solid ink block, to confirm the type holds against
+  linework. The peak/settlement marks are faint stand-ins for legibility — not
+  to be styled or developed here.
 
 Judging criteria (design toward these):
 1. Peak names read first, settlements second, figures last — without boxes or
