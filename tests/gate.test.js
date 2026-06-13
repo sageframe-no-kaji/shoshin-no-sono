@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseState, serializeState, createGate } from '../src/gate.js';
+import { parseState, serializeState, parseSeed, createGate } from '../src/gate.js';
 
 describe('the URL grammar (parse/serialize)', () => {
   it('parses a full door', () => {
@@ -33,6 +33,21 @@ describe('the URL grammar (parse/serialize)', () => {
   it('round-trips', () => {
     const state = { themes: ['craft'], media: ['software', 'writing'], status: [] };
     expect(parseState(serializeState(state))).toEqual(state);
+  });
+});
+
+describe('the seed channel (parseSeed)', () => {
+  it('parses an integer seed', () => {
+    expect(parseSeed('?seed=12345')).toBe(12345);
+    expect(parseSeed('?theme=craft&seed=42')).toBe(42);
+  });
+
+  it('returns null for missing, empty, or non-integer seeds', () => {
+    expect(parseSeed('')).toBeNull();
+    expect(parseSeed('?theme=craft')).toBeNull();
+    expect(parseSeed('?seed=')).toBeNull();
+    expect(parseSeed('?seed=abc')).toBeNull();
+    expect(parseSeed('?seed=3.5')).toBeNull();
   });
 });
 
@@ -96,5 +111,25 @@ describe('createGate over a stub window', () => {
     const gate = createGate(win);
     gate.setState({ themes: ['craft'] });
     expect(gate.shareableURL()).toBe('http://local/?theme=craft');
+  });
+
+  it('currentSeed reads the seed from the URL', () => {
+    expect(createGate(stubWindow('?seed=777')).currentSeed()).toBe(777);
+    expect(createGate(stubWindow('?theme=craft')).currentSeed()).toBeNull();
+  });
+
+  it('preserves an existing seed across filter changes', () => {
+    const win = stubWindow('?seed=777&theme=craft');
+    const gate = createGate(win);
+    gate.setState({ media: ['writing'] });
+    expect(win.location.search).toBe('?theme=craft&media=writing&seed=777');
+    expect(gate.currentSeed()).toBe(777);
+  });
+
+  it('does not invent a seed when the URL carries none', () => {
+    const win = stubWindow('?theme=craft');
+    const gate = createGate(win);
+    gate.setState({ media: ['writing'] });
+    expect(win.location.search).toBe('?theme=craft&media=writing');
   });
 });

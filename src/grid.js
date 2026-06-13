@@ -7,6 +7,8 @@
  * Aesthetic is deliberately mute; ho-04 owns the visual register.
  */
 
+import { matchesFilter } from './filter.js';
+
 /** @typedef {import('./gate.js').FilterState} FilterState */
 /** @typedef {ReturnType<typeof import('./indexer.js').createIndexer>} Indexer */
 /** @typedef {import('./indexer.js').Work} Work */
@@ -20,25 +22,14 @@ export function escapeHtml(value) {
 }
 
 /**
- * The filter_composition rule from the schema: multiplicative across
- * categories (every non-empty category must match), additive within (any
- * selected value matches).
+ * The works matching the active filter, per the shared filter_composition rule
+ * (see src/filter.js): multiplicative across categories, additive within.
  * @param {Indexer} indexer
  * @param {FilterState} state
  * @returns {Work[]}
  */
 export function filterWorks(indexer, state) {
-  /** @param {string[]} values @param {string[]} selected */
-  const matches = (values, selected) =>
-    selected.length === 0 || selected.some((v) => values.includes(v));
-  return indexer
-    .works()
-    .filter(
-      (w) =>
-        matches(w.themes, state.themes) &&
-        matches(w.media, state.media) &&
-        matches([w.status], state.status),
-    );
+  return indexer.works().filter((w) => matchesFilter(w, state));
 }
 
 /**

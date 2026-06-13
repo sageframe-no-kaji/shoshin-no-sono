@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shoshin no Sono — Cartography (ho-05 debug heat map)</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #fdfcf9;
+        color: #2b2b2b;
+        font-family: Spectral, Georgia, 'Times New Roman', serif;
+      }
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 5rem;
+      }
+      .meta {
+        font-size: 0.72rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: #9a958b;
+      }
+      h1 {
+        font-weight: 300;
+        font-size: 1.7rem;
+        margin: 0.4rem 0 0.2rem;
+      }
+      p.lede {
+        max-width: 56rem;
+        color: #6b6b6b;
+        font-size: 0.95rem;
+        line-height: 1.55;
+      }
+      .controls {
+        display: flex;
+        align-items: baseline;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+        margin: 1.25rem 0 0.75rem;
+      }
+      button {
+        font: 400 0.85rem Spectral, Georgia, serif;
+        color: #2b2b2b;
+        background: none;
+        border: 1px solid #c7c1b4;
+        border-radius: 2px;
+        padding: 0.25rem 0.6rem;
+        cursor: pointer;
+      }
+      button.chip {
+        color: #6b6b6b;
+        border-color: #e3ded4;
+      }
+      button.chip.on {
+        color: #fdfcf9;
+        background: #9a5b3c;
+        border-color: #9a5b3c;
+      }
+      .seedline {
+        font-size: 0.85rem;
+        color: #6b6b6b;
+      }
+      .seedline code {
+        color: #2b2b2b;
+      }
+      #pinned {
+        font-style: italic;
+        color: #9a958b;
+      }
+      .chips {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+      }
+      .plate {
+        border: 1px solid #e7e3da;
+        background: #fdfcf9;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="meta">Shoshin · ho-05 — position computer + heightfield</div>
+      <h1>Cartography debug — heat map</h1>
+      <p class="lede">
+        Transient verification surface: elevation maps to darkness. Confirm peaks land where the
+        position computer scattered them and rise to the heights the heightfield assigns. Toggle a
+        theme to watch the terrain re-weight — matching works stand, non-matching sink. Reload for a
+        novel layout; add <code>?seed=N</code> to reproduce one. Contours replace this in ho-06.
+      </p>
+
+      <div class="controls">
+        <button id="reseed">Reseed (novel layout)</button>
+        <span class="seedline">seed <code id="seed">—</code> <span id="pinned"></span></span>
+      </div>
+      <div class="chips" id="chips"></div>
+
+      <div class="plate">
+        <svg id="map" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+    <script type="module" src="./src/cartography-page.js"></script>
+  </body>
+</html>

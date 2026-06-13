@@ -6,8 +6,16 @@
  * parseState/serializeState are pure (the URL grammar, unit-testable with no
  * DOM); createGate is the thin adapter over location/history. Grammar:
  * `?theme=craft,agency&media=writing&status=shipped` — comma-separated values
- * within a category. Unknown params are ignored so future keys (focus, view,
- * seed — reserved for later hos) degrade gracefully in both directions.
+ * within a category. Unknown params are ignored so future keys (focus, view)
+ * degrade gracefully in both directions.
+ *
+ * The `seed` param (activated in ho-05 for the cartography layout) is a
+ * parallel channel: it lives alongside the filter grammar rather than inside
+ * FilterState, so the filter round-trip stays the catalog's contract.
+ * `?seed=N` reproduces a layout; no seed means the Cartographer rolls a fresh
+ * one per load. The Gate preserves an existing seed across filter changes so a
+ * shared `?seed=N&theme=craft` door survives chip toggles; nothing in ho-05
+ * writes a seed into the URL (exposing/locking the seed is deferred polish).
  */
 
 /** @typedef {{ themes: string[], media: string[], status: string[] }} FilterState */
@@ -59,6 +67,32 @@ export function serializeState(state) {
 }
 
 /**
+ * Parse the cartography layout seed. Missing, empty, or non-integer values
+ * yield null (the Cartographer then rolls an ephemeral seed → novel layout).
+ * @param {string} search
+ * @returns {number | null}
+ */
+export function parseSeed(search) {
+  const raw = new URLSearchParams(search).get('seed');
+  if (raw == null || raw.trim() === '') return null;
+  const n = Number(raw);
+  return Number.isInteger(n) ? n : null;
+}
+
+/**
+ * Compose the query string for a URL: the filter grammar plus the seed param
+ * when one is present.
+ * @param {FilterState} state
+ * @param {number | null} seed
+ * @returns {string}
+ */
+function serializeURL(state, seed) {
+  const filters = serializeState(state);
+  if (seed == null) return filters;
+  return filters ? `${filters}&seed=${seed}` : `?seed=${seed}`;
+}
+
+/**
  * Minimal structural view of window — what the Gate actually needs, and what
  * tests stub.
  * @typedef {Object} GateWindow
@@ -83,14 +117,23 @@ export function createGate(win) {
     return parseState(win.location.search);
   }
 
+  /** The active layout seed, or null when the URL carries none. @returns {number | null} */
+  function currentSeed() {
+    return parseSeed(win.location.search);
+  }
+
   /**
    * Merge a partial state, push the new URL (so back walks filter history),
-   * and notify listeners.
+   * and notify listeners. An existing seed is preserved across the change.
    * @param {Partial<FilterState>} partial
    */
   function setState(partial) {
     const next = { ...currentState(), ...partial };
-    win.history.pushState(null, '', `${win.location.pathname}${serializeState(next)}`);
+    win.history.pushState(
+      null,
+      '',
+      `${win.location.pathname}${serializeURL(next, currentSeed())}`,
+    );
     notify();
   }
 
@@ -106,5 +149,5 @@ export function createGate(win) {
 
   win.addEventListener('popstate', notify);
 
-  return Object.freeze({ currentState, setState, shareableURL, onChange });
+  return Object.freeze({ currentState, currentSeed, setState, shareableURL, onChange });
 }
