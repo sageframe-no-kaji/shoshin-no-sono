@@ -46,7 +46,7 @@ const tuners = {
   // register line weights — frozen defaults; exposed for the by-feel pass only
   weightRegular: 0.25,
   weightIndex: 0.7,
-  labelScale: 0.8, // multiplies peak/town label type — spec sizes were solo-plate scale
+  labelScale: 0.6, // multiplies peak/town label type — landed by feel in ho-07.5 (spec was solo-plate scale)
 
   // ho-07 towns
   anchorBias: 4,
