@@ -46,6 +46,8 @@ const tuners = {
   // register line weights — frozen defaults; exposed for the by-feel pass only
   weightRegular: 0.25,
   weightIndex: 0.7,
+  labelScale: 0.8, // multiplies peak/town label type — spec sizes were solo-plate scale
+
   // ho-07 towns
   anchorBias: 4,
   strengthFull: 3,
@@ -69,6 +71,7 @@ const TUNER_SPECS = [
   { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01 },
   { key: 'weightRegular', label: 'line weight (regular)', min: 0.05, max: 1.0, step: 0.05 },
   { key: 'weightIndex', label: 'line weight (index)', min: 0.1, max: 2.0, step: 0.05 },
+  { key: 'labelScale', label: 'label size', min: 0.5, max: 1.4, step: 0.05 },
   { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 6, step: 0.1 },
   { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5 },
   { key: 'footOffset', label: 'foot offset', min: 0, max: 160, step: 4 },
@@ -110,25 +113,25 @@ const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif
  * over the rings. A minimal static render pulled forward so the assembled map
  * is legible during the by-feel pass; ho-09 owns the interactive label layer
  * (cards, hover-dim, collision/leadering).
- * @param {number} x @param {number} y @param {string} name @param {string|null} native
+ * @param {number} x @param {number} y @param {string} name @param {string|null} native @param {number} scale
  */
-const peakLabel = (x, y, name, native) => {
+const peakLabel = (x, y, name, native, scale) => {
   const nat = native
-    ? `<tspan dx="8" font-family="${NATIVE_STACK}" font-size="14" fill="#5C5C5C" style="letter-spacing:0.10em;">${native}</tspan>`
+    ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="#5C5C5C" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="16.5" fill="#2B2B2B" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="3.5" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+    `font-size="${(16.5 * scale).toFixed(1)}" fill="#2B2B2B" style="letter-spacing:0.16em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3.5 * scale).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
   );
 };
 
-/** @param {import('./field.js').PositionedPeak[]} peaks */
-const peakLabelsSvg = (peaks) =>
+/** @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale */
+const peakLabelsSvg = (peaks, scale) =>
   peaks
     .map((p) => {
       const w = indexer.getWork(p.id);
-      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script) : '';
+      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, scale) : '';
     })
     .join('');
 
@@ -158,15 +161,15 @@ const wrapLabel = (name) => {
  * wrapped to a char limit, with a cream halo (paint-order stroke) so the glyphs
  * read clear of the contour lines.
  */
-const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name) => {
+const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name, /** @type {number} */ scale) => {
   const lines = wrapLabel(name);
   const tspans = lines
-    .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : LABEL_LINE_HEIGHT}">${ln}</tspan>`)
+    .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
     .join('');
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="11.5" fill="#6B6B6B" style="letter-spacing:0.22em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="3" stroke-linejoin="round">${tspans}</text>`
+    `font-size="${(11.5 * scale).toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.22em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3 * scale).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
@@ -178,7 +181,7 @@ const townsSvg = (towns) =>
       // Receded (non-matching) towns dim hard and drop their label — a sunk town
       // doesn't announce itself, and faint ghost-labels read as noise (Decision 6).
       if (!t.match) return `${g} opacity="0.1">${settlementSvg(t.blocks)}</g>`;
-      return `${g}>${settlementSvg(t.blocks)}</g><g>${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name)}</g>`;
+      return `${g}>${settlementSvg(t.blocks)}</g><g>${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name, tuners.labelScale)}</g>`;
     })
     .join('');
 
@@ -196,7 +199,7 @@ const render = () => {
     weightIndex: tuners.weightIndex,
   });
   svg += townsSvg(towns);
-  svg += peakLabelsSvg(field.peaks); // real peak labels (variant B), always on
+  svg += peakLabelsSvg(field.peaks, tuners.labelScale); // real peak labels (variant B), always on
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
