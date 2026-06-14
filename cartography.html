@@ -123,21 +123,51 @@
         width: 100%;
         height: auto;
       }
+      /* ho-07.2 emergence — the rise cross-fade and the rename pulse. Durations
+         are set inline from the tuners; these only carry the curves. */
+      @keyframes emgIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes emgPulse {
+        0% {
+          opacity: 0;
+        }
+        30% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        /* The player already short-circuits to the end frame; this also stills
+           any animation that slips through. */
+        #map * {
+          animation: none !important;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <div class="meta">Shoshin · ho-07 — town placement on the terrain</div>
-      <h1>Cartography debug — contours and towns</h1>
+      <div class="meta">Shoshin · ho-07.2 — world-then-writing emergence</div>
+      <h1>Cartography debug — the map remembers how it was made</h1>
       <p class="lede">
-        The cartographic register: iso-elevation <strong>contours</strong> from the heightfield, with
-        the six writing-piece <strong>towns</strong> seated on the terrain — each grown in the frozen
-        settlement morphology (hamlet → village → town → cathedral-close city), sized by its
-        documents weight, warped to the slope it lands on so the contours wrap it. Toggle a theme to
-        watch the terrain re-weight and non-matching towns recede. The sliders are the by-feel tuner
-        pass — the field controls and the town controls (seat blend, foot offset, deform, density,
-        size thresholds) — dial against the register live. Reload for a novel layout; add
-        <code>?seed=N</code> to reproduce one.
+        On load the terrain <strong>emerges</strong> in the order the work was conceived: peaks rise
+        from the floor one beat at a time, the renamed pair (forteller / pālana) pulses a second time
+        when it was named, and once the world has finished rising the six writing-piece
+        <strong>towns</strong> arrive over it in their own dated order. The rhythm is even beats —
+        dates set the order, never the spacing. The 2022 work sits on the floor from the first frame
+        and the faint <code>2025·11</code> line marks where the dense record begins. Toggle a theme to
+        explore (filtering renders statically, no re-emergence); <strong>Reseed</strong> earns a fresh
+        layout and a fresh becoming. The lower sliders dial the emergence by feel — beat dwell, the
+        world→writing hold, the pulse, the cross-fade, the floor-marker weight. Add
+        <code>?seed=N</code> to reproduce a layout; reduced-motion shows the finished map at once.
       </p>
 
       <div class="controls">

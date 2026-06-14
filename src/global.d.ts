@@ -4,4 +4,8 @@
  */
 interface Window {
   indexer?: ReturnType<typeof import('./indexer.js').createIndexer>;
+  emergence?: {
+    timeline: import('./emergence.js').EmergenceTimeline;
+    plan: () => import('./emergence.js').EmergenceStep[];
+  };
 }

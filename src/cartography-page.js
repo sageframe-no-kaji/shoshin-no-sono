@@ -21,6 +21,7 @@ import { createCartographer, computeField, computeTowns } from './cartographer.j
 import { contourMapSvg } from './contour-map.js';
 import { settlementSvg } from './settlement-map.js';
 import { chipVocabulary } from './grid.js';
+import { buildEmergenceTimeline, emergencePlan, scaleFn, CORPUS_FLOOR } from './emergence.js';
 
 const indexer = createIndexer(await loadWorks('./works.json'));
 const gate = createGate(window);
@@ -59,6 +60,15 @@ const tuners = {
   t1: 0.7,
   t2: 1.5,
   t3: 1.7,
+
+  // ho-07.2 emergence — timing/feel for the world-then-writing populate.
+  // Discrete cadence (the perf gate chose it: continuous re-contour is ~158ms,
+  // ~10× a frame): one recompute per beat, beats cross-faded on the compositor.
+  beatMs: 240, // rise/arrive beat dwell before the next
+  holdMs: 700, // the world→writing held seam
+  pulseMs: 520, // the rename flash dwell + duration
+  fadeMs: 320, // cross-fade between beats (the rise gesture)
+  floorMarkerOpacity: 0.3, // the 2025-11-11 corpus-floor horizon marker weight
 };
 
 /** @type {{ key: string, label: string, min: number, max: number, step: number }[]} */
@@ -82,6 +92,11 @@ const TUNER_SPECS = [
   { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05 },
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05 },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05 },
+  { key: 'beatMs', label: 'beat dwell (ms)', min: 80, max: 800, step: 20 },
+  { key: 'holdMs', label: 'world→writing hold (ms)', min: 0, max: 2000, step: 50 },
+  { key: 'pulseMs', label: 'rename pulse (ms)', min: 150, max: 1200, step: 20 },
+  { key: 'fadeMs', label: 'rise cross-fade (ms)', min: 0, max: 900, step: 20 },
+  { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05 },
 ];
 
 let showPeaks = false;
@@ -185,7 +200,85 @@ const townsSvg = (towns) =>
     })
     .join('');
 
+/**
+ * The corpus-floor marker (ho-07.2 Decision 5): a faint dashed horizon near the
+ * field's base with a small caption, marking 2025-11-11 — where the dense record
+ * begins. Present from the first emergence frame and at rest; the 2022 floor work
+ * (aspirational-intelligence) is a real peak and renders through the field. Weight
+ * is by-feel (tuner `floorMarkerOpacity`); 0 hides it.
+ */
+const corpusFloorSvg = () => {
+  const op = tuners.floorMarkerOpacity;
+  if (op <= 0) return '';
+  const y = 610;
+  return (
+    `<g opacity="${op}">` +
+    `<line x1="40" y1="${y}" x2="960" y2="${y}" stroke="#9A958B" stroke-width="0.5" stroke-dasharray="2 5"/>` +
+    `<text x="40" y="${y - 5}" font-family="Spectral, Georgia, serif" font-size="8" fill="#9A958B" ` +
+    `style="letter-spacing:0.24em;">${CORPUS_FLOOR.label.toUpperCase()} · 2025·11</text>` +
+    `</g>`
+  );
+};
+
+/**
+ * The rename pulse (ho-07.2 Decision 2): a terracotta ring flashing once at each
+ * pulsed peak's summit — a second beat of light for an already-risen peak, no
+ * re-contour. The `emgPulse` keyframe (cartography.html) fades it in and out.
+ * @param {string[]} ids @param {import('./field.js').PositionedPeak[]} peaks
+ */
+const pulseSvg = (ids, peaks) =>
+  ids
+    .map((id) => {
+      const p = peaks.find((q) => q.id === id);
+      if (!p) return '';
+      return (
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="24" fill="none" ` +
+        `stroke="#9A5B3C" stroke-width="2" style="animation:emgPulse ${tuners.pulseMs}ms ease-out;"/>`
+      );
+    })
+    .join('');
+
+/** Update the seed / pinned readouts and the theme chips. */
+const renderMeta = () => {
+  seedOut.textContent = String(carto.activeSeed());
+  pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';
+  renderChips();
+};
+
+/**
+ * The SVG for one reveal state — the static map seen through an emergence step:
+ * the field scaled to the risen peaks, only the arrived towns drawn, labels for
+ * risen peaks (computeField already drops not-yet-risen ones), the corpus-floor
+ * marker, and a pulse flash on a pulse step. With the final step's scale this is
+ * byte-equivalent to the static render — the snap target.
+ * @param {import('./emergence.js').EmergenceStep} step
+ * @returns {string}
+ */
+const frameSvg = (step) => {
+  const seed = carto.activeSeed();
+  const state = gate.currentState();
+  const field = computeField(indexer, state, seed, { ...tuners, emergenceScale: scaleFn(step) });
+  const towns = step.towns.size
+    ? computeTowns(indexer, state, field, { ...tuners, thresholds: [tuners.t1, tuners.t2, tuners.t3] }).filter(
+        (t) => step.towns.has(t.id),
+      )
+    : [];
+  let svg = corpusFloorSvg();
+  svg += contourMapSvg(field.heightfield, {
+    interval: tuners.interval,
+    weightRegular: tuners.weightRegular,
+    weightIndex: tuners.weightIndex,
+  });
+  svg += townsSvg(towns);
+  svg += peakLabelsSvg(field.peaks, tuners.labelScale);
+  if (showPeaks) svg += peakDotsSvg(field.peaks);
+  if (step.kind === 'pulse') svg += pulseSvg(step.ids, field.peaks);
+  return svg;
+};
+
 const render = () => {
+  // The resting / static path (filter toggles, reseed-less re-render). A fully
+  // revealed map: every peak at scale 1, so this equals the emergence end frame.
   const seed = carto.activeSeed();
   const state = gate.currentState();
   const field = computeField(indexer, state, seed, tuners);
@@ -193,7 +286,8 @@ const render = () => {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
-  let svg = contourMapSvg(field.heightfield, {
+  let svg = corpusFloorSvg();
+  svg += contourMapSvg(field.heightfield, {
     interval: tuners.interval,
     weightRegular: tuners.weightRegular,
     weightIndex: tuners.weightIndex,
@@ -205,6 +299,108 @@ const render = () => {
   seedOut.textContent = String(seed);
   pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';
   renderChips();
+};
+
+// ── The emergence player ──────────────────────────────────────────────────
+// The only stateful, timer-driven piece (ho-07.2 Decision 1). It walks the pure
+// plan (src/emergence.js), cross-fading each beat over the previous on the
+// compositor while the next beat's field computes on the main thread during the
+// hold. Filter changes render statically (Decision 6); a filter/reseed/tuner
+// change mid-play cancels cleanly and snaps to the final state.
+
+const timeline = buildEmergenceTimeline(indexer);
+window.emergence = { timeline, plan: () => emergencePlan(timeline) };
+
+/** Honour prefers-reduced-motion: the whole animation short-circuits to the end frame. */
+const reduceMotion = () =>
+  typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let prevSvg = '';
+/** Bumped on every (re)start or cancel so stale timers from a prior run no-op. */
+let playToken = 0;
+/** @type {ReturnType<typeof setTimeout> | null} */
+let beatTimer = null;
+
+/**
+ * The pre-rise baseline: the floor present, nothing risen yet (Decision 5).
+ * @returns {import('./emergence.js').EmergenceStep}
+ */
+const floorStep = () => ({
+  index: -1,
+  kind: 'hold',
+  date: null,
+  ids: [],
+  peakScale: new Set(timeline.floorIds),
+  towns: new Set(),
+});
+
+/**
+ * Paint a step. `animate` stacks it over the previous frame with the `emgIn`
+ * cross-fade; otherwise it replaces outright (the snap / static cases).
+ * @param {import('./emergence.js').EmergenceStep} step
+ * @param {boolean} animate
+ */
+const paint = (step, animate) => {
+  const svg = frameSvg(step);
+  map.innerHTML = animate
+    ? `<g>${prevSvg}</g><g style="animation:emgIn ${tuners.fadeMs}ms ease-out;">${svg}</g>`
+    : svg;
+  prevSvg = svg;
+};
+
+/** Stop any running emergence; subsequent stale ticks see a changed token and no-op. */
+const cancelEmergence = () => {
+  playToken++;
+  if (beatTimer !== null) {
+    clearTimeout(beatTimer);
+    beatTimer = null;
+  }
+};
+
+/**
+ * Cancel any running emergence and render the fully-emerged static map. This is
+ * the single snap target: the cancellation end (filter / reseed / tuner mid-play
+ * snap to final, Decision 6), the reduced-motion end, and the post-emergence
+ * settle all land here, and it equals the proven-equal final emergence frame.
+ */
+const staticRender = () => {
+  cancelEmergence();
+  prevSvg = '';
+  render();
+};
+
+/** Play the world-then-writing emergence from the floor (load and reseed; Decision 6). */
+const playEmergence = () => {
+  cancelEmergence();
+  const token = playToken;
+  const plan = emergencePlan(timeline);
+  renderMeta();
+  if (reduceMotion() || plan.length === 0) {
+    prevSvg = '';
+    render();
+    return;
+  }
+  // Baseline: the floor frame, then beats fade in over it.
+  prevSvg = frameSvg(floorStep());
+  map.innerHTML = prevSvg;
+  let i = 0;
+  const tick = () => {
+    if (token !== playToken) return; // a newer run (or a cancel) superseded this one
+    const step = plan[i];
+    paint(step, true);
+    i += 1;
+    if (i < plan.length) {
+      const dwell = step.kind === 'hold' ? tuners.holdMs : step.kind === 'pulse' ? tuners.pulseMs : tuners.beatMs;
+      beatTimer = setTimeout(tick, dwell);
+    } else {
+      // Settle to the canonical static map once the last beat's fade lands, so
+      // the resting state is exactly the proven-equal end frame.
+      beatTimer = setTimeout(() => {
+        if (token === playToken) staticRender();
+      }, tuners.fadeMs);
+    }
+  };
+  tick();
 };
 
 tunersEl.innerHTML = TUNER_SPECS.map(
@@ -221,19 +417,24 @@ tunersEl.addEventListener('input', (ev) => {
   tuners[key] = Number(el.value);
   const out = tunersEl.querySelector(`[data-val="${key}"]`);
   if (out) out.textContent = el.value;
-  render();
+  // Dialing a tuner cancels any run and shows the effect on the full map at once;
+  // re-watch the emergence with a new value via Reseed (Decision 7 workflow).
+  staticRender();
 });
 
-gate.onChange(render);
+// Filter changes are exploration, not re-narration — render statically and snap
+// any in-flight emergence to the final state (Decision 6).
+gate.onChange(staticRender);
 
+// A fresh layout earns a fresh becoming — reseed replays the emergence (Decision 6).
 document.getElementById('reseed')?.addEventListener('click', () => {
   carto.reseed();
-  render();
+  playEmergence();
 });
 
 document.getElementById('togglePeaks')?.addEventListener('change', (ev) => {
   showPeaks = ev.target instanceof HTMLInputElement ? ev.target.checked : false;
-  render();
+  staticRender();
 });
 
 chipsEl.addEventListener('click', (ev) => {
@@ -246,4 +447,6 @@ chipsEl.addEventListener('click', (ev) => {
   });
 });
 
-render();
+// On load: the map emerges. Reduced-motion and the empty case fall through to
+// the static render inside playEmergence.
+playEmergence();
