@@ -77,6 +77,13 @@ const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
+ * A well-formed ISO-8601 calendar date (`YYYY-MM-DD`) that also parses.
+ * @param {any} v
+ * @returns {boolean}
+ */
+const isIsoDate = (v) => typeof v === 'string' && DATE_RE.test(v) && !Number.isNaN(Date.parse(v));
+
+/**
  * Validate a parsed works.json document. Returns a list of human-readable errors;
  * an empty list means the document conforms.
  * @param {any} data
@@ -129,9 +136,23 @@ export function validateWorks(data) {
     }
     if (!STATUS.has(w.status)) errors.push(`${id}: unknown status ${w.status}`);
     for (const f of ['created', 'last_updated']) {
-      if (typeof w[f] !== 'string' || !DATE_RE.test(w[f]) || Number.isNaN(Date.parse(w[f]))) {
+      if (!isIsoDate(w[f])) {
         errors.push(`${id}: ${f} is not an ISO date`);
       }
+    }
+    // conceived: origin date (ho-07.1 — the ho-07.2 emergence rise). Required and
+    // ISO for non-archived works; archived pre-history may predate reliable
+    // records, so it is optional there but still ISO-validated when present.
+    if (w.status === 'archived') {
+      if (w.conceived != null && !isIsoDate(w.conceived)) {
+        errors.push(`${id}: conceived is not an ISO date`);
+      }
+    } else if (!isIsoDate(w.conceived)) {
+      errors.push(`${id}: conceived is required and must be an ISO date for non-archived works`);
+    }
+    // named: optional later-naming date (the ho-07.2 pulse); ISO when present.
+    if (w.named != null && !isIsoDate(w.named)) {
+      errors.push(`${id}: named is not an ISO date`);
     }
     if (media.includes('writing') && !w.publication_date) {
       errors.push(`${id}: writing media requires publication_date`);

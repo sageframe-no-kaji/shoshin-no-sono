@@ -9,7 +9,7 @@ const EMPTY = { themes: [], media: [], status: [] };
 
 describe('filterWorks — the filter_composition rule', () => {
   it('empty state matches everything', () => {
-    expect(filterWorks(idx, EMPTY)).toHaveLength(25);
+    expect(filterWorks(idx, EMPTY)).toHaveLength(29);
   });
 
   it('single theme narrows (additive within not triggered)', () => {
@@ -58,7 +58,7 @@ describe('renderCatalog', () => {
     expect(html).toContain('data-work="dandori"');
     expect(html).toContain('Dandori');
     expect(html).toContain('段取り');
-    expect(html).toContain('25 of 25 works');
+    expect(html).toContain('29 of 29 works');
     expect(html.indexOf('Methodology')).toBeLessThan(html.indexOf('Archived'));
   });
 

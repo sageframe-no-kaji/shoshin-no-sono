@@ -65,6 +65,8 @@
  * @property {string | null} embed_url
  * @property {string | null} personal_stake
  * @property {string} created
+ * @property {string} conceived Origin date — when the idea entered (ho-07.1). The rise moment in the ho-07.2 emergence animation. Required for non-archived works.
+ * @property {string} [named] Later-naming date — set only when a work was named after it was conceived (ho-07.1). The pulse moment in ho-07.2; absent for conceived-and-named-together works.
  * @property {string} last_updated
  * @property {string} short_description
  * @property {string[]} substantive_description

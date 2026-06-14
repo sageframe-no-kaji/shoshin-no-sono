@@ -162,6 +162,43 @@ describe('validateWorks catches corruption', () => {
   });
 });
 
+describe('validateWorks — conceived / named (ho-07.1)', () => {
+  it('flags a non-archived work missing conceived', () => {
+    const errors = corrupt((d) => delete d.works.find((/** @type {any} */ w) => w.id === 'ho-system').conceived);
+    expect(errors.join('\n')).toContain('conceived is required');
+  });
+
+  it('allows an archived work to omit conceived', () => {
+    const errors = corrupt((d) =>
+      delete d.works.find((/** @type {any} */ w) => w.id === 'aspirational-intelligence').conceived,
+    );
+    expect(errors).toEqual([]);
+  });
+
+  it('flags a malformed conceived date on a live work', () => {
+    const errors = corrupt(
+      (d) => (d.works.find((/** @type {any} */ w) => w.id === 'ho-system').conceived = 'April 2025'),
+    );
+    expect(errors.join('\n')).toContain('conceived is required and must be an ISO date');
+  });
+
+  it('flags a malformed conceived date even on an archived work', () => {
+    const errors = corrupt(
+      (d) =>
+        (d.works.find((/** @type {any} */ w) => w.id === 'aspirational-intelligence').conceived =
+          'late 2022'),
+    );
+    expect(errors.join('\n')).toContain('conceived is not an ISO date');
+  });
+
+  it('flags a malformed named date', () => {
+    const errors = corrupt(
+      (d) => (d.works.find((/** @type {any} */ w) => w.id === 'forteller').named = '2026/03/21'),
+    );
+    expect(errors.join('\n')).toContain('named is not an ISO date');
+  });
+});
+
 describe('validateWorks on degenerate documents', () => {
   it('tolerates an empty document without throwing', () => {
     expect(validateWorks({})).toEqual([]);

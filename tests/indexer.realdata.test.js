@@ -82,4 +82,43 @@ describe('the Indexer against the real corpus', () => {
       expect(Number.isFinite(idx.settlementWeight(w.id))).toBe(true);
     }
   });
+
+  // ho-07.1 — emergence data: conceived/named, the three new works, the edelmore split.
+  it('getWork("sageframe") returns the genesis work with conceived present', () => {
+    const sf = idx.getWork('sageframe');
+    expect(sf?.importance).toBe(10);
+    expect(sf?.conceived).toBe('2025-04-01');
+  });
+
+  it('shodo and sutra carry their same-day conception', () => {
+    expect(idx.getWork('shodo')?.conceived).toBe('2026-03-04');
+    expect(idx.getWork('sutra')?.conceived).toBe('2026-03-04');
+  });
+
+  it('the shodo⇄sutra pair answers from both endpoints though declared once', () => {
+    expect(idx.getOutgoing('sutra', 'paired_with').map((e) => e.target)).toEqual(['shodo']);
+    expect(idx.getOutgoing('shodo', 'paired_with').map((e) => e.target)).toEqual(['sutra']);
+    expect(idx.getOutgoing('shodo', 'paired_with')[0].declaredOn).toBe('sutra');
+  });
+
+  it('forteller carries conceived and the later named pulse', () => {
+    const f = idx.getWork('forteller');
+    expect(f?.conceived).toBe('2025-08-01');
+    expect(f?.named).toBe('2026-03-21');
+  });
+
+  it('the edelmore split: diary and reader present, edelmore id retired', () => {
+    expect(idx.getWork('edelmore')).toBeUndefined();
+    expect(idx.getWork('edelmore-diary')?.conceived).toBe('2026-05-14');
+    expect(idx.getOutgoing('edelmore-reader', 'descends_from').map((e) => e.target)).toEqual([
+      'edelmore-diary',
+    ]);
+  });
+
+  it('every non-archived work carries an ISO conceived date', () => {
+    for (const w of idx.works()) {
+      if (w.status === 'archived') continue;
+      expect(w.conceived).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
 });

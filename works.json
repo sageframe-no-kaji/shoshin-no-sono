@@ -151,6 +151,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-01-01",
+      "conceived": "2025-12-12",
       "last_updated": "2026-05-17",
       "short_description": "Published open methodology for human-AI collaborative software development in which the human practitioner maintains full architectural authority while using AI as an implementation partner. The core unit is a ho — a bounded ~2-hour session producing something real, connecting to the project arc via commit hash, ending with structured reflection. Practitioners progress through Shu-Ha-Ri stages; tiered understanding (Black Box, Functional, Deep) gives an honest frame for tracking what's understood versus delegated.",
       "substantive_description": [
@@ -171,7 +172,7 @@
       "native_script": "段取り",
       "native_translation": "Preparation; the order of things",
       "hero": "A prompt is a sentence; a handoff is an artifact.",
-      "importance": 6,
+      "importance": 7,
       "color": null,
       "featured": true,
       "media": ["methodology"],
@@ -194,6 +195,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-20",
+      "conceived": "2026-05-10",
       "last_updated": "2026-05-17",
       "short_description": "Methodology for autonomous coding agent prep discipline. A prompt is a sentence; a handoff is an artifact. Dandori transforms planning conversations into bounded markdown specs that the agent reads as one unit of work. Published as a Skill on GitHub. Sits alongside the Ho System: where Ho structures the practitioner's session, Dandori structures the agent's brief.",
       "substantive_description": [
@@ -248,6 +250,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-01-20",
+      "conceived": "2025-12-12",
       "last_updated": "2026-05-17",
       "short_description": "Production computer vision pipeline for wildlife monitoring. Streams from YouTube (or any rtsp/http source), runs YOLOv8 bird detection with a debounced state machine to suppress false positives, records arrival/departure clips, sends Telegram notifications. Companion web viewer provides a public event archive with HKSV-style timeline, visit statistics, live stream embeds. Deployed at Harvard's Memorial Hall monitoring peregrine falcons, developed for Nobel laureate economist Claudia Goldin and Harvard FAS. Species-agnostic architecture. Built from zero development experience in six weeks using the Ho System. 114 passing tests.",
       "substantive_description": [
@@ -298,6 +301,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-02-25",
+      "conceived": "2025-12-13",
       "last_updated": "2026-05-17",
       "short_description": "Wake-on-demand ZFS backup orchestrator. Pushes ZFS snapshots to a low-power remote backup node using syncoid over SSH, waking the node only when a backup run is scheduled or triggered. Runs entirely on the source machine — no agent needed on the remote. Bootstrap web UI with WebAuthn passkey auth provides job dashboard, run history, log viewer, break-glass DR restore. 278 tests, 99% coverage, zero lint or type errors. Built in approximately three hours using the Ho System.",
       "substantive_description": [
@@ -332,7 +336,7 @@
       "native_script": "経行",
       "native_translation": "Walking meditation",
       "hero": "The zazen of the system, not the workshop.",
-      "importance": 5,
+      "importance": 6,
       "color": null,
       "featured": false,
       "media": ["software"],
@@ -350,6 +354,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-05-10",
+      "conceived": "2026-02-20",
       "last_updated": "2026-05-17",
       "short_description": "Structured workbench application for Ho System practitioners. A place to define a project arc, sequence the hos within it, write structured devlogs, track progression through Shu-Ha-Ri stages, build a navigable learning trajectory over time. MVP deliberately excludes IDE integration, git interaction, and AI assistance — it is a record-keeping and reflection tool, not an execution environment. The second major Ho System pilot (after Kanyō), built using the methodology it implements.",
       "substantive_description": [
@@ -402,6 +407,7 @@
       "embed_url": null,
       "personal_stake": "Built for my teenage daughter, who lives with epilepsy from a TBI. She loves medical dramas and has spent enough time in hospitals to want to understand the medicine.",
       "created": "2026-04-28",
+      "conceived": "2026-02-12",
       "last_updated": "2026-05-17",
       "short_description": "Interactive medical mystery simulator. Players make genuine diagnostic decisions under pressure — ordering tests, forming differential diagnoses, managing uncertainty — with death as a possible consequence of error. Built as a demonstration of AI governance. Four-package monorepo: Anamnesis (LLM case-generation pipeline at design-time), Satori (deterministic game engine running frozen cases with no runtime generation), an LLM client abstraction layer, and Internal Affairs (SvelteKit frontend). Cases are generated once and frozen as immutable JSON — gameplay is deterministic and auditable even though the cases themselves are AI-authored.",
       "substantive_description": [
@@ -429,7 +435,7 @@
       "native_script": null,
       "native_translation": null,
       "hero": "The system's defense was opacity. I built the instrument that removed it.",
-      "importance": 8,
+      "importance": 6,
       "color": null,
       "featured": true,
       "media": ["software"],
@@ -456,6 +462,7 @@
       "embed_url": null,
       "personal_stake": "Built for my daughter, whose rare neurological condition defies institutional understanding. The school system she was inside had a tool that produced data about her education while being structured to make that data illegible to a parent trying to advocate for a child the institution didn't know how to see.",
       "created": "2026-04-10",
+      "conceived": "2026-04-09",
       "last_updated": "2026-05-17",
       "short_description": "Open-source research instrument that scrapes Google Classroom at the student level and aggregates assignment data into a unified dashboard, CSV export, and PDF downloader — without requiring any Google API credentials. Playwright browser automation operates entirely within a student account, surfacing implementation variance between teachers that Google's own interface deliberately obscures: assignment counts, due-date usage, completion rates, structural patterns across all classes at once. Built originally for IEP advocacy. Harvard GSE research collaboration in pursuit for a multi-site empirical audit.",
       "substantive_description": [
@@ -507,6 +514,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-02-05",
+      "conceived": "2026-03-01",
       "last_updated": "2026-05-17",
       "short_description": "Converts folders of MP3 (or other audio) files into clean, properly-chaptered M4B audiobooks for personal use. Ships as a signed macOS app and Windows installer; also distributed as a PyPI package. Full pipeline: automatic chapter detection from filenames, interactive visual chapter editor with built-in audio player, batch queue processing, automatic audio repair for common encoding problems. One of the first tools built under the Ho System; the GUI-to-CLI symmetry was a deliberate architectural choice to keep it scriptable without sacrificing approachability.",
       "substantive_description": [
@@ -538,7 +546,7 @@
       "color": null,
       "featured": true,
       "media": ["website", "writing"],
-      "group": "constructive-interference",
+      "group": "methodology",
       "themes": ["relationship", "attention"],
       "status": "live",
       "tags": ["manifesto", "safety-practice", "research", "hermeneutics"],
@@ -561,6 +569,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-25",
+      "conceived": "2026-04-29",
       "last_updated": "2026-05-17",
       "short_description": "The Pink Teaming manifesto. The cooperative counterpart to red teaming — where red teaming probes models adversarially for failure modes, pink teaming reads them with sustained hermeneutic attention to develop the practitioner's judgment. Companion to the Destructive Interference white paper. Site live; argument published.",
       "substantive_description": [
@@ -580,7 +589,7 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 40
     },
     {
       "id": "destructive-interference",
@@ -615,6 +624,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-02-17",
+      "conceived": "2026-02-10",
       "last_updated": "2026-05-17",
       "short_description": "A diagnostic taxonomy of eight named structural failure classes in AI-influenced writing: Pre-emptive Evaluation, Performed Urgency, Throat-Clear, Balanced Hedge, Significance Stamp, Mirror Summary, Emotional Instruction, Manufactured Transition. Each has a defined mechanism, a diagnostic test, and documented examples drawn from corpus analysis. The intellectual foundation of the whole Constructive Interference program. White paper near publication, not yet published. Operationalized via Kiku; deployed as a generative constraint in the atm-correspondence skill.",
       "substantive_description": [
@@ -657,6 +667,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-01",
+      "conceived": "2026-04-20",
       "last_updated": "2026-05-17",
       "short_description": "Hybrid regex + LLM extraction tool that processes AI conversation exports and surfaces patterns of language behavior. YAML-defined profiles enable two-tier detection: fast regex matching in Tier 1 for literal patterns, Claude API semantic classification in Tier 2 for patterns that resist rules. Built to operationalize the Destructive Interference taxonomy — the diagnostic framework needed an instrument that could scale. In active personal use; built to the full Ho verification stack.",
       "substantive_description": [
@@ -706,6 +717,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-15",
+      "conceived": "2026-04-12",
       "last_updated": "2026-05-17",
       "short_description": "Domain-agnostic system for making relational technical knowledge navigable: enter with a question, navigate by concept relationship, stop when you understand enough. Progressive-disclosure design — every concept has depth layers (name, definition, usage, relationships, full theory) and the reader controls how far they go rather than being forced through a linear document. Organized around mental models and questions, not product features or chapters. SSH, Actually is the first complete content set. Replicable across any field where understanding concept relationships matters more than memorizing isolated facts.",
       "substantive_description": [
@@ -748,6 +760,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-10",
+      "conceived": "2026-01-30",
       "last_updated": "2026-05-17",
       "short_description": "First content set in the *, Actually knowledge architecture system. Comprehensive guide to SSH, key pairs, hardware security keys, and modern authentication using a definition-first approach: mental models before commands, honest about where the subject is confusing, organized around concept relationships rather than product features. Covers SSH fundamentals, cryptographic primitives, FIDO2, passkeys, hardware security keys, with a companion commands reference. HTMX-based, terminal-aesthetic, keyboard-driven, zero framework overhead.",
       "substantive_description": [
@@ -802,6 +815,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-01",
+      "conceived": "2026-04-21",
       "last_updated": "2026-05-17",
       "short_description": "The interactive canvas on atmarcus.net. Click anywhere on the field; a ripple expands outward from that spot, a project label appears at the center, and the wave propagates and fades according to physics-derived rules. Each ripple is a real project, weighted by significance that controls reach, wavelength, lifespan, and label size. When two ripples overlap, constructive and destructive interference are visible. The Sageframe node is permanent and central; all others fade on a timescale set by weight. Companion explanation page walks the reader from no-code through full source via progressive disclosure across nine sections.",
       "substantive_description": [
@@ -856,6 +870,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-05-01",
+      "conceived": "2026-03-15",
       "last_updated": "2026-05-17",
       "short_description": "The pinkteaming.net manifesto reads itself to you. The active line sits at vertical middle in display weight, bright pink; everything above fades upward (the sky), everything below fades downward (the deep). Pacing is fixed and unhurried. The deep is a 2D UMAP projection of all 103 manifesto sentences embedded in 384 dimensions; dots cluster by semantic similarity and illuminate as the active line reaches their cluster. The sky is wave interference physics — twelve permanent sources that brighten and emit ripples as the active line enters their structural region. Companion explanation page walks the reader through surface, deep, and sky.",
       "substantive_description": [
@@ -913,6 +928,8 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-05-05",
+      "conceived": "2025-08-01",
+      "named": "2026-03-21",
       "last_updated": "2026-05-17",
       "short_description": "Push-only, vault-first CLI for tending the relationship between a configuration vault and the machines it describes; no agents, no YAML sprawl, declarative intent pushed outward from a single source of truth.",
       "substantive_description": [
@@ -962,6 +979,8 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-05-08",
+      "conceived": "2025-08-01",
+      "named": "2026-03-21",
       "last_updated": "2026-05-17",
       "short_description": "Operational workbench; dual-pane file manager with true server-side operations, ZFS-aware cross-dataset handling, a field view of machine topology, and Forteller built in as an integrated capability.",
       "substantive_description": [
@@ -975,8 +994,8 @@
       "sort_order_within_group": 20
     },
     {
-      "id": "edelmore",
-      "name": "Edelmore",
+      "id": "edelmore-diary",
+      "name": "Edelmore Diary",
       "native_script": null,
       "native_translation": null,
       "hero": "A cottage-core diary for a child — kept on your own machine.",
@@ -986,20 +1005,30 @@
       "media": ["software"],
       "group": "adaptive-tools",
       "themes": ["agency", "sovereignty"],
-      "status": "scaffolded",
-      "tags": ["software", "adaptive-tool", "udl", "diary", "voice-transcription", "personal"],
-      "repo": "https://github.com/sageframe-no-kaji/edelmore",
-      "license": null,
-      "deployment": [],
-      "tech_stack": "Web application, voice transcription, Tailscale-private homelab deployment",
+      "status": "shipped",
+      "tags": ["software", "adaptive-tool", "udl", "diary", "voice-transcription", "read-aloud", "homelab", "personal"],
+      "repo": "https://github.com/sageframe-no-kaji/edelmore-diary",
+      "license": "MIT",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/edelmore-diary"
+        },
+        {
+          "label": "Container image (GHCR)",
+          "url": "https://ghcr.io/sageframe-no-kaji/edelmore-diary"
+        }
+      ],
+      "tech_stack": "SvelteKit (TypeScript, Svelte 5 runes), SQLite (better-sqlite3), Tailwind v4, StPageFlip, argon2id; optional WhisperX transcription and Kokoro TTS read-aloud; Docker + Caddy",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
       "embed_url": null,
-      "personal_stake": "Built for a 13-year-old who wanted to keep an Anne Frank–style diary on her own terms.",
-      "created": "2026-05-12",
-      "last_updated": "2026-05-17",
-      "short_description": "A private web diary shaped like a book. It opens to today's page. Pages turn. Voice transcription handles the writing for hands that struggle with the keyboard. Runs on a parent's homelab, behind Tailscale and the home LAN, and nobody reads it but the person who wrote it. Built as an adaptive tool — for kids who have trouble writing — on Universal Design for Learning principles.",
+      "personal_stake": "Built for Iona, who wanted to keep an Anne Frank–style diary on her own terms — and for her sisters Ada and Isla.",
+      "created": "2026-05-14",
+      "conceived": "2026-05-14",
+      "last_updated": "2026-06-14",
+      "short_description": "A private web diary shaped like a book. It opens to today's page. Pages turn. Voice transcription handles the writing for hands that struggle with the keyboard, and it can read entries back aloud with the words highlighted as they're spoken. Runs on a parent's homelab, behind Tailscale and the home LAN, and nobody reads it but the person who wrote it. Built as an adaptive tool — for kids who have trouble writing — on Universal Design for Learning principles.",
       "substantive_description": [
         "Adaptive tools are usually designed apologetically — accommodation as patch, accessibility as afterthought. Edelmore is built from the opposite direction. Universal Design for Learning means the design itself accommodates without naming the accommodation. A diary that opens to today's page and turns its pages and accepts voice as easily as typing isn't a diary for kids with writing difficulties. It's a diary.",
         "The deeper argument is that scale-of-one design is a legitimate design target. A tool built for one specific 13-year-old, in the shape of a book the child imagined, deployed on her parent's homelab behind Tailscale, is not a small project. It's a complete project at the scale it was meant for. The economics of mass-market software training has obscured this — every tool is supposed to scale to millions or it doesn't count. Edelmore is what one tool, made for one person, looks like when it counts."
@@ -1010,6 +1039,57 @@
         "gallery": []
       },
       "sort_order_within_group": 10
+    },
+    {
+      "id": "edelmore-reader",
+      "name": "Edelmore Reader",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "A book that reads itself to you — on your own machine.",
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": ["software"],
+      "group": "adaptive-tools",
+      "themes": ["agency", "attention"],
+      "status": "scaffolded",
+      "tags": ["software", "adaptive-tool", "udl", "ebook-reader", "epub", "read-along", "tts", "accessibility", "personal"],
+      "repo": "https://github.com/sageframe-no-kaji/edelmore-reader",
+      "license": "MIT",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/edelmore-reader"
+        }
+      ],
+      "tech_stack": "Planned: SvelteKit (TypeScript), SQLite (better-sqlite3), server-side EPUB parsing, CSS Multi-column pagination, View Transitions page-turn, self-hosted Kokoro TTS, Tailwind v4, Docker",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": "For a kid who hears stories better than she reads them — and for anyone who wants reading to feel like the thing it used to be.",
+      "created": "2026-06-14",
+      "conceived": "2026-06-14",
+      "last_updated": "2026-06-14",
+      "short_description": "A self-hosted read-along EPUB reader that feels like a real book. Upload an EPUB or pick from a built-in library of public-domain children's books; the book opens where you left off, a songbird in the margin reads it aloud in a warm voice, and each word glows softly as it's spoken. Pages turn when the narration reaches the end of the page; the book remembers your place. Built for kids who hear stories better than they read them. Sibling project to Edelmore Diary, sharing its book metaphor, narration stack, and cottage-core identity; gated on the diary's refactor into shared modules. Seed committed, no code yet.",
+      "substantive_description": [
+        "Read-along ebook readers exist, and the technical problem — parsing EPUB, generating speech, highlighting words as they're spoken — is solved many times over. What none of them solve is the experience: every one feels like reading software, utilitarian and clinical, with no spatial sense of where you are in the book. For a kid with ataxia, dyslexia, attention differences, or just a preference for being read to, the gap between 'software that reads at you' and 'a book that's also reading itself to you' is the gap between using a tool and inhabiting an experience.",
+        "Edelmore Reader's differentiator isn't the technology — it's that the book metaphor is the product. The page turn, the warm serif typography, the soft green word-glow; the audio narration is one ingredient inside a larger reading experience, not the feature. It is the same warmth the diary built for writing, applied to published content — accessibility tools made to look like things people actually want to use."
+      ],
+      "relationships": [
+        {
+          "target": "edelmore-diary",
+          "type": "descends_from",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The sibling fork: reuses the diary's book metaphor, narration stack, visual identity, and deployment pattern; swaps the content model (diary entries → book chapters)."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
     },
     {
       "id": "aspirational-intelligence",
@@ -1035,6 +1115,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2021-01-01",
+      "conceived": "2022-11-04",
       "last_updated": "2026-05-17",
       "short_description": "An early creative practice examining how machine vision interprets aspiration, aesthetics, and desire — an Instagram-era body of work in AI-generated image making, before that territory became crowded. Documented as a marker of the timeline: where the work started, before it became systematic.",
       "substantive_description": [
@@ -1084,6 +1165,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-02-10",
+      "conceived": "2026-02-10",
       "last_updated": "2026-05-17",
       "short_description": "The Ho Process methodology debut, paired with the Kanyō result. The build story of the Harvard falcon-camera computer vision system: what it means for a practitioner with no formal engineering background to ship production AI in six weeks under a disciplined methodology.",
       "substantive_description": [
@@ -1140,6 +1222,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-03",
+      "conceived": "2026-03-03",
       "last_updated": "2026-05-17",
       "short_description": "The Shu-Ha-Ri argument as the Hōzō shipping story. The same practitioner who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime — 278 tests, 99% coverage — and the essay traces what changed: not the projects, the practitioner.",
       "substantive_description": [
@@ -1196,6 +1279,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-31",
+      "conceived": "2026-03-31",
       "last_updated": "2026-05-17",
       "short_description": "Manifesto on AI as universal capability amplifier, and the educational system critique that follows: education cannot absorb AI the way it absorbed prior technologies, because this technology amplifies the very capability education exists to develop.",
       "substantive_description": [
@@ -1245,6 +1329,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-15",
+      "conceived": "2026-04-15",
       "last_updated": "2026-05-17",
       "short_description": "Companion position paper to Glassroom: the empirical audit of variance in deployed Google Classroom implementations. What the instrument surfaced, formalized as the argument the data makes about institutional opacity.",
       "substantive_description": [
@@ -1301,6 +1386,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-08",
+      "conceived": "2026-04-08",
       "last_updated": "2026-05-17",
       "short_description": "Recursive sycophancy in sustained AI collaboration — the conceptual foundation for the Pink Teaming discipline. What voice integrity requires when the collaborator is structurally agreeable.",
       "substantive_description": [
@@ -1357,6 +1443,7 @@
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-15",
+      "conceived": "2026-04-15",
       "last_updated": "2026-05-17",
       "short_description": "Long-form position paper on AI governance as civic infrastructure: the structural argument that Glassroom and Satori both demonstrate at the architectural level. Where the boundaries are drawn between generation, execution, and narration determines what AI is allowed to do and what humans evaluate.",
       "substantive_description": [
@@ -1383,6 +1470,133 @@
         "gallery": []
       },
       "sort_order_within_group": 60
+    },
+    {
+      "id": "sageframe",
+      "name": "Sageframe",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The start of all of this.",
+      "importance": 10,
+      "color": null,
+      "featured": true,
+      "media": ["website"],
+      "group": "knowledge-architecture",
+      "themes": ["knowledge", "continuity"],
+      "status": "live",
+      "tags": ["knowledge-architecture", "body-of-work", "genesis", "sageframe"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Sageframe on atmarcus.net",
+          "url": "https://atmarcus.net/work/sageframe"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2025-04-01",
+      "conceived": "2025-04-01",
+      "last_updated": "2026-06-14",
+      "short_description": "The Sageframe knowledge architecture — the organizing system the whole body of work grew out of. Where the methodology, the production systems, the research program, and the writing all became legible as one project rather than scattered efforts. The genesis: the start of all of this. Canonical home at atmarcus.net/work/sageframe. (conceived date provisional: ~April 2025.)",
+      "substantive_description": [
+        "Before there were eight production systems and a published methodology, there was a way of organizing what was being learned. Sageframe is that organizing system — the knowledge architecture under which everything else is filed, related, and made coherent. It is the root of the tree: the place where a scatter of experiments became a body of work with a shape.",
+        "The deeper claim is that a body of work needs an architecture as much as any single system does. Without one, projects accumulate as a list; with one, they relate, and the relationships are the argument. Sageframe is the structure that lets the rest of the catalog say 'this is one project' and mean it."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 5
+    },
+    {
+      "id": "shodo",
+      "name": "Shodō",
+      "native_script": "書道",
+      "native_translation": "The way of writing; calligraphy",
+      "hero": "Search your whole corpus by meaning, not keyword.",
+      "importance": 9,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "constructive-interference",
+      "themes": ["continuity", "knowledge"],
+      "status": "shipped",
+      "tags": ["software", "research-instrument", "llm", "corpus-search", "semantic-search", "claude-api"],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": "LLM-backed semantic search over the practitioner's writing corpus",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-04",
+      "conceived": "2026-03-04",
+      "last_updated": "2026-06-14",
+      "short_description": "The practitioner's LLM-powered corpus search engine. Where keyword search finds strings, Shodō finds meaning — querying the entire accumulated writing corpus (essays, notes, conversation exports, project documents) by concept and intent rather than literal match. A core research instrument in the Constructive Interference program: the tool that makes a years-deep corpus navigable as a single searchable body.",
+      "substantive_description": [
+        "A writing practice accumulates faster than memory can index it. After enough essays, notes, and conversation transcripts, the corpus holds more than the writer can find again — the idea you know you wrote down a year ago is somewhere, but grep won't surface it because you don't remember the words you used. Shodō is the answer: semantic search over the whole corpus, retrieval by meaning.",
+        "The deeper argument is continuity. A body of work is only coherent if its earlier parts remain reachable from its later ones. Shodō is the retrieval layer that keeps the corpus continuous with itself — the instrument that lets the writing practice build on what it already knows instead of repeating it."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 40
+    },
+    {
+      "id": "sutra",
+      "name": "Sutra",
+      "native_script": "経",
+      "native_translation": "Sutra; thread",
+      "hero": "A writing surface under version control.",
+      "importance": 8,
+      "color": null,
+      "featured": true,
+      "media": ["software"],
+      "group": "constructive-interference",
+      "themes": ["agency", "craft"],
+      "status": "shipped",
+      "tags": ["software", "writing-tool", "version-control", "git", "authoring", "research-instrument"],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": "Git-backed writing surface; version-controlled document authoring",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-04",
+      "conceived": "2026-03-04",
+      "last_updated": "2026-06-14",
+      "short_description": "A git-controlled writing surface — a document authoring environment where every draft, revision, and branch of thought lives under version control. Writing as something you can diff, branch, and return to, with the full history preserved rather than overwritten. A core Constructive Interference instrument, conceived the same day as Shodō: where Shodō searches the corpus, Sutra is where the corpus is written.",
+      "substantive_description": [
+        "Most writing tools treat a document as a single mutable surface — you change it, and the previous state is gone. For a practice that cares about how thinking evolves, that's a loss. Sutra puts the writing under version control: every revision is kept, every branch of an argument is recoverable, and the history of a piece is as legible as the piece itself.",
+        "The deeper argument is authorship as a tracked, recoverable process rather than a disposable one. Paired with Shodō's retrieval, Sutra closes the loop on the writing practice — one tool to write the corpus under full history, one to search it by meaning. Together they are the working surface of the Constructive Interference program."
+      ],
+      "relationships": [
+        {
+          "target": "shodo",
+          "type": "paired_with",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Conceived the same day; the Constructive Interference writing/search pair — Sutra writes the corpus, Shodō searches it."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 50
     }
   ]
 }

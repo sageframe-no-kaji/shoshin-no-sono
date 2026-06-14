@@ -132,6 +132,10 @@
 
       "created": "ISO 8601 date. $comment: First-public or first-shipped date. Distinct from last_updated, which moves on every change. Drives chronological populate animation in the cartography (towns fade in over time in publication-date order).",
 
+      "conceived": "ISO 8601 date. $comment: Origin date — when the idea entered, the moment of conception. Precedes both `created` (first-public/first-shipped) and `publication_date` (when writing was published). Required for all non-`archived` works; archived pre-history may predate reliable records and may omit it. Drives the world-then-writing emergence animation (ho-07.2): a peak RISES on its conceived date. Dates carry order and simultaneity only — the animation plays even beats, so fuzzy months and multi-year gaps never distort pacing. Same-day conceptions share a beat (e.g. ho-system + kanyo; shodo + sutra). Provisional dates are allowed and flagged in the entry; order is what matters. (Added ho-07.1.)",
+
+      "named": "ISO 8601 date | null. $comment: The later-naming date — set ONLY when a work was named meaningfully after it was conceived (conceived under one name, renamed later). The PULSE moment in the emergence animation (ho-07.2): a second beat of light at the naming date. Most works are conceived-and-named together and omit this (null/absent). Example: Forteller / Pālana were conceived as Kṣetra-Ops (~2025-08) and named 2026-03-21. (Added ho-07.1.)",
+
       "last_updated": "ISO 8601 date. $comment: Per-work update date. Helps visitors see what's recent.",
 
       "short_description": "string. $comment: README-voice, one paragraph. The 'what it is, what it does' summary. Renders at the top of the card on click. May be truncated by the renderer if too long for card real estate.",
