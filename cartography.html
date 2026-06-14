@@ -133,17 +133,18 @@
           opacity: 1;
         }
       }
-      /* The rename re-glow (ho-07.6): a soft amber swell that brightens and eases
-         out — a glow, not a ring-pulse. Starts mid, blooms, fades. */
-      @keyframes emgReglow {
+      /* The beacon breath (ho-07.6): a slight, slow signal-fire pulse on the peak
+         beacons — the flicker of a lit fire, low amplitude so it reads as alive,
+         not as a flash. */
+      @keyframes emgBeacon {
         0% {
-          opacity: 0;
+          opacity: 0.62;
         }
-        35% {
-          opacity: 0.5;
+        50% {
+          opacity: 1;
         }
         100% {
-          opacity: 0;
+          opacity: 0.62;
         }
       }
       @media (prefers-reduced-motion: reduce) {
