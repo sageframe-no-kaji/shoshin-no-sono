@@ -74,7 +74,16 @@ export function relevance(work, state, floor) {
 }
 
 /**
- * @typedef {FieldOpts & { relevanceFloor?: number }} CartographyOpts
+ * @typedef {FieldOpts & {
+ *   relevanceFloor?: number,
+ *   emergenceScale?: (id: string) => number
+ * }} CartographyOpts
+ * `emergenceScale` (ho-07.2) is an additive, optional per-peak amplitude factor
+ * the emergence player passes to grow the terrain as peaks rise: it folds into a
+ * peak's amplitude alongside importance and filter relevance. A peak that scales
+ * to 0 is dropped from the heightfield entirely (truly absent, not merely flat),
+ * and from the returned peaks (so labels appear only as a peak rises). The
+ * default — `() => 1` — leaves every existing caller's field unchanged.
  */
 
 /**
@@ -97,7 +106,11 @@ export function relevance(work, state, floor) {
  */
 export function computeField(indexer, state, seed, opts = {}) {
   const floor = opts.relevanceFloor ?? DEFAULT_RELEVANCE_FLOOR;
+  const emergenceScale = opts.emergenceScale ?? (() => 1);
   const works = peakWorks(indexer);
+  // Positions come from the full peak set so a peak rises in place — its seat is
+  // fixed from frame 0 and does not shift as the others emerge (positions are
+  // seed-only, filter- and emergence-independent).
   const positioned = computePositions(
     works.map((w) => ({ id: w.id, importance: w.importance, amplitude: w.importance })),
     seed,
@@ -105,10 +118,15 @@ export function computeField(indexer, state, seed, opts = {}) {
   );
   const weighted = positioned.map((p, i) => ({
     ...p,
-    amplitude: works[i].importance * relevance(works[i], state, floor),
+    amplitude: works[i].importance * relevance(works[i], state, floor) * emergenceScale(works[i].id),
   }));
-  const heightfield = buildHeightfield(weighted, seed, opts);
-  return { peaks: weighted, heightfield, seed };
+  // A zero-amplitude (not-yet-risen) peak contributes nothing, so drop it before
+  // the heightfield and from the returned peaks — absent, not flat. Under the
+  // default scale every real peak has amplitude > 0 (importance ≥ 1, floor > 0),
+  // so this is a no-op for existing callers.
+  const active = weighted.filter((p) => p.amplitude > 0);
+  const heightfield = buildHeightfield(active, seed, opts);
+  return { peaks: active, heightfield, seed };
 }
 
 /**

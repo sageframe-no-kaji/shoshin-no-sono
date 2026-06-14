@@ -134,6 +134,44 @@ describe('computeField', () => {
   });
 });
 
+describe('computeField — the emergenceScale hook (ho-07.2)', () => {
+  it('scale 1 for all reproduces the default field exactly (no regression)', () => {
+    const base = computeField(indexer, empty, 42);
+    const scaled = computeField(indexer, empty, 42, { emergenceScale: () => 1 });
+    expect(scaled).toEqual(base);
+  });
+
+  it('scale 0 removes a peak from the field and the returned peaks', () => {
+    const onlyHo = computeField(indexer, empty, 42, {
+      emergenceScale: (id) => (id === 'ho-system' ? 1 : 0),
+    });
+    expect(onlyHo.peaks.map((p) => p.id)).toEqual(['ho-system']);
+    // a heightfield with one fewer massif is strictly lower at its tallest
+    const both = computeField(indexer, empty, 42);
+    expect(onlyHo.heightfield.max).toBeLessThan(both.heightfield.max);
+  });
+
+  it('a peak rises in place — its position is unchanged as others emerge', () => {
+    const full = computeField(indexer, empty, 42);
+    const partial = computeField(indexer, empty, 42, {
+      emergenceScale: (id) => (id === 'kanyo' ? 1 : 0),
+    });
+    const fullKanyo = full.peaks.find((p) => p.id === 'kanyo');
+    const partialKanyo = partial.peaks.find((p) => p.id === 'kanyo');
+    expect([partialKanyo?.x, partialKanyo?.y]).toEqual([fullKanyo?.x, fullKanyo?.y]);
+  });
+
+  it('all-zero scale yields a peakless field — only noise, no massifs', () => {
+    const none = computeField(indexer, empty, 42, { emergenceScale: () => 0 });
+    const both = computeField(indexer, empty, 42);
+    expect(none.peaks).toEqual([]);
+    // no massif remains: the max collapses to the faint value-noise ceiling,
+    // far below any real peak's elevation
+    expect(none.heightfield.max).toBeLessThan(0.5);
+    expect(none.heightfield.max).toBeLessThan(both.heightfield.max);
+  });
+});
+
 describe('computeTowns', () => {
   const dist = (/** @type {{x:number,y:number}} */ a, /** @type {{x:number,y:number}} */ b) =>
     Math.hypot(a.x - b.x, a.y - b.y);
