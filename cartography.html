@@ -133,12 +133,14 @@
           opacity: 1;
         }
       }
-      @keyframes emgPulse {
+      /* The rename re-glow (ho-07.6): a soft amber swell that brightens and eases
+         out — a glow, not a ring-pulse. Starts mid, blooms, fades. */
+      @keyframes emgReglow {
         0% {
           opacity: 0;
         }
-        30% {
-          opacity: 0.9;
+        35% {
+          opacity: 0.5;
         }
         100% {
           opacity: 0;

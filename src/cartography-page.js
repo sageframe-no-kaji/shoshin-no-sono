@@ -20,6 +20,7 @@ import { createGate } from './gate.js';
 import { createCartographer, computeField, computeTowns } from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
 import { settlementSvg } from './settlement-map.js';
+import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
 import { buildEmergenceTimeline, emergencePlan, scaleFn, CORPUS_FLOOR } from './emergence.js';
 
@@ -61,15 +62,25 @@ const tuners = {
   t2: 1.5,
   t3: 1.7,
 
-  // ho-07.2 emergence — timing/feel for the world-then-writing populate.
-  // Discrete cadence (the perf gate chose it: continuous re-contour is ~158ms,
-  // ~10× a frame): one recompute per beat, beats cross-faded on the compositor.
-  beatMs: 240, // rise/arrive beat dwell before the next
-  holdMs: 700, // the world→writing held seam
-  pulseMs: 520, // the rename flash dwell + duration
+  // ho-07.2 / ho-07.6 emergence — timing/feel for the world-then-writing populate.
+  // Discrete cadence for the world (the perf gate chose it: continuous re-contour
+  // is ~158ms): one recompute per beat, beats cross-faded on the compositor. The
+  // writing phase freezes the terrain and builds towns house-by-house on the cheap
+  // settlement layer (ho-07.6 Decision 1).
+  beatMs: 240, // rise beat dwell before the next
+  holdMs: 350, // the world→writing breath (ho-07.6 Decision 7 — shrunk from a seam)
   fadeMs: 320, // cross-fade between beats (the rise gesture)
-  floorMarkerOpacity: 0.3, // the 2025-11-11 corpus-floor horizon marker weight
+  nameDelayMs: 260, // peak name fades in this much AFTER its peak rises (ho-07.6 Decision 3)
+  townBuildMs: 650, // house-by-house build time per town beat (ho-07.6 Decision 1)
+  pulseMs: 560, // the rename re-glow dwell (ho-07.6 Decision 2 — a glow, not a ring)
+  beaconOpacity: 0.5, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
+  floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
 };
+
+/** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
+const TOWN_GAP_MS = 120;
+/** The signal-fire beacon hue (brand Amber — flame, NOT the reserved terracotta). */
+const BEACON_AMBER = '#D4952A';
 
 /** @type {{ key: string, label: string, min: number, max: number, step: number }[]} */
 const TUNER_SPECS = [
@@ -92,10 +103,13 @@ const TUNER_SPECS = [
   { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05 },
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05 },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05 },
-  { key: 'beatMs', label: 'beat dwell (ms)', min: 80, max: 800, step: 20 },
-  { key: 'holdMs', label: 'world→writing hold (ms)', min: 0, max: 2000, step: 50 },
-  { key: 'pulseMs', label: 'rename pulse (ms)', min: 150, max: 1200, step: 20 },
+  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20 },
   { key: 'fadeMs', label: 'rise cross-fade (ms)', min: 0, max: 900, step: 20 },
+  { key: 'nameDelayMs', label: 'name fade delay (ms)', min: 0, max: 800, step: 20 },
+  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50 },
+  { key: 'townBuildMs', label: 'town build (ms)', min: 150, max: 1600, step: 50 },
+  { key: 'pulseMs', label: 'rename re-glow (ms)', min: 150, max: 1200, step: 20 },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05 },
 ];
 
@@ -141,21 +155,53 @@ const peakLabel = (x, y, name, native, scale) => {
   );
 };
 
-/** @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale */
-const peakLabelsSvg = (peaks, scale) =>
+/**
+ * Peak labels. When `animate` is set (emergence frames), each name fades in
+ * offset *after* its peak has risen (ho-07.6 Decision 3) — the terrain lifts,
+ * then the name settles. Names already standing are held steady by the cross-fade's
+ * under-layer, so only a newly-risen peak's name visibly lags. The static render
+ * passes `animate = false`.
+ * @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale @param {boolean} [animate]
+ */
+const peakLabelsSvg = (peaks, scale, animate = false) =>
   peaks
     .map((p) => {
       const w = indexer.getWork(p.id);
-      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, scale) : '';
+      if (!w) return '';
+      const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, scale);
+      return animate
+        ? `<g style="opacity:0;animation:emgIn ${tuners.fadeMs}ms ease-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`
+        : label;
     })
     .join('');
+
+/**
+ * The signal-fire beacon (ho-07.6 Decision 5): a soft amber glow at each risen
+ * peak's summit — the beacons of Gondor, lit as the peak rises (a peak appears
+ * with its beacon, so the lighting follows the rise for free). Three stacked
+ * circles — a wide faint halo, a mid glow, a small bright core — in flame amber,
+ * never terracotta. Steady, not pulsing. Weight by `beaconOpacity` (0 hides it).
+ * @param {import('./field.js').PositionedPeak[]} peaks
+ */
+const beaconSvg = (peaks) => {
+  const op = tuners.beaconOpacity;
+  if (op <= 0) return '';
+  return peaks
+    .map(
+      (p) =>
+        `<g><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${BEACON_AMBER}" opacity="${(0.18 * op).toFixed(3)}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${BEACON_AMBER}" opacity="${(0.55 * op).toFixed(3)}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.3" fill="${BEACON_AMBER}" opacity="${Math.min(1, 0.95 * op).toFixed(3)}"/></g>`,
+    )
+    .join('');
+};
 
 const LABEL_MAX_CHARS = 20; // wrap long titles to a carriage return at word boundaries
 const LABEL_LINE_HEIGHT = 14;
 
-/** Word-wrap an upper-cased label to lines of at most LABEL_MAX_CHARS. @param {string} name @returns {string[]} */
+/** Word-wrap a label (case preserved) to lines of at most LABEL_MAX_CHARS. @param {string} name @returns {string[]} */
 const wrapLabel = (name) => {
-  const words = (name || '').toUpperCase().split(/\s+/).filter(Boolean);
+  const words = (name || '').split(/\s+/).filter(Boolean);
   /** @type {string[]} */
   const lines = [];
   let cur = '';
@@ -172,9 +218,11 @@ const wrapLabel = (name) => {
 };
 
 /**
- * Town label — typography variant B (settlement): spaced caps below the extent,
- * wrapped to a char limit, with a cream halo (paint-order stroke) so the glyphs
- * read clear of the contour lines.
+ * Town label — the *authorial voice* (ho-07.6 Decision 4, brand-grounded): italic,
+ * mixed-case, muted ink, tightly tracked — distinct from the peak's monumental
+ * upright caps. Writing about the work speaks in italic; terracotta stays reserved
+ * for the cathedral landmark and ho-09 interaction. Cream halo so it reads clear of
+ * the contours.
  */
 const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name, /** @type {number} */ scale) => {
   const lines = wrapLabel(name);
@@ -183,22 +231,30 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
     .join('');
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="${(11.5 * scale).toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.22em;" ` +
+    `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
     `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3 * scale).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
-/** @param {import('./cartographer.js').CartographyTown[]} towns */
-const townsSvg = (towns) =>
-  towns
-    .map((t) => {
-      const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})"`;
-      // Receded (non-matching) towns dim hard and drop their label — a sunk town
-      // doesn't announce itself, and faint ghost-labels read as noise (Decision 6).
-      if (!t.match) return `${g} opacity="0.1">${settlementSvg(t.blocks)}</g>`;
-      return `${g}>${settlementSvg(t.blocks)}</g><g>${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name, tuners.labelScale)}</g>`;
-    })
-    .join('');
+/**
+ * One town at a build fraction (ho-07.6 Decision 1). `fraction` 0→1 reveals its
+ * houses one at a time with the cathedral raised last (revealedBlocks); the label
+ * appears only once the town is essentially built, so a town announces itself when
+ * it stands, not while it's a building site. Non-matching towns dim and drop their
+ * label. fraction 1 is the finished town — the resting render uses it.
+ * @param {import('./cartographer.js').CartographyTown} t @param {number} fraction
+ */
+const oneTownSvg = (t, fraction) => {
+  const blocks = settlementSvg(revealedBlocks(t.blocks, fraction));
+  const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${blocks}</g>`;
+  if (!t.match) return `<g opacity="0.1">${g}</g>`;
+  const label =
+    fraction >= 0.999 ? `<g>${townLabel(t.seat.x, t.seat.y + t.extent + 14, t.name, tuners.labelScale)}</g>` : '';
+  return g + label;
+};
+
+/** All towns at full (the resting render). @param {import('./cartographer.js').CartographyTown[]} towns */
+const townsSvg = (towns) => towns.map((t) => oneTownSvg(t, 1)).join('');
 
 /**
  * The corpus-floor marker (ho-07.2 Decision 5): a faint dashed horizon near the
@@ -210,30 +266,34 @@ const townsSvg = (towns) =>
 const corpusFloorSvg = () => {
   const op = tuners.floorMarkerOpacity;
   if (op <= 0) return '';
-  const y = 610;
+  // Pulled up off the bottom edge and given a readable caption so it can actually
+  // be seen and judged (ho-07.6 Decision 6 — it was invisible at y≈610).
+  const y = 588;
   return (
     `<g opacity="${op}">` +
-    `<line x1="40" y1="${y}" x2="960" y2="${y}" stroke="#9A958B" stroke-width="0.5" stroke-dasharray="2 5"/>` +
-    `<text x="40" y="${y - 5}" font-family="Spectral, Georgia, serif" font-size="8" fill="#9A958B" ` +
-    `style="letter-spacing:0.24em;">${CORPUS_FLOOR.label.toUpperCase()} · 2025·11</text>` +
+    `<line x1="60" y1="${y}" x2="940" y2="${y}" stroke="#9A958B" stroke-width="0.8" stroke-dasharray="1 6" stroke-linecap="round"/>` +
+    `<text x="60" y="${y - 6}" font-family="Spectral, Georgia, serif" font-style="italic" font-size="9.5" fill="#9A958B" ` +
+    `style="letter-spacing:0.12em;">${CORPUS_FLOOR.label} · 2025</text>` +
     `</g>`
   );
 };
 
 /**
- * The rename pulse (ho-07.2 Decision 2): a terracotta ring flashing once at each
- * pulsed peak's summit — a second beat of light for an already-risen peak, no
- * re-contour. The `emgPulse` keyframe (cartography.html) fades it in and out.
+ * The rename re-glow (ho-07.6 Decision 2, replacing ho-07.2's terracotta rings):
+ * a soft amber swell at each renamed peak's beacon that brightens and settles —
+ * a glow in the fade language, not a hard ring. Same warm hue as the beacon, so
+ * the rename reads as the peak's fire flaring up at its naming. The `emgReglow`
+ * keyframe (cartography.html) swells then eases out.
  * @param {string[]} ids @param {import('./field.js').PositionedPeak[]} peaks
  */
-const pulseSvg = (ids, peaks) =>
+const reglowSvg = (ids, peaks) =>
   ids
     .map((id) => {
       const p = peaks.find((q) => q.id === id);
       if (!p) return '';
       return (
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="24" fill="none" ` +
-        `stroke="#9A5B3C" stroke-width="2" style="animation:emgPulse ${tuners.pulseMs}ms ease-out;"/>`
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="16" fill="${BEACON_AMBER}" ` +
+        `style="animation:emgReglow ${tuners.pulseMs}ms ease-out;"/>`
       );
     })
     .join('');
@@ -258,21 +318,16 @@ const frameSvg = (step) => {
   const seed = carto.activeSeed();
   const state = gate.currentState();
   const field = computeField(indexer, state, seed, { ...tuners, emergenceScale: scaleFn(step) });
-  const towns = step.towns.size
-    ? computeTowns(indexer, state, field, { ...tuners, thresholds: [tuners.t1, tuners.t2, tuners.t3] }).filter(
-        (t) => step.towns.has(t.id),
-      )
-    : [];
   let svg = corpusFloorSvg();
   svg += contourMapSvg(field.heightfield, {
     interval: tuners.interval,
     weightRegular: tuners.weightRegular,
     weightIndex: tuners.weightIndex,
   });
-  svg += townsSvg(towns);
-  svg += peakLabelsSvg(field.peaks, tuners.labelScale);
+  svg += beaconSvg(field.peaks);
+  svg += peakLabelsSvg(field.peaks, tuners.labelScale, true); // names fade in offset
   if (showPeaks) svg += peakDotsSvg(field.peaks);
-  if (step.kind === 'pulse') svg += pulseSvg(step.ids, field.peaks);
+  if (step.kind === 'pulse') svg += reglowSvg(step.ids, field.peaks);
   return svg;
 };
 
@@ -293,6 +348,7 @@ const render = () => {
     weightIndex: tuners.weightIndex,
   });
   svg += townsSvg(towns);
+  svg += beaconSvg(field.peaks); // signal-fire beacons, always on at rest
   svg += peakLabelsSvg(field.peaks, tuners.labelScale); // real peak labels (variant B), always on
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
   map.innerHTML = svg;
@@ -369,7 +425,82 @@ const staticRender = () => {
   render();
 };
 
-/** Play the world-then-writing emergence from the floor (load and reseed; Decision 6). */
+/**
+ * The writing phase (ho-07.6 Decision 1). The world is risen and frozen, so the
+ * heavy field + contours are computed once and only the cheap settlement layer
+ * animates: each arrive beat builds its town(s) house-by-house (revealedBlocks
+ * eased over townBuildMs via rAF), cathedral last, while already-arrived towns
+ * stand built. No re-contour anywhere here. Settles to the static map at the end.
+ * @param {import('./emergence.js').EmergenceStep[]} writeSteps @param {number} token
+ */
+const playWriting = (writeSteps, token) => {
+  const seed = carto.activeSeed();
+  const state = gate.currentState();
+  const field = computeField(indexer, state, seed, tuners); // full terrain, once
+  const allTowns = computeTowns(indexer, state, field, {
+    ...tuners,
+    thresholds: [tuners.t1, tuners.t2, tuners.t3],
+  });
+  const byId = new Map(allTowns.map((t) => [t.id, t]));
+  const terrain =
+    corpusFloorSvg() +
+    contourMapSvg(field.heightfield, {
+      interval: tuners.interval,
+      weightRegular: tuners.weightRegular,
+      weightIndex: tuners.weightIndex,
+    }) +
+    beaconSvg(field.peaks) +
+    peakLabelsSvg(field.peaks, tuners.labelScale) +
+    (showPeaks ? peakDotsSvg(field.peaks) : '');
+
+  /** @type {import('./cartographer.js').CartographyTown[]} */
+  const built = [];
+  const paintTowns = (/** @type {string[]} */ buildingIds, /** @type {number} */ fraction) => {
+    let layer = built.map((t) => oneTownSvg(t, 1)).join('');
+    for (const id of buildingIds) {
+      const t = byId.get(id);
+      if (t) layer += oneTownSvg(t, fraction);
+    }
+    map.innerHTML = `<g>${terrain}</g><g>${layer}</g>`;
+  };
+
+  let si = 0;
+  const buildStep = () => {
+    if (token !== playToken) return;
+    if (si >= writeSteps.length) {
+      beatTimer = setTimeout(() => {
+        if (token === playToken) staticRender();
+      }, tuners.fadeMs);
+      return;
+    }
+    const ids = writeSteps[si].ids;
+    const start = performance.now();
+    const frame = () => {
+      if (token !== playToken) return;
+      const f = Math.min(1, (performance.now() - start) / Math.max(1, tuners.townBuildMs));
+      paintTowns(ids, f);
+      if (f < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        for (const id of ids) {
+          const t = byId.get(id);
+          if (t) built.push(t);
+        }
+        si += 1;
+        beatTimer = setTimeout(buildStep, TOWN_GAP_MS);
+      }
+    };
+    requestAnimationFrame(frame);
+  };
+  paintTowns([], 0); // the frozen terrain, no towns yet
+  buildStep();
+};
+
+/**
+ * Play the world-then-writing emergence from the floor (load and reseed; Decision
+ * 6). The world walks beat-by-beat with the cross-fade; after the held breath, the
+ * writing phase builds the towns house-by-house over the frozen terrain.
+ */
 const playEmergence = () => {
   cancelEmergence();
   const token = playToken;
@@ -380,27 +511,29 @@ const playEmergence = () => {
     render();
     return;
   }
-  // Baseline: the floor frame, then beats fade in over it.
+  const worldSteps = plan.filter((s) => s.kind !== 'arrive');
+  const writeSteps = plan.filter((s) => s.kind === 'arrive');
+  // Baseline: the floor frame, then world beats fade in over it.
   prevSvg = frameSvg(floorStep());
   map.innerHTML = prevSvg;
   let i = 0;
-  const tick = () => {
+  const worldTick = () => {
     if (token !== playToken) return; // a newer run (or a cancel) superseded this one
-    const step = plan[i];
+    const step = worldSteps[i];
     paint(step, true);
     i += 1;
-    if (i < plan.length) {
-      const dwell = step.kind === 'hold' ? tuners.holdMs : step.kind === 'pulse' ? tuners.pulseMs : tuners.beatMs;
-      beatTimer = setTimeout(tick, dwell);
+    const dwell = step.kind === 'hold' ? tuners.holdMs : step.kind === 'pulse' ? tuners.pulseMs : tuners.beatMs;
+    if (i < worldSteps.length) {
+      beatTimer = setTimeout(worldTick, dwell);
     } else {
-      // Settle to the canonical static map once the last beat's fade lands, so
-      // the resting state is exactly the proven-equal end frame.
+      // The world is up; after the breath, build the writing.
       beatTimer = setTimeout(() => {
-        if (token === playToken) staticRender();
-      }, tuners.fadeMs);
+        if (token === playToken) playWriting(writeSteps, token);
+      }, dwell);
     }
   };
-  tick();
+  if (worldSteps.length === 0) playWriting(writeSteps, token);
+  else worldTick();
 };
 
 tunersEl.innerHTML = TUNER_SPECS.map(
