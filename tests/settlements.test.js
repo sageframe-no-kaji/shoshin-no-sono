@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   growSettlement,
   blocksExtent,
+  revealedBlocks,
   townSeat,
   sampleField,
   gradient,
@@ -212,5 +213,46 @@ describe('deform — place-then-deform', () => {
     );
     expect([terraSecond[1].x, terraSecond[1].y]).toEqual([0, 0]);
     expect(Math.abs(terraSecond[0].x)).toBeGreaterThan(2);
+  });
+});
+
+describe('revealedBlocks — house-by-house construction (ho-07.6)', () => {
+  /** @type {import('../src/settlements.js').Block[]} */
+  const city = [
+    { x: 0, y: 0, w: 12, h: 8, a: 0, terra: true }, // cathedral, declared first
+    { x: 10, y: 0, w: 6, h: 6, a: 0 },
+    { x: 20, y: 0, w: 6, h: 6, a: 0 },
+    { x: 30, y: 0, w: 6, h: 6, a: 0 },
+  ];
+
+  it('reveals nothing at 0 and everything at 1', () => {
+    expect(revealedBlocks(city, 0)).toEqual([]);
+    expect(revealedBlocks(city, 1)).toHaveLength(4);
+  });
+
+  it('builds houses first and the cathedral strictly last', () => {
+    // three houses, then the cathedral — never the reverse
+    const order = [0.25, 0.5, 0.75, 1].map((f) => revealedBlocks(city, f).map((b) => !!b.terra));
+    expect(order).toEqual([[false], [false, false], [false, false, false], [false, false, false, true]]);
+  });
+
+  it('the cathedral only appears once every house stands', () => {
+    const justBeforeFull = revealedBlocks(city, 0.74); // round(0.74*4)=3 → houses only
+    expect(justBeforeFull.some((b) => b.terra)).toBe(false);
+    expect(justBeforeFull).toHaveLength(3);
+  });
+
+  it('clamps out-of-range fractions', () => {
+    expect(revealedBlocks(city, -1)).toEqual([]);
+    expect(revealedBlocks(city, 2)).toHaveLength(4);
+  });
+
+  it('handles a cathedral-less hamlet (no terra block)', () => {
+    const hamlet = [
+      { x: 0, y: 0, w: 6, h: 6, a: 0 },
+      { x: 8, y: 0, w: 6, h: 6, a: 0 },
+    ];
+    expect(revealedBlocks(hamlet, 0.5)).toHaveLength(1);
+    expect(revealedBlocks(hamlet, 1)).toHaveLength(2);
   });
 });

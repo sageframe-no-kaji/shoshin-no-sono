@@ -414,6 +414,26 @@ export function blocksExtent(blocks) {
   return maxR;
 }
 
+/**
+ * A settlement under construction (ho-07.6 Decision 1): the houses built so far
+ * at a reveal fraction 0→1, the terracotta cathedral landmark gated to the very
+ * last increment so it is raised after every house. Houses come first in a
+ * stable build order, landmarks last; the visible count is `round(fraction × n)`,
+ * so the cathedral enters only when the count reaches the full set. At fraction 1
+ * this is the whole settlement (cathedral on top) — the resting render routes
+ * through here too, so the finished town and the last build frame are identical.
+ * Pure; a town's final size band is fixed, so a city simply *passes through*
+ * smaller silhouettes as its houses accumulate.
+ * @param {Block[]} blocks
+ * @param {number} fraction 0 (empty lot) → 1 (complete)
+ * @returns {Block[]} the visible prefix, houses-then-landmark
+ */
+export function revealedBlocks(blocks, fraction) {
+  const ordered = [...blocks.filter((b) => !b.terra), ...blocks.filter((b) => b.terra)];
+  const f = Math.max(0, Math.min(1, fraction));
+  return ordered.slice(0, Math.round(f * ordered.length));
+}
+
 /* ---------------- seat, size, deform (ho-07) ---------------- */
 
 /**
