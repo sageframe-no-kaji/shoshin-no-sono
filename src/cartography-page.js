@@ -163,23 +163,17 @@ const peakLabel = (x, y, name, native, scale) => {
 };
 
 /**
- * Peak labels. A name in `animatedIds` (the peaks that rose THIS beat) fades in on
- * its own schedule — `nameDelayMs` controls WHEN it starts (after its peak), and
- * `nameFadeMs` HOW LONG it takes; every other name renders plain (opacity 1). The
- * flicker-free trick (ho-07.6): only the freshly-risen name is animated, and it
- * lives solely in the cross-fade's over-layer — the under-layer always carries the
- * standing names plain at full, so re-inserting a frame never restarts a fade.
- * @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale @param {Set<string>} [animatedIds]
+ * Peak labels, plain (opacity 1) — the static / frozen contexts (resting render and
+ * the writing phase's frozen terrain). During the world rise the names are animated
+ * individually in the persistent overlay instead (see nameEl), so their fades can
+ * outlast a beat without re-flashing.
+ * @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale
  */
-const peakLabelsSvg = (peaks, scale, animatedIds) =>
+const peakLabelsSvg = (peaks, scale) =>
   peaks
     .map((p) => {
       const w = indexer.getWork(p.id);
-      if (!w) return '';
-      const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, scale);
-      return animatedIds && animatedIds.has(p.id)
-        ? `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`
-        : label;
+      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, scale) : '';
     })
     .join('');
 
@@ -248,16 +242,25 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
 };
 
 /**
- * One town at a build fraction (ho-07.6 Decision 1). `fraction` 0→1 reveals its
- * houses one at a time with the cathedral raised last (revealedBlocks); the label
- * appears only once the town is essentially built, so a town announces itself when
- * it stands, not while it's a building site. Non-matching towns dim and drop their
- * label. fraction 1 is the finished town — the resting render uses it.
+ * One town at a build fraction (ho-07.6 Decision 1). Houses appear in build order
+ * (cathedral last, via revealedBlocks) and each one *fades* in rather than popping:
+ * the fully-built houses draw solid, and the one currently going up draws at the
+ * fractional opacity between houses — so construction reads smooth. The label
+ * appears once the town essentially stands. Non-matching towns dim and drop their
+ * label. fraction 1 is the finished town (the resting render).
  * @param {import('./cartographer.js').CartographyTown} t @param {number} fraction
  */
 const oneTownSvg = (t, fraction) => {
-  const blocks = settlementSvg(revealedBlocks(t.blocks, fraction));
-  const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${blocks}</g>`;
+  const ordered = revealedBlocks(t.blocks, 1); // all blocks, build order (houses → cathedral)
+  const n = ordered.length;
+  const pos = Math.max(0, Math.min(1, fraction)) * n;
+  const fullCount = Math.floor(pos);
+  const fade = pos - fullCount; // the in-progress house's opacity
+  let inner = settlementSvg(ordered.slice(0, fullCount));
+  if (fullCount < n && fade > 0.001) {
+    inner += `<g opacity="${fade.toFixed(2)}">${settlementSvg([ordered[fullCount]])}</g>`;
+  }
+  const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${inner}</g>`;
   if (!t.match) return `<g opacity="0.1">${g}</g>`;
   // Cap the extent so a sprawling city doesn't fling its label far below the seat —
   // a consistent gap below each settlement instead of one that tracks size (ho-07.6).
@@ -300,18 +303,18 @@ const renderMeta = () => {
 };
 
 /**
- * The SVG for one reveal state — the static map seen through an emergence step:
- * the field scaled to the risen peaks, only the arrived towns drawn, labels for
- * risen peaks (computeField already drops not-yet-risen ones), the corpus-floor
- * marker, and a pulse flash on a pulse step. With the final step's scale this is
- * byte-equivalent to the static render — the snap target.
+ * The terrain for one reveal step — corpus-floor marker, contours, beacons. NO
+ * peak names (those live in the persistent overlay so their fades can outlast a
+ * beat) and NO towns (the writing phase owns those). Returns the SVG and the
+ * step's risen peaks, so the caller can place names for the newly-risen ones.
  * @param {import('./emergence.js').EmergenceStep} step
- * @returns {string}
+ * @returns {{ svg: string, peaks: import('./field.js').PositionedPeak[] }}
  */
-const frameSvg = (step, /** @type {Set<string>} */ animatedNames) => {
-  const seed = carto.activeSeed();
-  const state = gate.currentState();
-  const field = computeField(indexer, state, seed, { ...tuners, emergenceScale: scaleFn(step) });
+const stepTerrain = (step) => {
+  const field = computeField(indexer, gate.currentState(), carto.activeSeed(), {
+    ...tuners,
+    emergenceScale: scaleFn(step),
+  });
   let svg = corpusFloorSvg();
   svg += contourMapSvg(field.heightfield, {
     interval: tuners.interval,
@@ -319,9 +322,16 @@ const frameSvg = (step, /** @type {Set<string>} */ animatedNames) => {
     weightIndex: tuners.weightIndex,
   });
   svg += beaconSvg(field.peaks); // steady during the cross-fade (no reset)
-  svg += peakLabelsSvg(field.peaks, tuners.peakLabelScale, animatedNames); // newly-risen name fades on its own schedule
   if (showPeaks) svg += peakDotsSvg(field.peaks);
-  return svg;
+  return { svg, peaks: field.peaks };
+};
+
+/** One peak name, ready to append to the overlay, with its own WHEN/HOW-LONG fade. @param {import('./field.js').PositionedPeak} p */
+const nameEl = (p) => {
+  const w = indexer.getWork(p.id);
+  if (!w) return '';
+  const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, tuners.peakLabelScale);
+  return `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`;
 };
 
 const render = () => {
@@ -364,7 +374,6 @@ window.emergence = { timeline, plan: () => emergencePlan(timeline) };
 const reduceMotion = () =>
   typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-let prevSvg = '';
 /** Bumped on every (re)start or cancel so stale timers from a prior run no-op. */
 let playToken = 0;
 /** @type {ReturnType<typeof setTimeout> | null} */
@@ -383,26 +392,6 @@ const floorStep = () => ({
   towns: new Set(),
 });
 
-/**
- * Paint a step. The over-layer animates only the names that rose THIS beat
- * (step.ids); the all-plain version of the same frame is stored as `prevSvg` so
- * next beat's under-layer carries every standing name at full — that asymmetry is
- * what keeps names from re-flashing each beat (ho-07.6). `animate` false replaces
- * outright (the snap / static cases).
- * @param {import('./emergence.js').EmergenceStep} step
- * @param {boolean} animate
- */
-const paint = (step, animate) => {
-  const plain = frameSvg(step, new Set());
-  if (animate) {
-    const over = frameSvg(step, new Set(step.ids));
-    map.innerHTML = `<g>${prevSvg}</g><g style="animation:emgIn ${tuners.fadeMs}ms ease-out;">${over}</g>`;
-  } else {
-    map.innerHTML = plain;
-  }
-  prevSvg = plain; // next under-layer: all names plain at full
-};
-
 /** Stop any running emergence; subsequent stale ticks see a changed token and no-op. */
 const cancelEmergence = () => {
   playToken++;
@@ -413,26 +402,43 @@ const cancelEmergence = () => {
 };
 
 /**
- * Cancel any running emergence and render the fully-emerged static map. This is
- * the single snap target: the cancellation end (filter / reseed / tuner mid-play
- * snap to final, Decision 6), the reduced-motion end, and the post-emergence
- * settle all land here, and it equals the proven-equal final emergence frame.
+ * Cancel any running emergence and render the fully-emerged static map — the single
+ * snap target (filter / reseed / tuner mid-play, reduced-motion, and the
+ * post-emergence settle all land here; it equals the proven-equal final frame).
  */
 const staticRender = () => {
   cancelEmergence();
-  prevSvg = '';
   render();
 };
 
 /**
- * The writing phase (ho-07.6 Decision 1). The world is risen and frozen, so the
- * heavy field + contours are computed once and only the cheap settlement layer
- * animates: each arrive beat builds its town(s) house-by-house (revealedBlocks via
- * rAF, time scaled by house count), cathedral last, while already-arrived towns
- * stand built. No re-contour anywhere here. Settles to the static map at the end.
- * @param {import('./emergence.js').EmergenceStep[]} writeSteps @param {number} token
+ * The whole emergence runs over three persistent sibling layers inside #map:
+ *   terr   — terrain (contours + beacons), cross-faded per world beat
+ *   towns  — settlements, built house-by-house in the writing phase
+ *   names  — peak names, APPENDED once each (insertAdjacentHTML) as their peak
+ *            rises, never redrawn — so a name's WHEN/HOW-LONG fade plays its full
+ *            length across as many beats as it needs, and standing names never
+ *            re-flash (ho-07.6, fixing the truncated/flickering fade).
+ * @returns {{ terr: Element, towns: Element, names: Element } | null}
  */
-const playWriting = (writeSteps, token) => {
+const makeLayers = () => {
+  map.innerHTML = '<g id="emgTerr"></g><g id="emgTowns"></g><g id="emgNames"></g>';
+  const terr = map.querySelector('#emgTerr');
+  const towns = map.querySelector('#emgTowns');
+  const names = map.querySelector('#emgNames');
+  return terr && towns && names ? { terr, towns, names } : null;
+};
+
+/**
+ * The writing phase (ho-07.6 Decision 1): the world is frozen, so the heavy field +
+ * contours are computed once into `terr` and only the cheap `towns` layer animates.
+ * Each arrive beat builds its town(s) house-by-house (oneTownSvg fades each house
+ * in; time scales with house count), cathedral last; built towns stand. The `names`
+ * layer is left untouched — the peak names placed during the rise stay put.
+ * @param {import('./emergence.js').EmergenceStep[]} writeSteps @param {number} token
+ * @param {{ terr: Element, towns: Element }} layers
+ */
+const playWriting = (writeSteps, token, layers) => {
   const seed = carto.activeSeed();
   const state = gate.currentState();
   const field = computeField(indexer, state, seed, tuners); // full terrain, once
@@ -441,9 +447,8 @@ const playWriting = (writeSteps, token) => {
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
   const byId = new Map(allTowns.map((t) => [t.id, t]));
-  // The terrain is set ONCE into its own container so its breathing beacons keep
-  // their phase; only the towns container is rewritten per rAF frame.
-  const terrain =
+  // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
+  layers.terr.innerHTML =
     corpusFloorSvg() +
     contourMapSvg(field.heightfield, {
       interval: tuners.interval,
@@ -451,15 +456,11 @@ const playWriting = (writeSteps, token) => {
       weightIndex: tuners.weightIndex,
     }) +
     beaconSvg(field.peaks, true) +
-    peakLabelsSvg(field.peaks, tuners.peakLabelScale) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
-  map.innerHTML = `<g>${terrain}</g><g id="emgTowns"></g>`;
-  const townLayer = map.querySelector('#emgTowns');
-  if (!townLayer) return;
 
   /** @type {import('./cartographer.js').CartographyTown[]} */
   const built = [];
-  /** Build time for a beat scales with its house count, so hamlets are quick and cities take their time. */
+  /** Build time for a beat scales with its house count: hamlets quick, cities slower. */
   const houseCount = (/** @type {string[]} */ ids) =>
     ids.reduce((n, id) => n + (byId.get(id)?.blocks.length ?? 0), 0);
   const paintTowns = (/** @type {string[]} */ buildingIds, /** @type {number} */ fraction) => {
@@ -468,7 +469,7 @@ const playWriting = (writeSteps, token) => {
       const t = byId.get(id);
       if (t) layer += oneTownSvg(t, fraction);
     }
-    townLayer.innerHTML = layer;
+    layers.towns.innerHTML = layer;
   };
 
   let si = 0;
@@ -505,16 +506,18 @@ const playWriting = (writeSteps, token) => {
 
 /**
  * Play the world-then-writing emergence from the floor (load and reseed; Decision
- * 6). The world walks beat-by-beat with the cross-fade; after the held breath, the
- * writing phase builds the towns house-by-house over the frozen terrain.
+ * 6). The world walks beat-by-beat: the `terr` layer cross-fades the new terrain
+ * while each newly-risen peak's name is appended to the persistent `names` layer to
+ * fade in on its own schedule. After the held breath, the writing phase builds the
+ * towns over the frozen terrain.
  */
 const playEmergence = () => {
   cancelEmergence();
   const token = playToken;
   const plan = emergencePlan(timeline);
   renderMeta();
-  if (reduceMotion() || plan.length === 0) {
-    prevSvg = '';
+  const layers = reduceMotion() || plan.length === 0 ? null : makeLayers();
+  if (!layers) {
     render();
     return;
   }
@@ -522,26 +525,48 @@ const playEmergence = () => {
   // are simply not played, so renamed peaks rise once and stay like the rest.
   const worldSteps = plan.filter((s) => s.kind === 'rise' || s.kind === 'hold');
   const writeSteps = plan.filter((s) => s.kind === 'arrive');
-  // Baseline: the floor frame (all plain), then world beats fade in over it.
-  prevSvg = frameSvg(floorStep(), new Set());
-  map.innerHTML = prevSvg;
+  const placed = new Set();
+
+  /** Append names for any not-yet-placed risen peaks; existing names are untouched. */
+  const placeNames = (/** @type {import('./field.js').PositionedPeak[]} */ peaks) => {
+    let add = '';
+    for (const p of peaks) {
+      if (placed.has(p.id)) continue;
+      placed.add(p.id);
+      add += nameEl(p);
+    }
+    if (add) layers.names.insertAdjacentHTML('beforeend', add);
+  };
+
+  let prevTerr = '';
+  const showTerrain = (/** @type {import('./emergence.js').EmergenceStep} */ step, /** @type {boolean} */ animate) => {
+    const { svg, peaks } = stepTerrain(step);
+    layers.terr.innerHTML = animate
+      ? `<g>${prevTerr}</g><g style="animation:emgIn ${tuners.fadeMs}ms ease-out;">${svg}</g>`
+      : svg;
+    prevTerr = svg;
+    placeNames(peaks);
+  };
+
+  // Baseline: the floor terrain + the floor name(s), present from frame 0.
+  showTerrain(floorStep(), false);
+
   let i = 0;
   const worldTick = () => {
     if (token !== playToken) return; // a newer run (or a cancel) superseded this one
-    const step = worldSteps[i];
-    paint(step, true);
+    showTerrain(worldSteps[i], true);
+    const dwell = worldSteps[i].kind === 'hold' ? tuners.holdMs : tuners.beatMs;
     i += 1;
-    const dwell = step.kind === 'hold' ? tuners.holdMs : tuners.beatMs;
     if (i < worldSteps.length) {
       beatTimer = setTimeout(worldTick, dwell);
     } else {
       // The world is up; after the breath, build the writing.
       beatTimer = setTimeout(() => {
-        if (token === playToken) playWriting(writeSteps, token);
+        if (token === playToken) playWriting(writeSteps, token, layers);
       }, dwell);
     }
   };
-  if (worldSteps.length === 0) playWriting(writeSteps, token);
+  if (worldSteps.length === 0) playWriting(writeSteps, token, layers);
   else worldTick();
 };
 
