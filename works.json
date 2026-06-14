@@ -1518,32 +1518,37 @@
       "id": "shodo",
       "name": "Shodō",
       "native_script": "書道",
-      "native_translation": "The way of writing; calligraphy",
-      "hero": "Search your whole corpus by meaning, not keyword.",
+      "native_translation": "The Way of Writing",
+      "hero": "A map to the library of your AI universe.",
       "importance": 9,
       "color": null,
       "featured": true,
       "media": ["software"],
       "group": "constructive-interference",
       "themes": ["continuity", "knowledge"],
-      "status": "shipped",
-      "tags": ["software", "research-instrument", "llm", "corpus-search", "semantic-search", "claude-api"],
-      "repo": null,
+      "status": "scaffolded",
+      "tags": ["software", "research-instrument", "knowledge-management", "semantic-search", "embeddings", "sqlite-vec", "fts5", "mcp-server", "fastapi", "ai-corpus"],
+      "repo": "https://github.com/sageframe-no-kaji/shodo",
       "license": null,
-      "deployment": [],
-      "tech_stack": "LLM-backed semantic search over the practitioner's writing corpus",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/shodo"
+        }
+      ],
+      "tech_stack": "Python 3.11+, FastAPI, SQLite (sqlite-vec + FTS5), bge-m3 embeddings, cross-encoder reranker, HTMX + Jinja2 + Tailwind, HTTP-transported MCP server; optional Ollama; Docker Compose",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
       "embed_url": null,
       "personal_stake": null,
-      "created": "2026-03-04",
+      "created": "2026-05-07",
       "conceived": "2026-03-04",
       "last_updated": "2026-06-14",
-      "short_description": "The practitioner's LLM-powered corpus search engine. Where keyword search finds strings, Shodō finds meaning — querying the entire accumulated writing corpus (essays, notes, conversation exports, project documents) by concept and intent rather than literal match. A core research instrument in the Constructive Interference program: the tool that makes a years-deep corpus navigable as a single searchable body.",
+      "short_description": "A search-and-visualization engine for your own AI conversation history — the years of thinking-with-AI that current tools treat as exhaust. Shodō ingests exports from Claude, ChatGPT, and Claude Code, embeds and indexes them into a local SQLite corpus (sqlite-vec for vectors, FTS5 for lexical), and lets you search across years in natural language, drop into the matching exchange, walk to neighboring conversations on the shelf, and see the temporal density of your own attention as a heat map. Two named parts: Shūji, the disciplined ingestion/embedding engine that runs as a service; and Shodō, the family of interfaces (a web Library Surface plus HTTP, MCP, Python, and CLI bridges) that consume it. A core instrument of the Constructive Interference program and a module for Sutra. (created = build start; conceived ~March 2026.)",
       "substantive_description": [
-        "A writing practice accumulates faster than memory can index it. After enough essays, notes, and conversation transcripts, the corpus holds more than the writer can find again — the idea you know you wrote down a year ago is somewhere, but grep won't surface it because you don't remember the words you used. Shodō is the answer: semantic search over the whole corpus, retrieval by meaning.",
-        "The deeper argument is continuity. A body of work is only coherent if its earlier parts remain reachable from its later ones. Shodō is the retrieval layer that keeps the corpus continuous with itself — the instrument that lets the writing practice build on what it already knows instead of repeating it."
+        "Borges's Library of Babel held every possible book and no way to find any of them — total information, total uselessness. Your AI conversation history is a smaller version of the same problem: vast, complete, and effectively inaccessible. The record of years of real intellectual labor — architecture decisions argued through, drafts reasoned out, conclusions hard-won — persists in some sidebar and is practically unreachable. It cannot be searched semantically; topics cannot be traced across time; the same problems get solved twice. This is a knowledge-management crisis dressed up as a UI limitation.",
+        "Shodō is the catalog those wanderers in the hexagons prayed for. The architecture splits the work into an engine — Shūji, the penmanship practice: disciplined ingestion, normalization, threading, chunking, embedding, indexing, one SQLite file as the entire corpus — and the bridges (HTTP, MCP, Python, CLI) that expose it, so the corpus is reachable from any tool that speaks one of its protocols, including tools not yet written. The naming carries the philosophy: you cannot arrive at Shodō, the Way, by skipping Shūji, the practice. For anyone studying their own thinking, the conversational record is primary evidence — Shodō treats it that way."
       ],
       "relationships": [],
       "images": {
@@ -1557,31 +1562,36 @@
       "name": "Sutra",
       "native_script": "経",
       "native_translation": "Sutra; thread",
-      "hero": "A writing surface under version control.",
+      "hero": "Version control for writers. Without the version control.",
       "importance": 8,
       "color": null,
       "featured": true,
       "media": ["software"],
       "group": "constructive-interference",
       "themes": ["agency", "craft"],
-      "status": "shipped",
-      "tags": ["software", "writing-tool", "version-control", "git", "authoring", "research-instrument"],
-      "repo": null,
+      "status": "scaffolded",
+      "tags": ["software", "desktop-app", "writing-tool", "version-control", "git", "tauri", "rust", "codemirror", "authoring", "markdown"],
+      "repo": "https://github.com/sageframe-no-kaji/sutra",
       "license": null,
-      "deployment": [],
-      "tech_stack": "Git-backed writing surface; version-controlled document authoring",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/sutra"
+        }
+      ],
+      "tech_stack": "Tauri (Rust core + web frontend), libgit2 via git2-rs, CodeMirror 6; direct cross-platform distribution — notarized macOS .app, Windows installer, Linux AppImage",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
       "embed_url": null,
       "personal_stake": null,
-      "created": "2026-03-04",
+      "created": "2026-06-13",
       "conceived": "2026-03-04",
       "last_updated": "2026-06-14",
-      "short_description": "A git-controlled writing surface — a document authoring environment where every draft, revision, and branch of thought lives under version control. Writing as something you can diff, branch, and return to, with the full history preserved rather than overwritten. A core Constructive Interference instrument, conceived the same day as Shodō: where Shodō searches the corpus, Sutra is where the corpus is written.",
+      "short_description": "A cross-platform desktop writing environment (Tauri; macOS, Windows, Linux) that gives writers version control without the version control. You write in markdown; underneath, each piece is a git repository you never see. The vocabulary is built for writers, not engineers: Mark (pause and name a moment), Trail (the walkable timeline of your Marks), Echo (what changed between two Marks, line by line), Thread (a parallel exploration — try a different ending without losing the current one), Weave (fold a Thread back in), Enter (step into any past moment). Writing is recorded continuously — paper, not saving. The flagship application of the Constructive Interference program, and the writing engine the rest of that ecosystem is built around. (created = build start; conceived ~March 2026.)",
       "substantive_description": [
-        "Most writing tools treat a document as a single mutable surface — you change it, and the previous state is gone. For a practice that cares about how thinking evolves, that's a loss. Sutra puts the writing under version control: every revision is kept, every branch of an argument is recoverable, and the history of a piece is as legible as the piece itself.",
-        "The deeper argument is authorship as a tracked, recoverable process rather than a disposable one. Paired with Shodō's retrieval, Sutra closes the loop on the writing practice — one tool to write the corpus under full history, one to search it by meaning. Together they are the working surface of the Constructive Interference program."
+        "Writing tools are designed for producing documents, not for thinking. Word's version history is a crime scene; Google Docs' is a slideshow; Track Changes buries the prose in markup. None invite you to look at the shape of your own thinking over time. Git does — the diff is clean, line by line, what left and what arrived — but git is a terminal whose vocabulary was built for engineers. Nobody who writes for a living should have to type 'git checkout -b' to try a different ending. Sutra closes that gap: all of git's structural power (Marks are commits, Threads are branches, Echoes are diffs, the Trail is the log), none of its interface.",
+        "The persistence model is paper, not saving — content writes to disk on every keystroke, the Version Engine lays down silent micro-commits at inflection points, and Marks are the moments the writer chooses to name. The architecture is three parts: the Writing Surface (Tauri + CodeMirror 6), the Piece Manager (translates the writer's vocabulary to git operations), and the Version Engine (an isolatable Rust crate over libgit2 with Jujutsu-inspired no-staging semantics). Sutra is two things at once — a finished writing tool you can pick up today, and the writing engine at the core of the larger work, the surface that Shodō's corpus index and Voice DNA's style layer are designed to plug into."
       ],
       "relationships": [
         {
@@ -1589,7 +1599,7 @@
           "type": "paired_with",
           "strength": null,
           "articulated_in": null,
-          "note": "Conceived the same day; the Constructive Interference writing/search pair — Sutra writes the corpus, Shodō searches it."
+          "note": "The Constructive Interference tooling pair, conceived the same day: Shodō indexes the writer's full AI conversation corpus and is built as a module for Sutra; Sutra is the writing engine it plugs into."
         }
       ],
       "images": {
