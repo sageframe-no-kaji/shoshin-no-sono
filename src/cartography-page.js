@@ -70,11 +70,17 @@ const tuners = {
   // settlement layer (ho-07.6 Decision 1).
   beatMs: 240, // rise beat dwell before the next
   holdMs: 350, // the world→writing breath (ho-07.6 Decision 7 — shrunk from a seam)
-  fadeMs: 320, // cross-fade between beats; peak names fade in with their peak over this
+  fadeMs: 320, // terrain cross-fade between beats (the rise gesture)
+  nameDelayMs: 220, // WHEN a peak name starts fading in, after its peak rises (ho-07.6)
+  nameFadeMs: 420, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
+  townLabelGap: 6, // gap below a settlement to its label (capped extent → consistent)
   beaconOpacity: 0.55, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
 };
+
+/** Cap on a settlement's extent when placing its label, so big cities don't fling the label far. */
+const TOWN_LABEL_EXTENT_CAP = 38;
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
 const TOWN_GAP_MS = 140;
@@ -104,9 +110,12 @@ const TUNER_SPECS = [
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05 },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05 },
   { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20 },
-  { key: 'fadeMs', label: 'rise cross-fade (ms)', min: 0, max: 900, step: 20 },
+  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20 },
+  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20 },
+  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 1600, step: 20 },
   { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50 },
   { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2 },
+  { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1 },
   { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05 },
 ];
@@ -154,18 +163,23 @@ const peakLabel = (x, y, name, native, scale) => {
 };
 
 /**
- * Peak labels — plain (opacity 1). Their fade-in is the cross-fade's job: a
- * newly-risen peak's name fades in *with* its peak over the rise (the over-layer's
- * `emgIn`), and the under-layer holds every standing name steady, so nothing
- * flickers (ho-07.6 — the per-element animation that caused the flash/disappear
- * was removed). At rest and in the writing phase these are static.
- * @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale
+ * Peak labels. A name in `animatedIds` (the peaks that rose THIS beat) fades in on
+ * its own schedule — `nameDelayMs` controls WHEN it starts (after its peak), and
+ * `nameFadeMs` HOW LONG it takes; every other name renders plain (opacity 1). The
+ * flicker-free trick (ho-07.6): only the freshly-risen name is animated, and it
+ * lives solely in the cross-fade's over-layer — the under-layer always carries the
+ * standing names plain at full, so re-inserting a frame never restarts a fade.
+ * @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale @param {Set<string>} [animatedIds]
  */
-const peakLabelsSvg = (peaks, scale) =>
+const peakLabelsSvg = (peaks, scale, animatedIds) =>
   peaks
     .map((p) => {
       const w = indexer.getWork(p.id);
-      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, scale) : '';
+      if (!w) return '';
+      const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, scale);
+      return animatedIds && animatedIds.has(p.id)
+        ? `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`
+        : label;
     })
     .join('');
 
@@ -245,10 +259,11 @@ const oneTownSvg = (t, fraction) => {
   const blocks = settlementSvg(revealedBlocks(t.blocks, fraction));
   const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${blocks}</g>`;
   if (!t.match) return `<g opacity="0.1">${g}</g>`;
+  // Cap the extent so a sprawling city doesn't fling its label far below the seat —
+  // a consistent gap below each settlement instead of one that tracks size (ho-07.6).
+  const labelY = t.seat.y + Math.min(t.extent, TOWN_LABEL_EXTENT_CAP) + tuners.townLabelGap;
   const label =
-    fraction >= 0.999
-      ? `<g>${townLabel(t.seat.x, t.seat.y + t.extent + 8, t.name, tuners.townLabelScale)}</g>`
-      : '';
+    fraction >= 0.999 ? `<g>${townLabel(t.seat.x, labelY, t.name, tuners.townLabelScale)}</g>` : '';
   return g + label;
 };
 
@@ -293,7 +308,7 @@ const renderMeta = () => {
  * @param {import('./emergence.js').EmergenceStep} step
  * @returns {string}
  */
-const frameSvg = (step) => {
+const frameSvg = (step, /** @type {Set<string>} */ animatedNames) => {
   const seed = carto.activeSeed();
   const state = gate.currentState();
   const field = computeField(indexer, state, seed, { ...tuners, emergenceScale: scaleFn(step) });
@@ -304,7 +319,7 @@ const frameSvg = (step) => {
     weightIndex: tuners.weightIndex,
   });
   svg += beaconSvg(field.peaks); // steady during the cross-fade (no reset)
-  svg += peakLabelsSvg(field.peaks, tuners.peakLabelScale); // fade in with their peak via the cross-fade
+  svg += peakLabelsSvg(field.peaks, tuners.peakLabelScale, animatedNames); // newly-risen name fades on its own schedule
   if (showPeaks) svg += peakDotsSvg(field.peaks);
   return svg;
 };
@@ -369,17 +384,23 @@ const floorStep = () => ({
 });
 
 /**
- * Paint a step. `animate` stacks it over the previous frame with the `emgIn`
- * cross-fade; otherwise it replaces outright (the snap / static cases).
+ * Paint a step. The over-layer animates only the names that rose THIS beat
+ * (step.ids); the all-plain version of the same frame is stored as `prevSvg` so
+ * next beat's under-layer carries every standing name at full — that asymmetry is
+ * what keeps names from re-flashing each beat (ho-07.6). `animate` false replaces
+ * outright (the snap / static cases).
  * @param {import('./emergence.js').EmergenceStep} step
  * @param {boolean} animate
  */
 const paint = (step, animate) => {
-  const svg = frameSvg(step);
-  map.innerHTML = animate
-    ? `<g>${prevSvg}</g><g style="animation:emgIn ${tuners.fadeMs}ms ease-out;">${svg}</g>`
-    : svg;
-  prevSvg = svg;
+  const plain = frameSvg(step, new Set());
+  if (animate) {
+    const over = frameSvg(step, new Set(step.ids));
+    map.innerHTML = `<g>${prevSvg}</g><g style="animation:emgIn ${tuners.fadeMs}ms ease-out;">${over}</g>`;
+  } else {
+    map.innerHTML = plain;
+  }
+  prevSvg = plain; // next under-layer: all names plain at full
 };
 
 /** Stop any running emergence; subsequent stale ticks see a changed token and no-op. */
@@ -501,8 +522,8 @@ const playEmergence = () => {
   // are simply not played, so renamed peaks rise once and stay like the rest.
   const worldSteps = plan.filter((s) => s.kind === 'rise' || s.kind === 'hold');
   const writeSteps = plan.filter((s) => s.kind === 'arrive');
-  // Baseline: the floor frame, then world beats fade in over it.
-  prevSvg = frameSvg(floorStep());
+  // Baseline: the floor frame (all plain), then world beats fade in over it.
+  prevSvg = frameSvg(floorStep(), new Set());
   map.innerHTML = prevSvg;
   let i = 0;
   const worldTick = () => {
