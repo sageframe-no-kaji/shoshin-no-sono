@@ -106,6 +106,25 @@
         font-variant-numeric: tabular-nums;
         color: #2b2b2b;
       }
+      /* Locked (landed in a prior ho): greyed, but still movable. */
+      .tuner.locked {
+        opacity: 0.4;
+      }
+      .tuner .star {
+        color: #9a5b3c;
+        font-size: 0.7em;
+      }
+      .tunerlegend {
+        font-size: 0.72rem;
+        color: #9a958b;
+        margin: 0 0 0.6rem;
+      }
+      .tunerlegend .star {
+        color: #9a5b3c;
+      }
+      .reseedbar {
+        margin: 0.25rem 0 1rem;
+      }
       label.toggle {
         font-size: 0.85rem;
         color: #6b6b6b;
@@ -162,23 +181,28 @@
       <h1>Cartography debug — the map remembers how it was made</h1>
       <p class="lede">
         On load the terrain <strong>emerges</strong> in the order the work was conceived: peaks rise
-        from the floor one beat at a time, the renamed pair (forteller / pālana) pulses a second time
-        when it was named, and once the world has finished rising the six writing-piece
-        <strong>towns</strong> arrive over it in their own dated order. The rhythm is even beats —
-        dates set the order, never the spacing. The 2022 work sits on the floor from the first frame
-        and the faint <code>2025·11</code> line marks where the dense record begins. Toggle a theme to
-        explore (filtering renders statically, no re-emergence); <strong>Reseed</strong> earns a fresh
-        layout and a fresh becoming. The lower sliders dial the emergence by feel — beat dwell, the
-        world→writing hold, the pulse, the cross-fade, the floor-marker weight. Add
-        <code>?seed=N</code> to reproduce a layout; reduced-motion shows the finished map at once.
+        from the floor one beat at a time, each lighting a signal-fire <strong>beacon</strong> and
+        fading in its name; once the world has finished rising, the six writing-piece
+        <strong>towns</strong> build house-by-house over it in their own dated order, cathedrals last.
+        The rhythm is even beats — dates set the order, never the spacing. The 2022 work sits on the
+        floor from the first frame and the faint <code>2025·11</code> line marks where the dense
+        record begins. Toggle a theme to explore (filtering renders statically, no re-emergence);
+        <strong>Reseed</strong> earns a fresh layout and a fresh becoming. Add <code>?seed=N</code> to
+        reproduce a layout; reduced-motion shows the finished map at once.
       </p>
 
       <div class="controls">
-        <button id="reseed">Reseed (novel layout)</button>
         <span class="seedline">seed <code id="seed">—</code> <span id="pinned"></span></span>
         <label class="toggle"><input type="checkbox" id="togglePeaks" /> peak ids</label>
       </div>
+      <p class="tunerlegend">
+        <span style="opacity: 0.4">greyed</span> = landed in an earlier ho (still movable) ·
+        <span class="star">★</span> = animation timing, reseed to see it
+      </p>
       <div class="tuners" id="tuners"></div>
+      <div class="reseedbar">
+        <button id="reseed">Reseed — replay the emergence (novel layout)</button>
+      </div>
       <div class="chips" id="chips"></div>
 
       <div class="plate">

@@ -50,6 +50,7 @@ const tuners = {
   weightIndex: 0.7,
   peakLabelScale: 0.5, // peak label type — its own dial (ho-07.6: peaks were too big)
   townLabelScale: 0.7, // town label type — its own dial (ho-07.6: towns were too small)
+  townInk: 0.32, // settlement building lightness 0 (ink) → 1 (light warm grey) — ho-07.6
 
   // ho-07 towns
   anchorBias: 4,
@@ -84,37 +85,54 @@ const TOWN_GAP_MS = 140;
 /** The signal-fire beacon hue (brand Amber — flame, NOT the reserved terracotta). */
 const BEACON_AMBER = '#D4952A';
 
-/** @type {{ key: string, label: string, min: number, max: number, step: number }[]} */
+/** Settlement building fill: lerp from register ink to a light warm grey by `townInk`. */
+const INK_DARK = [0x2b, 0x2b, 0x2b];
+const INK_LIGHT = [0xa8, 0xa2, 0x97];
+const townInkColor = () => {
+  const t = Math.max(0, Math.min(1, tuners.townInk));
+  const c = INK_DARK.map((d, i) => Math.round(d + (INK_LIGHT[i] - d) * t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+};
+
+/**
+ * `locked`: landed in a prior ho (frozen register / ho-06.5 field / ho-07.5 towns) —
+ * greyed but still movable, so the active ho-07.6 dials are obvious. `reseed`: a
+ * pure-animation timing dial whose effect only shows during the emergence, so it
+ * needs a reseed to watch (marked with ★).
+ * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
+ */
 const TUNER_SPECS = [
-  { key: 'interval', label: 'ring spacing', min: 0.3, max: 1.5, step: 0.02 },
-  { key: 'summitExp', label: 'summit sharpness', min: 1.0, max: 3.0, step: 0.05 },
-  { key: 'noiseWeight', label: 'crenellation', min: 0, max: 2.0, step: 0.05 },
-  { key: 'radiusBase', label: 'base radius', min: 12, max: 60, step: 2 },
-  { key: 'radiusScale', label: 'radius × importance', min: 4, max: 40, step: 1 },
-  { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01 },
-  { key: 'weightRegular', label: 'line weight (regular)', min: 0.05, max: 1.0, step: 0.05 },
-  { key: 'weightIndex', label: 'line weight (index)', min: 0.1, max: 2.0, step: 0.05 },
+  { key: 'interval', label: 'ring spacing', min: 0.3, max: 1.5, step: 0.02, locked: true },
+  { key: 'summitExp', label: 'summit sharpness', min: 1.0, max: 3.0, step: 0.05, locked: true },
+  { key: 'noiseWeight', label: 'crenellation', min: 0, max: 2.0, step: 0.05, locked: true },
+  { key: 'radiusBase', label: 'base radius', min: 12, max: 60, step: 2, locked: true },
+  { key: 'radiusScale', label: 'radius × importance', min: 4, max: 40, step: 1, locked: true },
+  { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01, locked: true },
+  { key: 'weightRegular', label: 'line weight (regular)', min: 0.05, max: 1.0, step: 0.05, locked: true },
+  { key: 'weightIndex', label: 'line weight (index)', min: 0.1, max: 2.0, step: 0.05, locked: true },
+  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 6, step: 0.1, locked: true },
+  { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5, locked: true },
+  { key: 'footOffset', label: 'foot offset', min: 0, max: 160, step: 4, locked: true },
+  { key: 'elongK', label: 'valley elongation', min: 0, max: 12, step: 0.5, locked: true },
+  { key: 'contourFollow', label: 'contour follow', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 'density', label: 'town density', min: 0.5, max: 3, step: 0.1, locked: true },
+  { key: 'extentScale', label: 'density × weight', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05, locked: true },
+  { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
+  { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
+  // ho-07.6 — the live by-feel dials
   { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05 },
   { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05 },
-  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 6, step: 0.1 },
-  { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5 },
-  { key: 'footOffset', label: 'foot offset', min: 0, max: 160, step: 4 },
-  { key: 'elongK', label: 'valley elongation', min: 0, max: 12, step: 0.5 },
-  { key: 'contourFollow', label: 'contour follow', min: 0, max: 1, step: 0.05 },
-  { key: 'density', label: 'town density', min: 0.5, max: 3, step: 0.1 },
-  { key: 'extentScale', label: 'density × weight', min: 0, max: 1, step: 0.05 },
-  { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05 },
-  { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05 },
-  { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05 },
-  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20 },
-  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20 },
-  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20 },
-  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 1600, step: 20 },
-  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50 },
-  { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2 },
   { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1 },
+  { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02 },
   { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05 },
+  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true },
+  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true },
+  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20, reseed: true },
+  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 1600, step: 20, reseed: true },
+  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true },
+  { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true },
 ];
 
 let showPeaks = false;
@@ -253,9 +271,10 @@ const oneTownSvg = (t, fraction) => {
   const pos = Math.max(0, Math.min(1, fraction)) * n;
   const fullCount = Math.floor(pos);
   const fade = pos - fullCount; // the in-progress house's opacity
-  let inner = settlementSvg(ordered.slice(0, fullCount));
+  const ink = townInkColor();
+  let inner = settlementSvg(ordered.slice(0, fullCount), { ink });
   if (fullCount < n && fade > 0.001) {
-    inner += `<g opacity="${fade.toFixed(2)}">${settlementSvg([ordered[fullCount]])}</g>`;
+    inner += `<g opacity="${fade.toFixed(2)}">${settlementSvg([ordered[fullCount]], { ink })}</g>`;
   }
   const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${inner}</g>`;
   if (!t.match) return `<g opacity="0.1">${g}</g>`;
@@ -569,7 +588,8 @@ const playEmergence = () => {
 
 tunersEl.innerHTML = TUNER_SPECS.map(
   (t) =>
-    `<label class="tuner"><span class="tname">${t.label}</span>` +
+    `<label class="tuner${t.locked ? ' locked' : ''}">` +
+    `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
     `<input type="range" data-key="${t.key}" min="${t.min}" max="${t.max}" step="${t.step}" value="${tuners[t.key]}" />` +
     `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`,
 ).join('');
