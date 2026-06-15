@@ -19,7 +19,7 @@ import { createIndexer, loadWorks } from './indexer.js';
 import { createGate } from './gate.js';
 import { createCartographer, computeField, computeTowns } from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
-import { contourLevels, extractContour } from './contours.js';
+import { extractContour } from './contours.js';
 import { settlementSvg } from './settlement-map.js';
 import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
@@ -51,7 +51,7 @@ const tuners = {
   weightIndex: 0.4,
   peakLabelScale: 0.5, // peak label BASE type size (ho-07.6)
   importanceScale: 0.6, // how much a peak's importance scales its label, like a real map (ho-07.6)
-  townLabelScale: 0.7, // town label type — its own dial (ho-07.6)
+  townLabelScale: 0.85, // town label type — its own dial (ho-07.6)
   townInk: 0.32, // settlement building lightness 0 (ink) → 1 (light warm grey) — ho-07.6
 
   // ho-07 towns
@@ -80,7 +80,7 @@ const tuners = {
   townLabelGap: 0, // gap from a settlement's OUTER edge to its label
   beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
-  elevationScale: 1, // size of the USGS elevation (iso) labels (ho-07.6)
+  elevationScale: 1.5, // size of the USGS elevation (iso) labels (ho-07.6)
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -123,9 +123,8 @@ const TUNER_SPECS = [
   { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05, locked: true },
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
-  // ho-07.6 — the live by-feel dial
-  { key: 'elevationScale', label: 'iso label size', min: 0.4, max: 2.5, step: 0.05 },
-  // landed for now — locked (still movable)
+  // ho-07.6 — landed for now, locked (still movable)
+  { key: 'elevationScale', label: 'iso label size', min: 0.4, max: 2.5, step: 0.05, locked: true },
   { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
   { key: 'importanceScale', label: 'label × importance', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
@@ -329,23 +328,25 @@ const corpusFloorSvg = () => {
 
 /** Heightfield units → feet: an importance-9 summit (height ≈ 9) reads ≈ 9000 ft. */
 const FEET_PER_UNIT = 1000;
+/** Elevation labels land on ROUND contours (every 1000 ft), like a real topo map. */
+const ELEVATION_STEP_FT = 1000;
 
 /**
- * USGS-style elevation labels inline on the index contours (ho-07.6). Each index
- * ring carries its elevation in feet, set into the line (a cream halo breaks the
- * stroke) and rotated to run along it. A few per ring, spaced out. Rendered only
- * in the resting / frozen-terrain views (computed once), not per world beat.
+ * USGS-style elevation labels (ho-07.6). Iso-lines are extracted at *round* 1000-ft
+ * elevations — independent of the visual contour interval — so the numbers read
+ * 1000, 2000, 3000… rather than the rendered rings' off values. Each carries its
+ * elevation in feet, set inline with a cream halo and rotated along the line. A
+ * couple per level. Rendered only in the resting / frozen-terrain views (computed
+ * once), not per world beat.
  * @param {import('./field.js').Heightfield} hf
  */
 const elevationLabelsSvg = (hf) => {
-  const indexEvery = 5;
+  const maxFeet = hf.max * FEET_PER_UNIT;
   let svg = '';
-  contourLevels(hf.max, tuners.interval).forEach((level, k) => {
-    if (k % indexEvery !== 0) return; // index rings only
-    const feet = Math.round((level * FEET_PER_UNIT) / 100) * 100;
-    const segs = extractContour(hf, level);
-    if (segs.length < 8) return;
-    const stride = Math.max(8, Math.floor(segs.length / 3)); // a few labels per ring
+  for (let feet = ELEVATION_STEP_FT; feet < maxFeet; feet += ELEVATION_STEP_FT) {
+    const segs = extractContour(hf, feet / FEET_PER_UNIT);
+    if (segs.length < 8) continue;
+    const stride = Math.max(8, Math.floor(segs.length / 2)); // ~a couple labels per level
     for (let i = Math.floor(stride / 2); i < segs.length; i += stride) {
       const [a, b] = segs[i];
       const mx = (a.x + b.x) / 2;
@@ -360,7 +361,7 @@ const elevationLabelsSvg = (hf) => {
         `font-family="Spectral, Georgia, serif" font-size="${sz.toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
         `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(2.4 * tuners.elevationScale).toFixed(1)}" stroke-linejoin="round">${feet}</text>`;
     }
-  });
+  }
   return svg;
 };
 
