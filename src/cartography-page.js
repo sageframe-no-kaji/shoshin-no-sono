@@ -19,6 +19,7 @@ import { createIndexer, loadWorks } from './indexer.js';
 import { createGate } from './gate.js';
 import { createCartographer, computeField, computeTowns } from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
+import { contourLevels, extractContour } from './contours.js';
 import { settlementSvg } from './settlement-map.js';
 import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
@@ -45,11 +46,12 @@ const tuners = {
   radiusBase: 12,
   radiusScale: 8,
   relevanceFloor: 0.45,
-  // register line weights — frozen defaults; exposed for the by-feel pass only
-  weightRegular: 0.25,
-  weightIndex: 0.7,
-  peakLabelScale: 0.5, // peak label type — its own dial (ho-07.6: peaks were too big)
-  townLabelScale: 0.7, // town label type — its own dial (ho-07.6: towns were too small)
+  // register line weights — landed at 0.15 / 0.4 by feel (ho-07.6), locked
+  weightRegular: 0.15,
+  weightIndex: 0.4,
+  peakLabelScale: 0.5, // peak label BASE type size (ho-07.6)
+  importanceScale: 0.6, // how much a peak's importance scales its label, like a real map (ho-07.6)
+  townLabelScale: 0.7, // town label type — its own dial (ho-07.6)
   townInk: 0.32, // settlement building lightness 0 (ink) → 1 (light warm grey) — ho-07.6
 
   // ho-07 towns
@@ -120,19 +122,21 @@ const TUNER_SPECS = [
   { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05, locked: true },
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
-  // ho-07.6 — the live by-feel dials
+  // ho-07.6 — the live by-feel dials (the label sizes stay open)
   { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05 },
+  { key: 'importanceScale', label: 'label × importance', min: 0, max: 2, step: 0.05 },
   { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05 },
-  { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1 },
-  { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02 },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
-  { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05 },
-  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true },
-  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true },
-  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20, reseed: true },
-  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 1600, step: 20, reseed: true },
-  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true },
-  { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true },
+  // landed for now — locked (still movable)
+  { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
+  { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05, locked: true },
+  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
+  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
+  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20, reseed: true, locked: true },
+  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 1600, step: 20, reseed: true, locked: true },
+  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true, locked: true },
+  { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true, locked: true },
 ];
 
 let showPeaks = false;
@@ -178,17 +182,27 @@ const peakLabel = (x, y, name, native, scale) => {
 };
 
 /**
+ * A peak's label scale: the base size dialed up or down by its importance, like a
+ * real map where the big places carry the big type (ho-07.6). `importanceScale` 0
+ * makes every peak the same; higher spreads them — importance 10 reaches
+ * (1 + importanceScale)× an importance-2 peak. Floored so the smallest stays legible.
+ * @param {number} importance
+ */
+const peakNameScale = (importance) =>
+  tuners.peakLabelScale * Math.max(0.4, 1 + tuners.importanceScale * ((importance - 2) / 8));
+
+/**
  * Peak labels, plain (opacity 1) — the static / frozen contexts (resting render and
  * the writing phase's frozen terrain). During the world rise the names are animated
  * individually in the persistent overlay instead (see nameEl), so their fades can
- * outlast a beat without re-flashing.
- * @param {import('./field.js').PositionedPeak[]} peaks @param {number} scale
+ * outlast a beat without re-flashing. Each name is sized by its importance.
+ * @param {import('./field.js').PositionedPeak[]} peaks
  */
-const peakLabelsSvg = (peaks, scale) =>
+const peakLabelsSvg = (peaks) =>
   peaks
     .map((p) => {
       const w = indexer.getWork(p.id);
-      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, scale) : '';
+      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, peakNameScale(p.importance)) : '';
     })
     .join('');
 
@@ -311,6 +325,42 @@ const corpusFloorSvg = () => {
   );
 };
 
+/** Heightfield units → feet: an importance-9 summit (height ≈ 9) reads ≈ 9000 ft. */
+const FEET_PER_UNIT = 1000;
+
+/**
+ * USGS-style elevation labels inline on the index contours (ho-07.6). Each index
+ * ring carries its elevation in feet, set into the line (a cream halo breaks the
+ * stroke) and rotated to run along it. A few per ring, spaced out. Rendered only
+ * in the resting / frozen-terrain views (computed once), not per world beat.
+ * @param {import('./field.js').Heightfield} hf
+ */
+const elevationLabelsSvg = (hf) => {
+  const indexEvery = 5;
+  let svg = '';
+  contourLevels(hf.max, tuners.interval).forEach((level, k) => {
+    if (k % indexEvery !== 0) return; // index rings only
+    const feet = Math.round((level * FEET_PER_UNIT) / 100) * 100;
+    const segs = extractContour(hf, level);
+    if (segs.length < 8) return;
+    const stride = Math.max(8, Math.floor(segs.length / 3)); // a few labels per ring
+    for (let i = Math.floor(stride / 2); i < segs.length; i += stride) {
+      const [a, b] = segs[i];
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      let ang = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+      if (ang > 90) ang -= 180;
+      if (ang < -90) ang += 180; // keep the numerals upright
+      svg +=
+        `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="central" ` +
+        `transform="rotate(${ang.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})" ` +
+        `font-family="Spectral, Georgia, serif" font-size="6" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
+        `paint-order="stroke" stroke="#FDFCF9" stroke-width="2.4" stroke-linejoin="round">${feet}</text>`;
+    }
+  });
+  return svg;
+};
+
 /** Update the seed / pinned readouts and the theme chips. */
 const renderMeta = () => {
   seedOut.textContent = String(carto.activeSeed());
@@ -346,7 +396,7 @@ const stepTerrain = (step) => {
 const nameEl = (p) => {
   const w = indexer.getWork(p.id);
   if (!w) return '';
-  const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, tuners.peakLabelScale);
+  const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, peakNameScale(p.importance));
   return `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`;
 };
 
@@ -366,9 +416,10 @@ const render = () => {
     weightRegular: tuners.weightRegular,
     weightIndex: tuners.weightIndex,
   });
+  svg += elevationLabelsSvg(field.heightfield); // USGS elevation labels on the index rings
   svg += townsSvg(towns);
   svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
-  svg += peakLabelsSvg(field.peaks, tuners.peakLabelScale); // real peak labels (variant B), always on
+  svg += peakLabelsSvg(field.peaks); // real peak labels (variant B), sized by importance
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
@@ -471,6 +522,7 @@ const playWriting = (writeSteps, token, layers) => {
       weightRegular: tuners.weightRegular,
       weightIndex: tuners.weightIndex,
     }) +
+    elevationLabelsSvg(field.heightfield) +
     beaconSvg(field.peaks, true) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
 
