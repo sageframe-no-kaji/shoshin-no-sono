@@ -74,8 +74,8 @@ const tuners = {
   beatMs: 240, // rise beat dwell before the next
   holdMs: 350, // the world→writing breath (ho-07.6 Decision 7 — shrunk from a seam)
   fadeMs: 320, // terrain cross-fade between beats (the rise gesture)
-  nameDelayMs: 220, // WHEN a peak name starts fading in, after its peak rises (ho-07.6)
-  nameFadeMs: 420, // HOW LONG the peak name takes to fade in (ho-07.6)
+  nameDelayMs: 580, // WHEN a peak name starts fading in, after its peak rises (ho-07.6)
+  nameFadeMs: 2000, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
   townLabelGap: 0, // gap from a settlement's OUTER edge to its label
   beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
@@ -135,7 +135,7 @@ const TUNER_SPECS = [
   { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
   { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
   { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20, reseed: true, locked: true },
-  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 1600, step: 20, reseed: true, locked: true },
+  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 4000, step: 20, reseed: true, locked: true },
   { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true, locked: true },
   { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true, locked: true },
 ];
@@ -191,21 +191,6 @@ const peakLabel = (x, y, name, native, scale) => {
  */
 const peakNameScale = (importance) =>
   tuners.peakLabelScale * Math.max(0.4, 1 + tuners.importanceScale * ((importance - 2) / 8));
-
-/**
- * Peak labels, plain (opacity 1) — the static / frozen contexts (resting render and
- * the writing phase's frozen terrain). During the world rise the names are animated
- * individually in the persistent overlay instead (see nameEl), so their fades can
- * outlast a beat without re-flashing. Each name is sized by its importance.
- * @param {import('./field.js').PositionedPeak[]} peaks
- */
-const peakLabelsSvg = (peaks) =>
-  peaks
-    .map((p) => {
-      const w = indexer.getWork(p.id);
-      return w ? peakLabel(p.x, p.y - 12, w.name, w.native_script, peakNameScale(p.importance)) : '';
-    })
-    .join('');
 
 /**
  * The signal-fire beacon (ho-07.6 Decision 5): a soft amber glow at each risen
@@ -277,10 +262,11 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
  * the fully-built houses draw solid, and the one currently going up draws at the
  * fractional opacity between houses — so construction reads smooth. The label
  * appears once the town essentially stands. Non-matching towns dim and drop their
- * label. fraction 1 is the finished town (the resting render).
- * @param {import('./cartographer.js').CartographyTown} t @param {number} fraction
+ * the label appears once the town essentially stands. `drawLabel` false omits it, so the
+ * resting render can place all labels on one collision-checked layer above everything.
+ * @param {import('./cartographer.js').CartographyTown} t @param {number} fraction @param {boolean} [drawLabel]
  */
-const oneTownSvg = (t, fraction) => {
+const oneTownSvg = (t, fraction, drawLabel = true) => {
   const ordered = revealedBlocks(t.blocks, 1); // all blocks, build order (houses → cathedral)
   const n = ordered.length;
   const pos = Math.max(0, Math.min(1, fraction)) * n;
@@ -293,16 +279,85 @@ const oneTownSvg = (t, fraction) => {
   }
   const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${inner}</g>`;
   if (!t.match) return `<g opacity="0.1">${g}</g>`;
-  // The label clears the settlement's OUTER edge: full extent (the settlement's
-  // reach) plus the gap, so the gap is always outside the buildings (ho-07.6).
-  const labelY = t.seat.y + t.extent + tuners.townLabelGap;
-  const label =
-    fraction >= 0.999 ? `<g>${townLabel(t.seat.x, labelY, t.name, tuners.townLabelScale)}</g>` : '';
-  return g + label;
+  return drawLabel && fraction >= 0.999 ? g + townLabelSvg(t) : g;
 };
 
-/** All towns at full (the resting render). @param {import('./cartographer.js').CartographyTown[]} towns */
-const townsSvg = (towns) => towns.map((t) => oneTownSvg(t, 1)).join('');
+/** The y of a town's label — below the settlement's outer edge plus the gap (ho-07.6). */
+const townLabelY = (/** @type {import('./cartographer.js').CartographyTown} */ t) =>
+  t.seat.y + t.extent + tuners.townLabelGap;
+
+/** A town's label markup. @param {import('./cartographer.js').CartographyTown} t */
+const townLabelSvg = (t) => `<g>${townLabel(t.seat.x, townLabelY(t), t.name, tuners.townLabelScale)}</g>`;
+
+/** All town buildings at full, no labels (the resting render places labels on top). @param {import('./cartographer.js').CartographyTown[]} towns */
+const townsSvg = (towns) => towns.map((t) => oneTownSvg(t, 1, false)).join('');
+
+/**
+ * @typedef {Object} LabelItem
+ * @property {number} cx center x @property {number} top box top y
+ * @property {number} w box width @property {number} h box height
+ * @property {number} priority higher wins a collision @property {string} svg
+ */
+
+/**
+ * Greedy label placement (ho-07.6): place labels by priority, dropping any whose box
+ * overlaps one already placed — so text never lands on text. A pragmatic stand-in
+ * for ho-09's full collision/leadering layer; here a colliding label is simply
+ * omitted rather than nudged or leadered.
+ * @param {LabelItem[]} items @returns {string}
+ */
+const placeLabels = (items) => {
+  const ranked = [...items].sort((a, b) => b.priority - a.priority);
+  /** @type {{x1:number,y1:number,x2:number,y2:number}[]} */
+  const placed = [];
+  let out = '';
+  for (const it of ranked) {
+    const box = { x1: it.cx - it.w / 2, y1: it.top, x2: it.cx + it.w / 2, y2: it.top + it.h };
+    const hit = placed.some((p) => !(box.x2 < p.x1 || box.x1 > p.x2 || box.y2 < p.y1 || box.y1 > p.y2));
+    if (hit) continue;
+    placed.push(box);
+    out += it.svg;
+  }
+  return out;
+};
+
+/** The collision-checked place-name layer for the resting map: peaks and towns, sized by importance, biggest first. @param {import('./cartographer.js').CartographyField} field @param {import('./cartographer.js').CartographyTown[]} towns */
+const placeNameLayer = (field, towns) => {
+  /** @type {LabelItem[]} */
+  const items = [];
+  for (const p of field.peaks) {
+    const w = indexer.getWork(p.id);
+    if (!w) continue;
+    const sc = peakNameScale(p.importance);
+    const fs = 16.5 * sc;
+    const chars = (w.name || '').length;
+    const wide = chars * fs * 0.78 + (w.native_script ? fs * 2.6 : 0); // caps + tracking + native
+    items.push({
+      cx: p.x,
+      top: p.y - 12 - fs,
+      w: wide + 6,
+      h: fs + 6,
+      priority: p.importance + 0.5, // a work edges out an equal-importance town
+      svg: peakLabel(p.x, p.y - 12, w.name, w.native_script, sc),
+    });
+  }
+  for (const t of towns) {
+    if (!t.match) continue;
+    const fs = 12.5 * tuners.townLabelScale;
+    const lines = wrapLabel(t.name);
+    const maxc = Math.max(1, ...lines.map((l) => l.length));
+    const h = (lines.length - 1) * LABEL_LINE_HEIGHT * tuners.townLabelScale + fs;
+    items.push({
+      cx: t.seat.x,
+      top: townLabelY(t) - fs,
+      w: maxc * fs * 0.5 + 6,
+      h: h + 6,
+      priority: indexer.getWork(t.id)?.importance ?? 0,
+      svg: townLabelSvg(t),
+    });
+  }
+  return placeLabels(items);
+};
 
 /**
  * The corpus-floor marker (ho-07.2 Decision 5): a faint dashed horizon near the
@@ -401,7 +456,8 @@ const nameEl = (p) => {
   const w = indexer.getWork(p.id);
   if (!w) return '';
   const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, peakNameScale(p.importance));
-  return `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`;
+  // ease-in-out for a smooth swell rather than a quick pop (ho-07.6).
+  return `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-in-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`;
 };
 
 const render = () => {
@@ -421,10 +477,10 @@ const render = () => {
     weightIndex: tuners.weightIndex,
   });
   svg += elevationLabelsSvg(field.heightfield); // USGS elevation labels on the index rings
-  svg += townsSvg(towns);
+  svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
-  svg += peakLabelsSvg(field.peaks); // real peak labels (variant B), sized by importance
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
+  svg += placeNameLayer(field, towns); // ALL place names, above everything, collision-checked
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
   pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';
