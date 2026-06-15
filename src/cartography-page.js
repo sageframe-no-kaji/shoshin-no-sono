@@ -77,9 +77,10 @@ const tuners = {
   nameDelayMs: 220, // WHEN a peak name starts fading in, after its peak rises (ho-07.6)
   nameFadeMs: 420, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
-  townLabelGap: 10, // gap from a settlement's OUTER edge to its label
+  townLabelGap: 0, // gap from a settlement's OUTER edge to its label
   beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
+  elevationScale: 1, // size of the USGS elevation (iso) labels (ho-07.6)
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -122,11 +123,12 @@ const TUNER_SPECS = [
   { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05, locked: true },
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
-  // ho-07.6 — the live by-feel dials (the label sizes stay open)
-  { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05 },
-  { key: 'importanceScale', label: 'label × importance', min: 0, max: 2, step: 0.05 },
-  { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05 },
+  // ho-07.6 — the live by-feel dial
+  { key: 'elevationScale', label: 'iso label size', min: 0.4, max: 2.5, step: 0.05 },
   // landed for now — locked (still movable)
+  { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
+  { key: 'importanceScale', label: 'label × importance', min: 0, max: 2, step: 0.05, locked: true },
+  { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
   { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
   { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
   { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05, locked: true },
@@ -351,11 +353,12 @@ const elevationLabelsSvg = (hf) => {
       let ang = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
       if (ang > 90) ang -= 180;
       if (ang < -90) ang += 180; // keep the numerals upright
+      const sz = 6 * tuners.elevationScale;
       svg +=
         `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="central" ` +
         `transform="rotate(${ang.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})" ` +
-        `font-family="Spectral, Georgia, serif" font-size="6" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
-        `paint-order="stroke" stroke="#FDFCF9" stroke-width="2.4" stroke-linejoin="round">${feet}</text>`;
+        `font-family="Spectral, Georgia, serif" font-size="${sz.toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
+        `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(2.4 * tuners.elevationScale).toFixed(1)}" stroke-linejoin="round">${feet}</text>`;
     }
   });
   return svg;
