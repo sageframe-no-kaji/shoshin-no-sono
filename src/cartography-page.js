@@ -76,7 +76,7 @@ const tuners = {
   nameFadeMs: 420, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
   townLabelGap: 10, // gap from a settlement's OUTER edge to its label
-  beaconOpacity: 0.55, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
+  beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
 };
 
