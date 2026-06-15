@@ -74,13 +74,10 @@ const tuners = {
   nameDelayMs: 220, // WHEN a peak name starts fading in, after its peak rises (ho-07.6)
   nameFadeMs: 420, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
-  townLabelGap: 6, // gap below a settlement to its label (capped extent → consistent)
+  townLabelGap: 10, // gap from a settlement's OUTER edge to its label
   beaconOpacity: 0.55, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
 };
-
-/** Cap on a settlement's extent when placing its label, so big cities don't fling the label far. */
-const TOWN_LABEL_EXTENT_CAP = 38;
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
 const TOWN_GAP_MS = 140;
@@ -262,9 +259,9 @@ const oneTownSvg = (t, fraction) => {
   }
   const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${inner}</g>`;
   if (!t.match) return `<g opacity="0.1">${g}</g>`;
-  // Cap the extent so a sprawling city doesn't fling its label far below the seat —
-  // a consistent gap below each settlement instead of one that tracks size (ho-07.6).
-  const labelY = t.seat.y + Math.min(t.extent, TOWN_LABEL_EXTENT_CAP) + tuners.townLabelGap;
+  // The label clears the settlement's OUTER edge: full extent (the settlement's
+  // reach) plus the gap, so the gap is always outside the buildings (ho-07.6).
+  const labelY = t.seat.y + t.extent + tuners.townLabelGap;
   const label =
     fraction >= 0.999 ? `<g>${townLabel(t.seat.x, labelY, t.name, tuners.townLabelScale)}</g>` : '';
   return g + label;
