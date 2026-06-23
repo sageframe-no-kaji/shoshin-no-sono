@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseState, serializeState, parseSeed, parseRender, createGate } from '../src/gate.js';
+import { parseState, serializeState, parseSeed, parseRender, parseLayers, createGate } from '../src/gate.js';
 
 describe('the URL grammar (parse/serialize)', () => {
   it('parses a full door', () => {
@@ -149,42 +149,84 @@ describe('the render channel (parseRender, ho-A-6.0)', () => {
   });
 });
 
-describe('createGate render state (ho-A-6.0)', () => {
-  it('currentRender reads the URL and defaults to contour', () => {
-    expect(createGate(stubWindow('')).currentRender()).toBe('contour');
-    expect(createGate(stubWindow('?render=hachure')).currentRender()).toBe('hachure');
+describe('the layers channel (parseLayers, ho-A-6.1)', () => {
+  it('defaults to iso-only when neither layer key nor render= is present', () => {
+    expect(parseLayers('')).toEqual({ iso: true, hachure: false });
+    expect(parseLayers('?theme=craft')).toEqual({ iso: true, hachure: false });
   });
 
-  it('setRender swaps the renderer and notifies', () => {
+  it('parses ?iso=1&hachure=1 to both-layers', () => {
+    expect(parseLayers('?iso=1&hachure=1')).toEqual({ iso: true, hachure: true });
+  });
+
+  it('treats presence-without-value as truthy', () => {
+    expect(parseLayers('?iso&hachure')).toEqual({ iso: true, hachure: true });
+    expect(parseLayers('?iso=&hachure=')).toEqual({ iso: true, hachure: true });
+  });
+
+  it('respects iso=0 to disable the iso layer', () => {
+    expect(parseLayers('?iso=0&hachure=1')).toEqual({ iso: false, hachure: true });
+    expect(parseLayers('?iso=0')).toEqual({ iso: false, hachure: false });
+  });
+
+  it('falls back to ?render= when no new keys are present', () => {
+    expect(parseLayers('?render=hachure')).toEqual({ iso: false, hachure: true });
+    expect(parseLayers('?render=contour')).toEqual({ iso: true, hachure: false });
+  });
+
+  it('new grammar wins: ?render= is ignored when any new key is present', () => {
+    // `?render=` says one mode, but the new keys take over with per-key
+    // defaults (iso defaults true, hachure defaults false) when present.
+    expect(parseLayers('?render=contour&hachure=1')).toEqual({ iso: true, hachure: true });
+    expect(parseLayers('?render=hachure&iso=1')).toEqual({ iso: true, hachure: false });
+    expect(parseLayers('?render=hachure&iso=0&hachure=1')).toEqual({ iso: false, hachure: true });
+  });
+});
+
+describe('createGate layers state (ho-A-6.1)', () => {
+  it('currentLayers reads the URL with per-key defaults', () => {
+    expect(createGate(stubWindow('')).currentLayers()).toEqual({ iso: true, hachure: false });
+    // ?hachure=1 alone → iso defaults true (the v1.0 visitor surface), hachure on.
+    expect(createGate(stubWindow('?hachure=1')).currentLayers()).toEqual({ iso: true, hachure: true });
+    expect(createGate(stubWindow('?iso=0&hachure=1')).currentLayers()).toEqual({ iso: false, hachure: true });
+    expect(createGate(stubWindow('?iso=1&hachure=1')).currentLayers()).toEqual({ iso: true, hachure: true });
+  });
+
+  it('setLayers merges a partial and notifies', () => {
     const win = stubWindow('?theme=craft');
     const gate = createGate(win);
     const seen = vi.fn();
     gate.onChange(seen);
-    gate.setRender('hachure');
-    expect(win.location.search).toBe('?theme=craft&render=hachure');
-    expect(gate.currentRender()).toBe('hachure');
+    gate.setLayers({ hachure: true });
+    expect(win.location.search).toBe('?theme=craft&hachure=1');
+    expect(gate.currentLayers()).toEqual({ iso: true, hachure: true });
     expect(seen).toHaveBeenCalled();
   });
 
-  it('setRender to the default omits the param from the URL', () => {
-    const win = stubWindow('?theme=craft&render=hachure');
+  it('setLayers to the default ({iso:true, hachure:false}) drops layer keys from the URL', () => {
+    const win = stubWindow('?theme=craft&hachure=1');
     const gate = createGate(win);
-    gate.setRender('contour');
+    gate.setLayers({ hachure: false });
     expect(win.location.search).toBe('?theme=craft');
   });
 
-  it('preserves render mode across filter changes', () => {
-    const win = stubWindow('?render=hachure&theme=craft');
+  it('preserves layers across filter changes', () => {
+    const win = stubWindow('?iso=0&hachure=1&theme=craft');
     const gate = createGate(win);
     gate.setState({ media: ['writing'] });
-    expect(win.location.search).toBe('?theme=craft&media=writing&render=hachure');
-    expect(gate.currentRender()).toBe('hachure');
+    expect(win.location.search).toBe('?theme=craft&media=writing&iso=0&hachure=1');
+    expect(gate.currentLayers()).toEqual({ iso: false, hachure: true });
   });
 
-  it('preserves render mode and seed together', () => {
-    const win = stubWindow('?seed=42&render=hachure');
+  it('preserves layers and seed together', () => {
+    const win = stubWindow('?seed=42&hachure=1');
     const gate = createGate(win);
     gate.setState({ themes: ['craft'] });
-    expect(win.location.search).toBe('?theme=craft&seed=42&render=hachure');
+    expect(win.location.search).toBe('?theme=craft&seed=42&hachure=1');
+  });
+
+  it('a legacy ?render=hachure URL load reads as {iso:false, hachure:true}', () => {
+    const gate = createGate(stubWindow('?render=hachure'));
+    expect(gate.currentLayers()).toEqual({ iso: false, hachure: true });
   });
 });

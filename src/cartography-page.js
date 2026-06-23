@@ -100,7 +100,8 @@ const tuners = {
   labelRed: 0,           // muted dark — user dialed back from terracotta
   labelGlow: 1.0,        // matches the filter dilation baseline
   beaconImportance: 0.6, // landed at 0.6 — full spread was too aggressive on low-imp peaks
-  isoOverlayWeight: 1.0, // multiplier on the basic overlay weights
+  // ho-A-6.1: isoOverlayWeight retired. Independent layers means the iso
+  // renderer uses weightRegular/weightIndex directly when its layer is on.
   hachureImportance: 0.6, // density gates at log-scaled local elevation
 };
 
@@ -190,12 +191,11 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
   { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05, locked: true },
-  { key: 'isoOverlayWeight', label: 'iso overlay weight', min: 0, max: 3, step: 0.05, locked: true },
 ];
 
 let showPeaks = false;
-/** Iso overlay on top of the hachure plate (ho-A-6.0). No effect in iso mode. */
-let showIsos = false;
+// ho-A-6.1: showIsos removed. The iso overlay use-case is now "iso layer on
+// AND hachure layer on" via independent gate flags.
 
 const themes = chipVocabulary(indexer).themes;
 
@@ -283,11 +283,12 @@ const peakLabel = (x, y, name, native, scale) => {
   const nat = native
     ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
-  // Hachure plate: textured cream glow via SVG filter — feMorphology dilates
-  // the OUTER letter silhouette (not per-letter strokes), feDisplacementMap
-  // roughs the edge so it reads inked. Iso plate keeps the ho-07.6
-  // paint-order stroke halo — works clean against contours.
-  if (gate.currentRender() === 'hachure') {
+  // When the hachure layer is on, labels read over a busy ground; use the
+  // textured cream glow via SVG filter — feMorphology dilates the OUTER
+  // letter silhouette (not per-letter strokes), feDisplacementMap roughs
+  // the edge so it reads inked. Otherwise the ho-07.6 paint-order stroke
+  // halo works clean over contours-or-empty.
+  if (gate.currentLayers().hachure) {
     return (
       `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
       `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
@@ -387,9 +388,9 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
     .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
     .join('');
   const fs = 12.5 * scale;
-  // Hachure plate: textured glow filter around the italic text silhouette —
-  // exterior boundary only, no per-letter stroke widening.
-  if (gate.currentRender() === 'hachure') {
+  // Hachure layer on: textured glow filter around the italic text silhouette
+  // — exterior boundary only, no per-letter stroke widening.
+  if (gate.currentLayers().hachure) {
     return (
       `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
       `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
@@ -472,12 +473,12 @@ const placeLabels = (items) => {
 const placeNameLayer = (field, towns) => {
   /** @type {LabelItem[]} */
   const items = [];
-  // Hachure mode uses an SVG filter that dilates the text alpha by ~4*glow px;
-  // collision boxes grow modestly to match the visible glow footprint. Iso
-  // mode keeps the tighter stroke-halo box.
-  const inHachure = gate.currentRender() === 'hachure';
-  const peakCardPad = inHachure ? 3 * tuners.labelGlow : 0;
-  const townCardPad = inHachure ? 3 * tuners.labelGlow : 0;
+  // Hachure layer on: SVG filter dilates the text alpha by ~4*glow px;
+  // collision boxes grow modestly to match the visible glow footprint.
+  // Hachure layer off: tighter stroke-halo box.
+  const hasHachure = gate.currentLayers().hachure;
+  const peakCardPad = hasHachure ? 3 * tuners.labelGlow : 0;
+  const townCardPad = hasHachure ? 3 * tuners.labelGlow : 0;
   for (const p of field.peaks) {
     const w = indexer.getWork(p.id);
     if (!w) continue;
@@ -589,8 +590,16 @@ const renderMeta = () => {
  * @returns {string}
  */
 const terrainSvg = (heightfield) => {
-  if (gate.currentRender() === 'hachure') {
-    let svg = hachureMapSvg(heightfield, {
+  const layers = gate.currentLayers();
+  let svg = '';
+  // Hachures paint first (under), so the iso scaffold reads on top when both
+  // layers are on. When only hachures are on, the hachure renderer emits its
+  // own cream paper. When only isos are on, the iso renderer emits paper.
+  // When both are on, the iso paper rect is harmless (same color over hachure
+  // paper). When neither is on, the page falls back to the corpus floor over
+  // bare cream — legitimate "annotated empty paper" view.
+  if (layers.hachure) {
+    svg += hachureMapSvg(heightfield, {
       sampleStep: tuners.hachureSampleStep,
       slopeFloor: tuners.hachureSlopeFloor,
       slopeRef: tuners.hachureSlopeRef,
@@ -603,25 +612,18 @@ const terrainSvg = (heightfield) => {
       importance: tuners.hachureImportance,
       seed: carto.activeSeed(),
     });
-    // Optional iso overlay on top of the hachure plate — basic weights, paper
-    // transparent so the hachures show through. Uses ho-06's validated default
-    // interval (0.62) rather than the iso panel's tuned value, so the overlay
-    // reads as a skeletal contour scaffold over the hachures.
-    if (showIsos) {
-      svg += contourMapSvg(heightfield, {
-        interval: 0.62,
-        weightRegular: 0.18 * tuners.isoOverlayWeight,
-        weightIndex: 0.35 * tuners.isoOverlayWeight,
-        paper: 'transparent',
-      });
-    }
-    return svg;
   }
-  return contourMapSvg(heightfield, {
-    interval: tuners.interval,
-    weightRegular: tuners.weightRegular,
-    weightIndex: tuners.weightIndex,
-  });
+  if (layers.iso) {
+    svg += contourMapSvg(heightfield, {
+      interval: tuners.interval,
+      weightRegular: tuners.weightRegular,
+      weightIndex: tuners.weightIndex,
+      // When hachures are also on, suppress the iso paper rect so the hachure
+      // ground shows through.
+      paper: layers.hachure ? 'transparent' : undefined,
+    });
+  }
+  return svg;
 };
 
 /**
@@ -663,12 +665,13 @@ const render = () => {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
-  let svg = gate.currentRender() === 'hachure' ? labelGlowFilter(tuners.labelGlow) : '';
+  const layers = gate.currentLayers();
+  let svg = layers.hachure ? labelGlowFilter(tuners.labelGlow) : '';
   svg += corpusFloorSvg();
   svg += terrainSvg(field.heightfield);
-  // Iso elevation labels are coupled to contour lines; they only read on the
-  // iso renderer (ho-A-6.0 keeps the hachure plate untexted by design).
-  if (gate.currentRender() === 'contour') svg += elevationLabelsSvg(field.heightfield);
+  // Iso elevation labels are placed on iso lines — they only read when the
+  // iso layer is on, regardless of hachures.
+  if (layers.iso) svg += elevationLabelsSvg(field.heightfield);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
@@ -741,7 +744,7 @@ const staticRender = () => {
  * @returns {{ terr: Element, towns: Element, names: Element } | null}
  */
 const makeLayers = () => {
-  const defs = gate.currentRender() === 'hachure' ? labelGlowFilter(tuners.labelGlow) : '';
+  const defs = gate.currentLayers().hachure ? labelGlowFilter(tuners.labelGlow) : '';
   map.innerHTML = defs + '<g id="emgTerr"></g><g id="emgTowns"></g><g id="emgNames"></g>';
   const terr = map.querySelector('#emgTerr');
   const towns = map.querySelector('#emgTowns');
@@ -771,7 +774,7 @@ const playWriting = (writeSteps, token, layers) => {
   layers.terr.innerHTML =
     corpusFloorSvg() +
     terrainSvg(field.heightfield) +
-    (gate.currentRender() === 'contour' ? elevationLabelsSvg(field.heightfield) : '') +
+    (gate.currentLayers().iso ? elevationLabelsSvg(field.heightfield) : '') +
     beaconSvg(field.peaks, true) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
 
@@ -887,19 +890,32 @@ const playEmergence = () => {
   else worldTick();
 };
 
-/** Render the active mode's tuner specs into the panel (ho-A-6.0). */
+/**
+ * Render the full tuner panel (ho-A-6.1). Three always-visible sections:
+ * Iso, Hachure, Universal. Replaces the mode-conditional rendering from
+ * ho-A-6.0 — the practitioner needs every dial reachable when both layers
+ * can be live at once.
+ * @type {{title: string, specs: typeof TUNER_SPECS | typeof HACHURE_TUNER_SPECS | typeof UNIVERSAL_TUNER_SPECS}[]}
+ */
+const TUNER_SECTIONS = [
+  { title: 'iso', specs: TUNER_SPECS },
+  { title: 'hachure', specs: HACHURE_TUNER_SPECS },
+  { title: 'universal', specs: UNIVERSAL_TUNER_SPECS },
+];
+
 const renderTuners = () => {
-  const modeSpecs = gate.currentRender() === 'hachure' ? HACHURE_TUNER_SPECS : TUNER_SPECS;
-  const specs = [...modeSpecs, ...UNIVERSAL_TUNER_SPECS];
-  tunersEl.innerHTML = specs
-    .map(
-      (t) =>
-        `<label class="tuner${t.locked ? ' locked' : ''}">` +
-        `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
-        `<input type="range" data-key="${t.key}" min="${t.min}" max="${t.max}" step="${t.step}" value="${tuners[t.key]}" />` +
-        `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`,
-    )
-    .join('');
+  /** @param {typeof TUNER_SPECS[number]} t */
+  const tunerRow = (t) =>
+    `<label class="tuner${t.locked ? ' locked' : ''}">` +
+    `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
+    `<input type="range" data-key="${t.key}" min="${t.min}" max="${t.max}" step="${t.step}" value="${tuners[t.key]}" />` +
+    `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`;
+  tunersEl.innerHTML = TUNER_SECTIONS.map(
+    (s) =>
+      `<div class="tunersection"><span class="tsectiontitle">${s.title}</span>` +
+      s.specs.map(tunerRow).join('') +
+      `</div>`,
+  ).join('');
 };
 renderTuners();
 
@@ -915,19 +931,25 @@ tunersEl.addEventListener('input', (ev) => {
   staticRender();
 });
 
-/** Render-mode toggle (ho-A-6.0). Re-renders tuners + map for the new mode. */
-const wireRenderToggle = () => {
-  const radios = /** @type {NodeListOf<HTMLInputElement>} */ (
-    document.querySelectorAll('input[name="render"]')
+/**
+ * Layer checkboxes (ho-A-6.1). Two independent toggles — `iso layer` and
+ * `hachure layer` — drive `gate.setLayers`. Replaces the ho-A-6.0
+ * render-mode radio; the iso-overlay checkbox is also gone (its job is now
+ * "both layers on").
+ */
+const wireLayerToggles = () => {
+  const isoBox = /** @type {HTMLInputElement | null} */ (document.getElementById('toggleIsoLayer'));
+  const hachureBox = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('toggleHachureLayer')
   );
   const sync = () => {
-    const mode = gate.currentRender();
-    radios.forEach((r) => (r.checked = r.value === mode));
+    const layers = gate.currentLayers();
+    if (isoBox) isoBox.checked = layers.iso;
+    if (hachureBox) hachureBox.checked = layers.hachure;
   };
-  radios.forEach((r) =>
-    r.addEventListener('change', () => {
-      if (r.checked) gate.setRender(/** @type {'contour' | 'hachure'} */ (r.value));
-    }),
+  isoBox?.addEventListener('change', () => gate.setLayers({ iso: isoBox.checked }));
+  hachureBox?.addEventListener('change', () =>
+    gate.setLayers({ hachure: hachureBox.checked }),
   );
   gate.onChange(() => {
     sync();
@@ -935,7 +957,7 @@ const wireRenderToggle = () => {
   });
   sync();
 };
-wireRenderToggle();
+wireLayerToggles();
 
 // Filter changes are exploration, not re-narration — render statically and snap
 // any in-flight emergence to the final state (Decision 6).
@@ -952,10 +974,8 @@ document.getElementById('togglePeaks')?.addEventListener('change', (ev) => {
   staticRender();
 });
 
-document.getElementById('toggleIsos')?.addEventListener('change', (ev) => {
-  showIsos = ev.target instanceof HTMLInputElement ? ev.target.checked : false;
-  staticRender();
-});
+// ho-A-6.1: the iso-overlay handler is gone. Both-layers is now expressed by
+// ticking both `iso layer` and `hachure layer`.
 
 chipsEl.addEventListener('click', (ev) => {
   const btn = ev.target instanceof Element ? ev.target.closest('[data-theme]') : null;

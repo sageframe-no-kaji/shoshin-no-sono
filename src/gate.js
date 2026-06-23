@@ -80,9 +80,10 @@ export function parseSeed(search) {
 }
 
 /**
- * Parse the terrain render mode (ho-A-6.0). Either `contour` (the iso renderer
- * committed in ho-06) or `hachure` (the sidequest renderer). Anything missing
- * or unrecognized falls back to `contour` — the iso register stays the default.
+ * Parse the terrain render mode (ho-A-6.0, legacy). Either `contour` (the iso
+ * renderer committed in ho-06) or `hachure` (the sidequest renderer). Kept
+ * exported for ho-A-6.1 backward-compat: shared URLs from the sidequest still
+ * resolve to the right layer state.
  * @typedef {'contour' | 'hachure'} RenderMode
  * @param {string} search
  * @returns {RenderMode}
@@ -93,18 +94,65 @@ export function parseRender(search) {
 }
 
 /**
- * Compose the query string for a URL: the filter grammar plus the seed param
- * when one is present plus the render mode when it diverges from the default.
+ * Parse the terrain layers (ho-A-6.1). Two independent boolean flags — iso and
+ * hachure — replace the ho-A-6.0 render-mode XOR. Either flag can be active or
+ * inactive independently.
+ *
+ * Grammar: `?iso=1&hachure=1`. Presence-truthy values (`1`, `true`, empty
+ * string) parse to `true`; absent or any other value to `false`.
+ *
+ * Backward-compat: if neither `iso` nor `hachure` is present in the URL, fall
+ * back to legacy `?render=` parsing — `?render=hachure` → `{iso: false,
+ * hachure: true}`, `?render=contour` (or absent) → `{iso: true, hachure: false}`.
+ * When *either* new key is present, the new grammar wins and `?render=` is
+ * ignored — the new keys are authoritative.
+ *
+ * Default (URL carries no layer keys and no `?render=`): `{iso: true,
+ * hachure: false}` — preserves the iso-only experience that ships at v1.0.
+ *
+ * @typedef {{ iso: boolean, hachure: boolean }} TerrainLayers
+ * @param {string} search
+ * @returns {TerrainLayers}
+ */
+export function parseLayers(search) {
+  const params = new URLSearchParams(search);
+  const hasIso = params.has('iso');
+  const hasHachure = params.has('hachure');
+  if (!hasIso && !hasHachure) {
+    // Legacy ?render= path.
+    const mode = parseRender(search);
+    return { iso: mode === 'contour', hachure: mode === 'hachure' };
+  }
+  // Each key falls back to its OWN default when absent: iso defaults true
+  // (the v1.0 visitor experience), hachure defaults false. This way `?hachure=1`
+  // means "add hachures to the iso plate," not "switch to hachure-only."
+  const iso = hasIso ? isTruthy(params.get('iso')) : true;
+  const hachure = hasHachure ? isTruthy(params.get('hachure')) : false;
+  return { iso, hachure };
+}
+
+/** Presence-truthy: '1', 'true', or empty (key present without a value). */
+function isTruthy(/** @type {string | null} */ v) {
+  if (v == null) return false;
+  return v === '' || v === '1' || v.toLowerCase() === 'true';
+}
+
+/**
+ * Compose the query string for a URL: filters + seed + the layer flags when
+ * they diverge from the default ({iso: true, hachure: false}). Default state
+ * emits no layer keys, keeping shareable URLs clean.
  * @param {FilterState} state
  * @param {number | null} seed
- * @param {RenderMode} render
+ * @param {TerrainLayers} layers
  * @returns {string}
  */
-function serializeURL(state, seed, render) {
+function serializeURL(state, seed, layers) {
   /** @type {string[]} */
   const tail = [];
   if (seed != null) tail.push(`seed=${seed}`);
-  if (render !== 'contour') tail.push(`render=${render}`);
+  // Default is iso-only; emit keys only when state differs.
+  if (!layers.iso) tail.push('iso=0');
+  if (layers.hachure) tail.push('hachure=1');
   const filters = serializeState(state);
   if (tail.length === 0) return filters;
   return filters ? `${filters}&${tail.join('&')}` : `?${tail.join('&')}`;
@@ -140,14 +188,14 @@ export function createGate(win) {
     return parseSeed(win.location.search);
   }
 
-  /** The active terrain renderer. @returns {RenderMode} */
-  function currentRender() {
-    return parseRender(win.location.search);
+  /** The active terrain layers (ho-A-6.1). @returns {TerrainLayers} */
+  function currentLayers() {
+    return parseLayers(win.location.search);
   }
 
   /**
    * Merge a partial state, push the new URL (so back walks filter history),
-   * and notify listeners. An existing seed and render mode are preserved
+   * and notify listeners. An existing seed and layer config are preserved
    * across the change.
    * @param {Partial<FilterState>} partial
    */
@@ -156,21 +204,22 @@ export function createGate(win) {
     win.history.pushState(
       null,
       '',
-      `${win.location.pathname}${serializeURL(next, currentSeed(), currentRender())}`,
+      `${win.location.pathname}${serializeURL(next, currentSeed(), currentLayers())}`,
     );
     notify();
   }
 
   /**
-   * Switch the terrain renderer; the filter state and seed are preserved.
-   * Listeners notify so the page re-renders.
-   * @param {RenderMode} mode
+   * Merge a partial layer config and push the new URL; filters and seed are
+   * preserved. Listeners notify so the page re-renders.
+   * @param {Partial<TerrainLayers>} partial
    */
-  function setRender(mode) {
+  function setLayers(partial) {
+    const next = { ...currentLayers(), ...partial };
     win.history.pushState(
       null,
       '',
-      `${win.location.pathname}${serializeURL(currentState(), currentSeed(), mode)}`,
+      `${win.location.pathname}${serializeURL(currentState(), currentSeed(), next)}`,
     );
     notify();
   }
@@ -190,9 +239,9 @@ export function createGate(win) {
   return Object.freeze({
     currentState,
     currentSeed,
-    currentRender,
+    currentLayers,
     setState,
-    setRender,
+    setLayers,
     shareableURL,
     onChange,
   });
