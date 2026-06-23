@@ -52,3 +52,58 @@ to the overview's ho entries.
 ### Settlement density scales with weight — 2026-06-13
 - Practitioner: "sometimes there will be many more buildings, no?" Yes — building count/extent scales continuously with settlementWeight = ln(1 + Σ documents-edge strengths). The four size names (hamlet/village/town/city) are BANDS on that continuum: the band sets the STYLE (city → cathedral close + plazas + parallel flanks), the weight sets the COUNT/extent within it. ho-07 owns the weight→density mapping at placement; the spike shows one representative mid-city. (Ties to the parked ho-07 settlement-weight tuner — ln base immaterial, curve family + thresholds are the tuners.)
 - Contour weights dropped again to 0.25 regular / 0.7 index (near the small-scale floor — below ~0.22 regular strokes start dropping out on the 45% plate).
+
+## Session 4 — ridge (closed-with-park, 2026-06-23)
+
+Two rounds. Neither produced a lock-in; the session closes with a known-good parametric primitive **parked for ho-08 to pick up or leave alone**, plus a durable register principle that survives regardless of which succession-carrier ho-08 chooses.
+
+### Round 1 — A/B/C (rejected as posed)
+- **A (field-true contours, saddle from f):** not a ridge — a *reframe* saying "the ridge is a placement decision, not a rendering mark." If peaks happen to sit close, the saddle emerges naturally; if not, succession is silent on the map. The "elder = taller stack of rings" directional cue also fails the schema: importance and `succeeded_by` are independent, so the taller peak isn't reliably the parent.
+- **B (spine line + perpendicular hachures), C (forced-looking elongated connecting contours):** overlay marks not derived from f(x,y). Violates session-1's **"character from process, not decoration."** Off-register, both rejected.
+
+### Round 2 — D/E/F under tightened bound
+Re-prompted: the ridge MUST be a third contribution to f(x,y), every stroke must be a real level set of the summed field, directionality must emerge from the *shape* of the ridge term itself.
+- **D (gaussian tube, constant cross-section, 30% peak max):** directionality from longitudinal height grade — too quiet to read at strength 0.30.
+- **E (tapered cone, 50% peak max): the recommendation.** Cross-section tapers from wide-at-parent to narrow-at-child. Directionality lives in the *width function* — semantically clean, independent of importance and aspect.
+- **F (asymmetric scarp, 70% peak max):** directionality from lateral aspect (one flank steeper than the other) — wrong axis. Aspect is sideways, not from-to.
+
+Visual differences between D/E/F were subtle at the 400×400 viewBox because contour levels were normalized to each variant's own field max — the strength axis hid itself. The session's real deliverable is the **parametric primitive**, not the visual nuance; the SVGs are receipts that the primitive produces field-true contours.
+
+### Register principle (durable — propagate to register page)
+
+> **Relationship features either deform the field (third term in f) or are honest human-overlay marks like roads and trails. Fake-contour overlays — drawn ink that pretends to be a contour without being a level set of f — are off-register.**
+
+Carries forward independent of which carrier ho-08 ultimately picks for succession, and independent of the rendering register (iso-contour vs. streamline).
+
+### Tapered-spur primitive (parked, not locked in `field.js`)
+
+For each `succeeded_by` edge:
+
+```
+ridge(x, y) = 0.50 · exp(−d⊥² / (2 · w(t)²))
+```
+
+where, along the segment between predecessor P and successor S:
+
+- `t ∈ [0, 1]` — parameter along PS (0 at parent P, 1 at child S)
+- `d⊥` — perpendicular distance from the point (x, y) to the segment
+- `w(t) = 32 · (1 − 0.62 · t) + 11` — width tapers from ~32 at parent end to ~15 at child end
+- ridge max = 0.50 × peak max (peaks specified as equal-height radial gaussians)
+
+Add as a third term to f(x, y) alongside the two peak gaussians. Register-agnostic: produces a saddle / figure-eight in iso-contour rendering AND a streamline bow in gradient-flow rendering — same primitive, both visualizations show the lineage.
+
+### Why parked, not locked
+
+Session 4 ruled out *overlay-style ridge marks*. It did **not** decide that the ridge is the carrier of `succeeded_by`. Four candidates remain for **ho-08** to weigh:
+
+1. **Placement pull** — successor laid out near predecessor; existing field/streamlines do the work; no new code in the field generator.
+2. **Field deformation** — this tapered-spur primitive added to f along each `succeeded_by` edge.
+3. **Roads / trails** (session 5, still to run) — human marks on terrain, semantically distinct from the field.
+4. **Rivers** (parked back in session 2) — succession as directional flow, river-as-lineage.
+
+ho-08 weighs all four against the chosen rendering register and commits. The primitive sits here ready, used or unused depending on that call. The SVG variants from Claude Design are not retained — the math is the spec; the pictures were illustrations.
+
+### Propagated
+- Register principle ("field-deform or honest overlay; no fake contours") → register page when next opened.
+- Four-carrier candidate list → ho-08 (to be authored).
+- Tapered-spur primitive → here only; not yet in `src/field.js`.
