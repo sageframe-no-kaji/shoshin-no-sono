@@ -169,7 +169,7 @@ const TUNER_SPECS = [
 const UNIVERSAL_TUNER_SPECS = [
   { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
   { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05, locked: true },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 5, step: 0.05 },
   { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05, locked: true },
 ];
 
@@ -335,10 +335,19 @@ const beaconSvg = (peaks, pulse = false) => {
       const norm = Math.max(0, Math.min(1, p.importance / 10));
       const factor = norm * norm;
       const scaled = op * (1 - dial + dial * factor);
+      // Opacity caps at 1 (SVG). Past `scaled=1` the dial keeps amplifying via
+      // radius growth — sqrt so a 5× weight ~doubles the visible glow, not 5×.
+      const sizeMul = scaled > 1 ? Math.sqrt(scaled) : 1;
+      const rHalo = (9 * sizeMul).toFixed(1);
+      const rGlow = (3.4 * sizeMul).toFixed(1);
+      const rCore = (1.3 * sizeMul).toFixed(1);
+      const opHalo = Math.min(1, 0.18 * scaled).toFixed(3);
+      const opGlow = Math.min(1, 0.55 * scaled).toFixed(3);
+      const opCore = Math.min(1, 0.95 * scaled).toFixed(3);
       return (
-        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${BEACON_AMBER}" opacity="${(0.18 * scaled).toFixed(3)}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${BEACON_AMBER}" opacity="${(0.55 * scaled).toFixed(3)}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.3" fill="${BEACON_AMBER}" opacity="${Math.min(1, 0.95 * scaled).toFixed(3)}"/></g>`
+        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rHalo}" fill="${BEACON_AMBER}" opacity="${opHalo}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rGlow}" fill="${BEACON_AMBER}" opacity="${opGlow}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rCore}" fill="${BEACON_AMBER}" opacity="${opCore}"/></g>`
       );
     })
     .join('');
