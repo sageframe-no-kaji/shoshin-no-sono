@@ -160,10 +160,10 @@ const TUNER_SPECS = [
 /**
  * Universal tuners (ho-A-6.0). Shown in *both* iso and hachure panels because
  * they affect overlays that span both renderers (labels, etc.).
- * @type {{ key: string, label: string, min: number, max: number, step: number }[]}
+ * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
  */
 const UNIVERSAL_TUNER_SPECS = [
-  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05 },
+  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
 ];
 
 /**
@@ -811,10 +811,7 @@ const renderTuners = () => {
     gate.currentRender() === 'hachure'
       ? HACHURE_TUNER_SPECS.map((t) => ({ ...t, locked: false, reseed: false }))
       : TUNER_SPECS;
-  const specs = [
-    ...modeSpecs,
-    ...UNIVERSAL_TUNER_SPECS.map((t) => ({ ...t, locked: false, reseed: false })),
-  ];
+  const specs = [...modeSpecs, ...UNIVERSAL_TUNER_SPECS];
   tunersEl.innerHTML = specs
     .map(
       (t) =>
