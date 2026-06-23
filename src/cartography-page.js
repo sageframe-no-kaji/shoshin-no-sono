@@ -19,6 +19,7 @@ import { createIndexer, loadWorks } from './indexer.js';
 import { createGate } from './gate.js';
 import { createCartographer, computeField, computeTowns } from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
+import { hachureMapSvg } from './hachure-map.js';
 import { extractContour } from './contours.js';
 import { settlementSvg } from './settlement-map.js';
 import { revealedBlocks } from './settlements.js';
@@ -78,9 +79,30 @@ const tuners = {
   nameFadeMs: 2000, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
   townLabelGap: 0, // gap from a settlement's OUTER edge to its label
-  beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
+  beaconOpacity: 1.85, // the per-peak signal-fire beacon weight (ho-A-6.0: relanded from ho-07.6's 1.0)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
   elevationScale: 1.5, // size of the USGS elevation (iso) labels (ho-07.6)
+
+  // ho-A-6.0 hachure renderer (sidequest off ho-06) — by-feel landings against the
+  // real corpus, screenshot at seed=12345 (Reflect pending).
+  hachureSampleStep: 2,
+  hachureSlopeFloor: 0.005,
+  hachureSlopeRef: 0.05,
+  hachureLenBase: 3.8,
+  hachureLenScale: 5,
+  hachureWBase: 0.05,
+  hachureWScale: 0.4,
+  hachurePosJitter: 1.05,
+  hachureAngleJitter: 0.15,
+
+  // Label + beacon + overlay dials (ho-A-6.0) — landed values from the
+  // by-feel pass and locked as the sidequest baseline.
+  labelRed: 0,           // muted dark — user dialed back from terracotta
+  labelGlow: 1.0,        // matches the filter dilation baseline
+  beaconImportance: 0.6, // landed at 0.6 — full spread was too aggressive on low-imp peaks
+  // ho-A-6.1: isoOverlayWeight retired. Independent layers means the iso
+  // renderer uses weightRegular/weightIndex directly when its layer is on.
+  hachureImportance: 0.6, // density gates at log-scaled local elevation
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -130,7 +152,7 @@ const TUNER_SPECS = [
   { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
   { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
   { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05, locked: true },
+  // `beacon weight` and `beacon by importance` moved to UNIVERSAL_TUNER_SPECS (ho-A-6.0).
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05, locked: true },
   { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
   { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
@@ -140,7 +162,40 @@ const TUNER_SPECS = [
   { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true, locked: true },
 ];
 
+/**
+ * Universal tuners (ho-A-6.0). Shown in *both* iso and hachure panels because
+ * they affect overlays that span both renderers (labels, etc.).
+ * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
+ */
+const UNIVERSAL_TUNER_SPECS = [
+  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
+  { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05, locked: true },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 5, step: 0.05, locked: true },
+  { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05, locked: true },
+];
+
+/**
+ * Hachure renderer tuners (ho-A-6.0 sidequest). Shown only when `?render=hachure`
+ * is active so the panel doesn't sprawl; the iso tuners hide in turn under hachure.
+ * All locked as the landed baseline of this sidequest — still movable.
+ * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
+ */
+const HACHURE_TUNER_SPECS = [
+  { key: 'hachureSampleStep', label: 'sample stride (px)', min: 2, max: 14, step: 1, locked: true },
+  { key: 'hachureSlopeFloor', label: 'flat threshold', min: 0, max: 0.05, step: 0.001, locked: true },
+  { key: 'hachureSlopeRef', label: 'steep ceiling', min: 0.05, max: 0.8, step: 0.01, locked: true },
+  { key: 'hachureLenBase', label: 'stroke length (min)', min: 0, max: 6, step: 0.1, locked: true },
+  { key: 'hachureLenScale', label: 'stroke length (slope)', min: 0, max: 12, step: 0.1, locked: true },
+  { key: 'hachureWBase', label: 'stroke weight (min)', min: 0.05, max: 1, step: 0.01, locked: true },
+  { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05, locked: true },
+  { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
+  { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
+  { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05, locked: true },
+];
+
 let showPeaks = false;
+// ho-A-6.1: showIsos removed. The iso overlay use-case is now "iso layer on
+// AND hachure layer on" via independent gate flags.
 
 const themes = chipVocabulary(indexer).themes;
 
@@ -164,6 +219,56 @@ const peakDotsSvg = (peaks) =>
 const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
 
 /**
+ * Textured cream glow filter (ho-A-6.0). Dilates the text alpha (feMorphology)
+ * to grow a halo around the EXTERIOR silhouette of the letterforms, then
+ * displaces that edge by fractal turbulence so the boundary reads as inked-
+ * by-hand rather than geometric. The result composites cream-only outside the
+ * text and leaves the original colored letters untouched.
+ * @param {number} glow `labelGlow` tuner value — scales dilation + roughness.
+ */
+const labelGlowFilter = (glow) => {
+  const radius = Math.max(0.5, 4 * glow);
+  const displace = Math.max(0.5, 2 * glow);
+  return (
+    `<defs><filter id="lblglow" x="-40%" y="-40%" width="180%" height="180%">` +
+    `<feMorphology in="SourceAlpha" operator="dilate" radius="${radius.toFixed(2)}" result="halo"/>` +
+    `<feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="7" result="noise"/>` +
+    `<feDisplacementMap in="halo" in2="noise" scale="${displace.toFixed(2)}" result="rough"/>` +
+    `<feFlood flood-color="#FDFCF9" result="flood"/>` +
+    `<feComposite in="flood" in2="rough" operator="in" result="glow"/>` +
+    `<feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>` +
+    `</filter></defs>`
+  );
+};
+
+/**
+ * Label color dial (ho-A-6.0). Three-stop gradient so the slider's 1.0
+ * default lands exactly on terracotta — linear between 0..1 (warm dark →
+ * terracotta) and 1..1.5 (terracotta → vivid red). Native script tracks the
+ * primary color but in a slightly lighter parallel gradient so the visual
+ * hierarchy survives the dial.
+ */
+const LABEL_PRIMARY_STOPS = [
+  [0x2b, 0x2b, 0x2b],
+  [0x9a, 0x5b, 0x3c],
+  [0xc5, 0x3d, 0x24],
+];
+const LABEL_NATIVE_STOPS = [
+  [0x5c, 0x5c, 0x5c],
+  [0xb5, 0x72, 0x55],
+  [0xd8, 0x6a, 0x52],
+];
+
+/** @param {number[][]} stops 3 RGB stops at 0 / 1 / 1.5 @param {number} t */
+const labelColor = (stops, t) => {
+  const clamped = Math.max(0, Math.min(1.5, t));
+  const [a, b] = clamped <= 1 ? [stops[0], stops[1]] : [stops[1], stops[2]];
+  const u = clamped <= 1 ? clamped : (clamped - 1) / 0.5;
+  const c = a.map((v, i) => Math.round(v + (b[i] - v) * u));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+};
+
+/**
  * Peak label — typography variant B (peak): wide-tracked roman caps with the
  * native script set beside at near-equal optical size, a cream halo so it reads
  * over the rings. A minimal static render pulled forward so the assembled map
@@ -172,13 +277,28 @@ const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif
  * @param {number} x @param {number} y @param {string} name @param {string|null} native @param {number} scale
  */
 const peakLabel = (x, y, name, native, scale) => {
+  const primary = labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed);
+  const natFill = labelColor(LABEL_NATIVE_STOPS, tuners.labelRed);
+  const fs = 16.5 * scale;
   const nat = native
-    ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="#5C5C5C" style="letter-spacing:0.10em;">${native}</tspan>`
+    ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
+  // When the hachure layer is on, labels read over a busy ground; use the
+  // textured cream glow via SVG filter — feMorphology dilates the OUTER
+  // letter silhouette (not per-letter strokes), feDisplacementMap roughs
+  // the edge so it reads inked. Otherwise the ho-07.6 paint-order stroke
+  // halo works clean over contours-or-empty.
+  if (gate.currentLayers().hachure) {
+    return (
+      `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+      `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
+      `filter="url(#lblglow)">${(name || '').toUpperCase()}${nat}</text>`
+    );
+  }
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="${(16.5 * scale).toFixed(1)}" fill="#2B2B2B" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3.5 * scale).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+    `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
   );
 };
 
@@ -206,13 +326,31 @@ const beaconSvg = (peaks, pulse = false) => {
   const op = tuners.beaconOpacity;
   if (op <= 0) return '';
   const anim = pulse ? ' style="animation:emgBeacon 2800ms ease-in-out infinite;"' : '';
+  const dial = tuners.beaconImportance;
+  // Quadratic spread by importance: factor = (imp/10)^2. Log compressed the
+  // high end so peaks 5–10 all read at ~60–100% — not enough contrast. The
+  // power curve drops imp 3 to ~10% and lets imp 9 sit at ~80%, so the
+  // hierarchy reads. `dial` lerps from uniform (0) to fully spread (1).
   return peaks
-    .map(
-      (p) =>
-        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${BEACON_AMBER}" opacity="${(0.18 * op).toFixed(3)}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${BEACON_AMBER}" opacity="${(0.55 * op).toFixed(3)}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.3" fill="${BEACON_AMBER}" opacity="${Math.min(1, 0.95 * op).toFixed(3)}"/></g>`,
-    )
+    .map((p) => {
+      const norm = Math.max(0, Math.min(1, p.importance / 10));
+      const factor = norm * norm;
+      const scaled = op * (1 - dial + dial * factor);
+      // Opacity caps at 1 (SVG). Past `scaled=1` the dial keeps amplifying via
+      // radius growth — sqrt so a 5× weight ~doubles the visible glow, not 5×.
+      const sizeMul = scaled > 1 ? Math.sqrt(scaled) : 1;
+      const rHalo = (9 * sizeMul).toFixed(1);
+      const rGlow = (3.4 * sizeMul).toFixed(1);
+      const rCore = (1.3 * sizeMul).toFixed(1);
+      const opHalo = Math.min(1, 0.18 * scaled).toFixed(3);
+      const opGlow = Math.min(1, 0.55 * scaled).toFixed(3);
+      const opCore = Math.min(1, 0.95 * scaled).toFixed(3);
+      return (
+        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rHalo}" fill="${BEACON_AMBER}" opacity="${opHalo}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rGlow}" fill="${BEACON_AMBER}" opacity="${opGlow}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rCore}" fill="${BEACON_AMBER}" opacity="${opCore}"/></g>`
+      );
+    })
     .join('');
 };
 
@@ -249,10 +387,20 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
   const tspans = lines
     .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
     .join('');
+  const fs = 12.5 * scale;
+  // Hachure layer on: textured glow filter around the italic text silhouette
+  // — exterior boundary only, no per-letter stroke widening.
+  if (gate.currentLayers().hachure) {
+    return (
+      `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+      `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
+      `filter="url(#lblglow)">${tspans}</text>`
+    );
+  }
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3 * scale).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
+    `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
@@ -325,6 +473,12 @@ const placeLabels = (items) => {
 const placeNameLayer = (field, towns) => {
   /** @type {LabelItem[]} */
   const items = [];
+  // Hachure layer on: SVG filter dilates the text alpha by ~4*glow px;
+  // collision boxes grow modestly to match the visible glow footprint.
+  // Hachure layer off: tighter stroke-halo box.
+  const hasHachure = gate.currentLayers().hachure;
+  const peakCardPad = hasHachure ? 3 * tuners.labelGlow : 0;
+  const townCardPad = hasHachure ? 3 * tuners.labelGlow : 0;
   for (const p of field.peaks) {
     const w = indexer.getWork(p.id);
     if (!w) continue;
@@ -335,8 +489,8 @@ const placeNameLayer = (field, towns) => {
     items.push({
       cx: p.x,
       top: p.y - 12 - fs,
-      w: wide + 6,
-      h: fs + 6,
+      w: wide + 6 + 2 * peakCardPad,
+      h: fs + 6 + 2 * peakCardPad,
       priority: p.importance + 0.5, // a work edges out an equal-importance town
       svg: peakLabel(p.x, p.y - 12, w.name, w.native_script, sc),
     });
@@ -350,8 +504,8 @@ const placeNameLayer = (field, towns) => {
     items.push({
       cx: t.seat.x,
       top: townLabelY(t) - fs,
-      w: maxc * fs * 0.5 + 6,
-      h: h + 6,
+      w: maxc * fs * 0.5 + 6 + 2 * townCardPad,
+      h: h + 6 + 2 * townCardPad,
       priority: indexer.getWork(t.id)?.importance ?? 0,
       svg: townLabelSvg(t),
     });
@@ -428,6 +582,51 @@ const renderMeta = () => {
 };
 
 /**
+ * Render the terrain SVG for the active mode (ho-A-6.0). The iso renderer is
+ * the committed register from ho-06; the hachure renderer is the sidequest
+ * A/B. Both consume the same Heightfield; this wrapper picks which one and
+ * passes the right tuner slice.
+ * @param {import('./field.js').Heightfield} heightfield
+ * @returns {string}
+ */
+const terrainSvg = (heightfield) => {
+  const layers = gate.currentLayers();
+  let svg = '';
+  // Hachures paint first (under), so the iso scaffold reads on top when both
+  // layers are on. When only hachures are on, the hachure renderer emits its
+  // own cream paper. When only isos are on, the iso renderer emits paper.
+  // When both are on, the iso paper rect is harmless (same color over hachure
+  // paper). When neither is on, the page falls back to the corpus floor over
+  // bare cream — legitimate "annotated empty paper" view.
+  if (layers.hachure) {
+    svg += hachureMapSvg(heightfield, {
+      sampleStep: tuners.hachureSampleStep,
+      slopeFloor: tuners.hachureSlopeFloor,
+      slopeRef: tuners.hachureSlopeRef,
+      lenBase: tuners.hachureLenBase,
+      lenScale: tuners.hachureLenScale,
+      wBase: tuners.hachureWBase,
+      wScale: tuners.hachureWScale,
+      posJitter: tuners.hachurePosJitter,
+      angleJitter: tuners.hachureAngleJitter,
+      importance: tuners.hachureImportance,
+      seed: carto.activeSeed(),
+    });
+  }
+  if (layers.iso) {
+    svg += contourMapSvg(heightfield, {
+      interval: tuners.interval,
+      weightRegular: tuners.weightRegular,
+      weightIndex: tuners.weightIndex,
+      // When hachures are also on, suppress the iso paper rect so the hachure
+      // ground shows through.
+      paper: layers.hachure ? 'transparent' : undefined,
+    });
+  }
+  return svg;
+};
+
+/**
  * The terrain for one reveal step — corpus-floor marker, contours, beacons. NO
  * peak names (those live in the persistent overlay so their fades can outlast a
  * beat) and NO towns (the writing phase owns those). Returns the SVG and the
@@ -441,11 +640,7 @@ const stepTerrain = (step) => {
     emergenceScale: scaleFn(step),
   });
   let svg = corpusFloorSvg();
-  svg += contourMapSvg(field.heightfield, {
-    interval: tuners.interval,
-    weightRegular: tuners.weightRegular,
-    weightIndex: tuners.weightIndex,
-  });
+  svg += terrainSvg(field.heightfield);
   svg += beaconSvg(field.peaks); // steady during the cross-fade (no reset)
   if (showPeaks) svg += peakDotsSvg(field.peaks);
   return { svg, peaks: field.peaks };
@@ -470,13 +665,13 @@ const render = () => {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
-  let svg = corpusFloorSvg();
-  svg += contourMapSvg(field.heightfield, {
-    interval: tuners.interval,
-    weightRegular: tuners.weightRegular,
-    weightIndex: tuners.weightIndex,
-  });
-  svg += elevationLabelsSvg(field.heightfield); // USGS elevation labels on the index rings
+  const layers = gate.currentLayers();
+  let svg = layers.hachure ? labelGlowFilter(tuners.labelGlow) : '';
+  svg += corpusFloorSvg();
+  svg += terrainSvg(field.heightfield);
+  // Iso elevation labels are placed on iso lines — they only read when the
+  // iso layer is on, regardless of hachures.
+  if (layers.iso) svg += elevationLabelsSvg(field.heightfield);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
@@ -549,7 +744,8 @@ const staticRender = () => {
  * @returns {{ terr: Element, towns: Element, names: Element } | null}
  */
 const makeLayers = () => {
-  map.innerHTML = '<g id="emgTerr"></g><g id="emgTowns"></g><g id="emgNames"></g>';
+  const defs = gate.currentLayers().hachure ? labelGlowFilter(tuners.labelGlow) : '';
+  map.innerHTML = defs + '<g id="emgTerr"></g><g id="emgTowns"></g><g id="emgNames"></g>';
   const terr = map.querySelector('#emgTerr');
   const towns = map.querySelector('#emgTowns');
   const names = map.querySelector('#emgNames');
@@ -577,12 +773,8 @@ const playWriting = (writeSteps, token, layers) => {
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
   layers.terr.innerHTML =
     corpusFloorSvg() +
-    contourMapSvg(field.heightfield, {
-      interval: tuners.interval,
-      weightRegular: tuners.weightRegular,
-      weightIndex: tuners.weightIndex,
-    }) +
-    elevationLabelsSvg(field.heightfield) +
+    terrainSvg(field.heightfield) +
+    (gate.currentLayers().iso ? elevationLabelsSvg(field.heightfield) : '') +
     beaconSvg(field.peaks, true) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
 
@@ -698,13 +890,34 @@ const playEmergence = () => {
   else worldTick();
 };
 
-tunersEl.innerHTML = TUNER_SPECS.map(
-  (t) =>
+/**
+ * Render the full tuner panel (ho-A-6.1). Three always-visible sections:
+ * Iso, Hachure, Universal. Replaces the mode-conditional rendering from
+ * ho-A-6.0 — the practitioner needs every dial reachable when both layers
+ * can be live at once.
+ * @type {{title: string, specs: typeof TUNER_SPECS | typeof HACHURE_TUNER_SPECS | typeof UNIVERSAL_TUNER_SPECS}[]}
+ */
+const TUNER_SECTIONS = [
+  { title: 'iso', specs: TUNER_SPECS },
+  { title: 'hachure', specs: HACHURE_TUNER_SPECS },
+  { title: 'universal', specs: UNIVERSAL_TUNER_SPECS },
+];
+
+const renderTuners = () => {
+  /** @param {typeof TUNER_SPECS[number]} t */
+  const tunerRow = (t) =>
     `<label class="tuner${t.locked ? ' locked' : ''}">` +
     `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
     `<input type="range" data-key="${t.key}" min="${t.min}" max="${t.max}" step="${t.step}" value="${tuners[t.key]}" />` +
-    `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`,
-).join('');
+    `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`;
+  tunersEl.innerHTML = TUNER_SECTIONS.map(
+    (s) =>
+      `<div class="tunersection"><span class="tsectiontitle">${s.title}</span>` +
+      s.specs.map(tunerRow).join('') +
+      `</div>`,
+  ).join('');
+};
+renderTuners();
 
 tunersEl.addEventListener('input', (ev) => {
   const el = ev.target;
@@ -717,6 +930,34 @@ tunersEl.addEventListener('input', (ev) => {
   // re-watch the emergence with a new value via Reseed (Decision 7 workflow).
   staticRender();
 });
+
+/**
+ * Layer checkboxes (ho-A-6.1). Two independent toggles — `iso layer` and
+ * `hachure layer` — drive `gate.setLayers`. Replaces the ho-A-6.0
+ * render-mode radio; the iso-overlay checkbox is also gone (its job is now
+ * "both layers on").
+ */
+const wireLayerToggles = () => {
+  const isoBox = /** @type {HTMLInputElement | null} */ (document.getElementById('toggleIsoLayer'));
+  const hachureBox = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('toggleHachureLayer')
+  );
+  const sync = () => {
+    const layers = gate.currentLayers();
+    if (isoBox) isoBox.checked = layers.iso;
+    if (hachureBox) hachureBox.checked = layers.hachure;
+  };
+  isoBox?.addEventListener('change', () => gate.setLayers({ iso: isoBox.checked }));
+  hachureBox?.addEventListener('change', () =>
+    gate.setLayers({ hachure: hachureBox.checked }),
+  );
+  gate.onChange(() => {
+    sync();
+    renderTuners();
+  });
+  sync();
+};
+wireLayerToggles();
 
 // Filter changes are exploration, not re-narration — render statically and snap
 // any in-flight emergence to the final state (Decision 6).
@@ -732,6 +973,9 @@ document.getElementById('togglePeaks')?.addEventListener('change', (ev) => {
   showPeaks = ev.target instanceof HTMLInputElement ? ev.target.checked : false;
   staticRender();
 });
+
+// ho-A-6.1: the iso-overlay handler is gone. Both-layers is now expressed by
+// ticking both `iso layer` and `hachure layer`.
 
 chipsEl.addEventListener('click', (ev) => {
   const btn = ev.target instanceof Element ? ev.target.closest('[data-theme]') : null;
