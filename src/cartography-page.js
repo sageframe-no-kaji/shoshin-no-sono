@@ -220,6 +220,22 @@ const peakDotsSvg = (peaks) =>
 const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
 
 /**
+ * Background card behind a label (ho-A-6.0). Cream rounded rect that masks the
+ * busy hachure ground only OUTSIDE the letterforms — the per-letter stroke halo
+ * approach narrowed the colored letters by half its stroke width on each side.
+ * Coordinates: (cx, top) is the top-center of the text box; w, h its dims.
+ * @param {number} cx @param {number} top @param {number} w @param {number} h @param {number} pad
+ */
+const labelCard = (cx, top, w, h, pad) => {
+  const x = cx - w / 2 - pad;
+  const y = top - pad;
+  const ww = w + 2 * pad;
+  const hh = h + 2 * pad;
+  const r = Math.min(pad * 0.5 + 2, 7);
+  return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${ww.toFixed(1)}" height="${hh.toFixed(1)}" rx="${r.toFixed(1)}" ry="${r.toFixed(1)}" fill="#FDFCF9"/>`;
+};
+
+/**
  * Label color dial (ho-A-6.0). Three-stop gradient so the slider's 1.0
  * default lands exactly on terracotta — linear between 0..1 (warm dark →
  * terracotta) and 1..1.5 (terracotta → vivid red). Native script tracks the
@@ -257,17 +273,26 @@ const labelColor = (stops, t) => {
 const peakLabel = (x, y, name, native, scale) => {
   const primary = labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed);
   const natFill = labelColor(LABEL_NATIVE_STOPS, tuners.labelRed);
-  // Hachure mode is far busier than iso; thin per-letter halos leave the
-  // counter-spaces of italic letters filled with strokes. Fatter base in
-  // hachure mode makes the halo merge into a continuous cream card.
-  const haloBase = gate.currentRender() === 'hachure' ? 8 : 5;
+  const fs = 16.5 * scale;
   const nat = native
     ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
+  const textEl =
+    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+    `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;">${(name || '').toUpperCase()}${nat}</text>`;
+  // Hachure plate: a cream card behind the whole label is the only way to
+  // mask the dense ground without eating the letters. Iso plate retains the
+  // ho-07.6 paint-order stroke halo because it works clean against contours.
+  if (gate.currentRender() === 'hachure') {
+    const chars = (name || '').length;
+    const wide = chars * fs * 0.78 + (native ? fs * 2.6 : 0);
+    const pad = 6 * tuners.labelGlow;
+    return labelCard(x, y - fs * 0.85, wide, fs * 1.0, pad) + textEl;
+  }
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="${(16.5 * scale).toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(haloBase * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+    `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
   );
 };
 
@@ -338,15 +363,24 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
   const tspans = lines
     .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
     .join('');
-  // Italic letterforms at this size leave open bowls and counter-spaces; in
-  // hachure mode the strokes inside the bowls of 'd', 'a', 'g' read as broken
-  // letters. A much wider halo base fills the bowls with cream and lets the
-  // letters draw clean.
-  const haloBase = gate.currentRender() === 'hachure' ? 10 : 4.5;
+  const fs = 12.5 * scale;
+  const textEl =
+    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+    `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;">${tspans}</text>`;
+  // Hachure plate: card behind the italic label so the cream sits OUTSIDE
+  // the letterforms; the prior thick stroke halo was eating the letter
+  // strokes by drawing inside the path.
+  if (gate.currentRender() === 'hachure') {
+    const maxc = Math.max(1, ...lines.map((l) => l.length));
+    const wide = maxc * fs * 0.55;
+    const tall = (lines.length - 1) * LABEL_LINE_HEIGHT * scale + fs * 1.15;
+    const pad = 5 * tuners.labelGlow;
+    return labelCard(x, y - fs * 0.85, wide, tall, pad) + textEl;
+  }
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(haloBase * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
+    `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
@@ -419,6 +453,11 @@ const placeLabels = (items) => {
 const placeNameLayer = (field, towns) => {
   /** @type {LabelItem[]} */
   const items = [];
+  // Hachure mode wraps each label in a cream card; the visible footprint
+  // grows by `pad` on every side. Iso mode keeps the tighter stroke-halo box.
+  const inHachure = gate.currentRender() === 'hachure';
+  const peakCardPad = inHachure ? 6 * tuners.labelGlow : 0;
+  const townCardPad = inHachure ? 5 * tuners.labelGlow : 0;
   for (const p of field.peaks) {
     const w = indexer.getWork(p.id);
     if (!w) continue;
@@ -429,8 +468,8 @@ const placeNameLayer = (field, towns) => {
     items.push({
       cx: p.x,
       top: p.y - 12 - fs,
-      w: wide + 6,
-      h: fs + 6,
+      w: wide + 6 + 2 * peakCardPad,
+      h: fs + 6 + 2 * peakCardPad,
       priority: p.importance + 0.5, // a work edges out an equal-importance town
       svg: peakLabel(p.x, p.y - 12, w.name, w.native_script, sc),
     });
@@ -444,8 +483,8 @@ const placeNameLayer = (field, towns) => {
     items.push({
       cx: t.seat.x,
       top: townLabelY(t) - fs,
-      w: maxc * fs * 0.5 + 6,
-      h: h + 6,
+      w: maxc * fs * 0.5 + 6 + 2 * townCardPad,
+      h: h + 6 + 2 * townCardPad,
       priority: indexer.getWork(t.id)?.importance ?? 0,
       svg: townLabelSvg(t),
     });
