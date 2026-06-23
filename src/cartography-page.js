@@ -95,28 +95,13 @@ const tuners = {
   hachurePosJitter: 1.05,
   hachureAngleJitter: 0.15,
 
-  // Label dials (ho-A-6.0) — live in both iso and hachure panels.
-  // labelRed: 0 = muted dark, 1 = terracotta, 1.5 = vivid; 0.85 lands a touch
-  // shy of full terracotta.
-  // labelGlow: multiplier on the cream halo around place names (1 = current
-  // baseline: 5 / 4.5 for peak / town).
-  labelRed: 0.85,
-  labelGlow: 1.0,
-
-  // Beacon importance dial (ho-A-6.0). 0 = every peak gets full beacon weight
-  // (the ho-07.6 baseline). 1 = beacon opacity log-scaled by importance —
-  // 1+log(1+imp)/log(11), so only the high-importance peaks light up bright.
-  // The existing `beacon weight` (beaconOpacity) is the overall level.
-  beaconImportance: 0,
-
-  // ho-A-6.0 iso overlay (hachure mode only) — multiplier on the basic
-  // overlay weights (regular 0.18, index 0.35 at 1.0).
-  isoOverlayWeight: 1.0,
-
-  // Hachure importance dial (ho-A-6.0). 0 = uniform density (current). 1 =
-  // emission probability per sample scales log(1+elev)/log(1+max) — high
-  // peaks radiate denser streamlines, low skirts thin out.
-  hachureImportance: 0,
+  // Label + beacon + overlay dials (ho-A-6.0) — landed values from the
+  // by-feel pass and locked as the sidequest baseline.
+  labelRed: 0,           // muted dark — user dialed back from terracotta
+  labelGlow: 1.0,        // matches the filter dilation baseline
+  beaconImportance: 1.0, // full quadratic spread across importance
+  isoOverlayWeight: 1.0, // multiplier on the basic overlay weights
+  hachureImportance: 0.6, // density gates at log-scaled local elevation
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -166,7 +151,7 @@ const TUNER_SPECS = [
   { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
   { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
   { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
+  // `beacon weight` and `beacon by importance` moved to UNIVERSAL_TUNER_SPECS (ho-A-6.0).
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05, locked: true },
   { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
   { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
@@ -182,9 +167,10 @@ const TUNER_SPECS = [
  * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
  */
 const UNIVERSAL_TUNER_SPECS = [
-  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05 },
-  { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05 },
-  { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05 },
+  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
+  { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05, locked: true },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
+  { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05, locked: true },
 ];
 
 /**
@@ -203,8 +189,8 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
-  { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05 },
-  { key: 'isoOverlayWeight', label: 'iso overlay weight', min: 0, max: 3, step: 0.05 },
+  { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 'isoOverlayWeight', label: 'iso overlay weight', min: 0, max: 3, step: 0.05, locked: true },
 ];
 
 let showPeaks = false;
@@ -340,13 +326,15 @@ const beaconSvg = (peaks, pulse = false) => {
   if (op <= 0) return '';
   const anim = pulse ? ' style="animation:emgBeacon 2800ms ease-in-out infinite;"' : '';
   const dial = tuners.beaconImportance;
-  // Log-scaled importance: 1+log(1+imp)/log(11) maps imp 0→0, imp 10→1.
-  // `dial` mixes uniform (1) with the log factor — 0 = ho-07.6 baseline.
-  const LOG_MAX = Math.log(11);
+  // Quadratic spread by importance: factor = (imp/10)^2. Log compressed the
+  // high end so peaks 5–10 all read at ~60–100% — not enough contrast. The
+  // power curve drops imp 3 to ~10% and lets imp 9 sit at ~80%, so the
+  // hierarchy reads. `dial` lerps from uniform (0) to fully spread (1).
   return peaks
     .map((p) => {
-      const logFactor = Math.log(1 + Math.max(0, p.importance)) / LOG_MAX;
-      const scaled = op * (1 - dial + dial * logFactor);
+      const norm = Math.max(0, Math.min(1, p.importance / 10));
+      const factor = norm * norm;
+      const scaled = op * (1 - dial + dial * factor);
       return (
         `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${BEACON_AMBER}" opacity="${(0.18 * scaled).toFixed(3)}"/>` +
         `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${BEACON_AMBER}" opacity="${(0.55 * scaled).toFixed(3)}"/>` +
