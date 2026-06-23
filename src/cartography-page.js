@@ -120,13 +120,16 @@ const townInkColor = () => {
 };
 
 /**
- * `locked`: landed in a prior ho (frozen register / ho-06.5 field / ho-07.5 towns) —
- * greyed but still movable, so the active ho-07.6 dials are obvious. `reseed`: a
- * pure-animation timing dial whose effect only shows during the emergence, so it
- * needs a reseed to watch (marked with ★).
- * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
+ * Tuner spec shape. `locked`: landed in a prior ho (frozen register / ho-06.5
+ * field / ho-07.5 towns / ho-A landings) — greyed but still movable, so any
+ * active dials in the current ho are obvious. `reseed`: a pure-animation
+ * timing dial whose effect only shows during the emergence, so it needs a
+ * reseed to watch (marked with ★).
+ * @typedef {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }} TunerSpec
  */
-const TUNER_SPECS = [
+
+/** Iso-layer terrain field + contour rendering. @type {TunerSpec[]} */
+const ISO_TUNER_SPECS = [
   { key: 'interval', label: 'ring spacing', min: 0.3, max: 1.5, step: 0.02, locked: true },
   { key: 'summitExp', label: 'summit sharpness', min: 1.0, max: 3.0, step: 0.05, locked: true },
   { key: 'noiseWeight', label: 'crenellation', min: 0, max: 2.0, step: 0.05, locked: true },
@@ -135,51 +138,10 @@ const TUNER_SPECS = [
   { key: 'relevanceFloor', label: 'sink floor (filtered)', min: 0, max: 0.6, step: 0.01, locked: true },
   { key: 'weightRegular', label: 'line weight (regular)', min: 0.05, max: 1.0, step: 0.05, locked: true },
   { key: 'weightIndex', label: 'line weight (index)', min: 0.1, max: 2.0, step: 0.05, locked: true },
-  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 6, step: 0.1, locked: true },
-  { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5, locked: true },
-  { key: 'footOffset', label: 'foot offset', min: 0, max: 160, step: 4, locked: true },
-  { key: 'elongK', label: 'valley elongation', min: 0, max: 12, step: 0.5, locked: true },
-  { key: 'contourFollow', label: 'contour follow', min: 0, max: 1, step: 0.05, locked: true },
-  { key: 'density', label: 'town density', min: 0.5, max: 3, step: 0.1, locked: true },
-  { key: 'extentScale', label: 'density × weight', min: 0, max: 1, step: 0.05, locked: true },
-  { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05, locked: true },
-  { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
-  { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
-  // ho-07.6 — landed for now, locked (still movable)
-  { key: 'elevationScale', label: 'iso label size', min: 0.4, max: 2.5, step: 0.05, locked: true },
-  { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
-  { key: 'importanceScale', label: 'label × importance', min: 0, max: 2, step: 0.05, locked: true },
-  { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
-  { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
-  { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
-  // `beacon weight` and `beacon by importance` moved to UNIVERSAL_TUNER_SPECS (ho-A-6.0).
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05, locked: true },
-  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
-  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
-  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20, reseed: true, locked: true },
-  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 4000, step: 20, reseed: true, locked: true },
-  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true, locked: true },
-  { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true, locked: true },
 ];
 
-/**
- * Universal tuners (ho-A-6.0). Shown in *both* iso and hachure panels because
- * they affect overlays that span both renderers (labels, etc.).
- * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
- */
-const UNIVERSAL_TUNER_SPECS = [
-  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
-  { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05, locked: true },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 5, step: 0.05, locked: true },
-  { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05, locked: true },
-];
-
-/**
- * Hachure renderer tuners (ho-A-6.0 sidequest). Shown only when `?render=hachure`
- * is active so the panel doesn't sprawl; the iso tuners hide in turn under hachure.
- * All locked as the landed baseline of this sidequest — still movable.
- * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
- */
+/** Hachure-layer streamline rendering (ho-A-6.0). @type {TunerSpec[]} */
 const HACHURE_TUNER_SPECS = [
   { key: 'hachureSampleStep', label: 'sample stride (px)', min: 2, max: 14, step: 1, locked: true },
   { key: 'hachureSlopeFloor', label: 'flat threshold', min: 0, max: 0.05, step: 0.001, locked: true },
@@ -191,6 +153,48 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
   { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05, locked: true },
+];
+
+/** Town placement and building rendering. @type {TunerSpec[]} */
+const TOWN_TUNER_SPECS = [
+  { key: 'anchorBias', label: 'anchor bias (p)', min: 1, max: 6, step: 0.1, locked: true },
+  { key: 'strengthFull', label: 'strength → seated', min: 1, max: 6, step: 0.5, locked: true },
+  { key: 'footOffset', label: 'foot offset', min: 0, max: 160, step: 4, locked: true },
+  { key: 'elongK', label: 'valley elongation', min: 0, max: 12, step: 0.5, locked: true },
+  { key: 'contourFollow', label: 'contour follow', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 'density', label: 'town density', min: 0.5, max: 3, step: 0.1, locked: true },
+  { key: 'extentScale', label: 'density × weight', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 't1', label: 'size: hamlet→village', min: 0.2, max: 1.4, step: 0.05, locked: true },
+  { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
+  { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
+  { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
+];
+
+/** Place names, iso elevation labels, town labels, and label treatment. @type {TunerSpec[]} */
+const LABEL_TUNER_SPECS = [
+  { key: 'elevationScale', label: 'iso label size', min: 0.4, max: 2.5, step: 0.05, locked: true },
+  { key: 'peakLabelScale', label: 'peak label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
+  { key: 'importanceScale', label: 'label × importance', min: 0, max: 2, step: 0.05, locked: true },
+  { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
+  { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
+  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
+  { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05, locked: true },
+];
+
+/** Beacon (signal-fire) rendering at peak summits. @type {TunerSpec[]} */
+const BEACON_TUNER_SPECS = [
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 5, step: 0.05, locked: true },
+  { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05, locked: true },
+];
+
+/** Emergence animation timings (★ reseed to watch). @type {TunerSpec[]} */
+const EMERGENCE_TUNER_SPECS = [
+  { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
+  { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
+  { key: 'nameDelayMs', label: 'name: when (ms)', min: 0, max: 1200, step: 20, reseed: true, locked: true },
+  { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 4000, step: 20, reseed: true, locked: true },
+  { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true, locked: true },
+  { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true, locked: true },
 ];
 
 let showPeaks = false;
@@ -891,20 +895,25 @@ const playEmergence = () => {
 };
 
 /**
- * Render the full tuner panel (ho-A-6.1). Three always-visible sections:
- * Iso, Hachure, Universal. Replaces the mode-conditional rendering from
- * ho-A-6.0 — the practitioner needs every dial reachable when both layers
- * can be live at once.
- * @type {{title: string, specs: typeof TUNER_SPECS | typeof HACHURE_TUNER_SPECS | typeof UNIVERSAL_TUNER_SPECS}[]}
+ * Render the full tuner panel. Six always-visible sections grouped by the
+ * thing each dial actually drives: iso terrain rendering, hachure terrain
+ * rendering, town placement and buildings, label sizing and treatment,
+ * beacon weight, and emergence timing. Replaces the earlier three-section
+ * layout (iso/hachure/universal) where "iso" was a grab bag and "universal"
+ * was a catch-all.
+ * @type {{title: string, specs: TunerSpec[]}[]}
  */
 const TUNER_SECTIONS = [
-  { title: 'iso', specs: TUNER_SPECS },
+  { title: 'iso', specs: ISO_TUNER_SPECS },
   { title: 'hachure', specs: HACHURE_TUNER_SPECS },
-  { title: 'universal', specs: UNIVERSAL_TUNER_SPECS },
+  { title: 'towns', specs: TOWN_TUNER_SPECS },
+  { title: 'labels', specs: LABEL_TUNER_SPECS },
+  { title: 'beacons', specs: BEACON_TUNER_SPECS },
+  { title: 'emergence', specs: EMERGENCE_TUNER_SPECS },
 ];
 
 const renderTuners = () => {
-  /** @param {typeof TUNER_SPECS[number]} t */
+  /** @param {TunerSpec} t */
   const tunerRow = (t) =>
     `<label class="tuner${t.locked ? ' locked' : ''}">` +
     `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
