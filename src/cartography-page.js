@@ -79,7 +79,7 @@ const tuners = {
   nameFadeMs: 2000, // HOW LONG the peak name takes to fade in (ho-07.6)
   perHouseMs: 28, // build time PER HOUSE — town build scales with house count (ho-07.6)
   townLabelGap: 0, // gap from a settlement's OUTER edge to its label
-  beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
+  beaconOpacity: 1.85, // the per-peak signal-fire beacon weight (ho-A-6.0: relanded from ho-07.6's 1.0)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
   elevationScale: 1.5, // size of the USGS elevation (iso) labels (ho-07.6)
 
@@ -99,7 +99,7 @@ const tuners = {
   // by-feel pass and locked as the sidequest baseline.
   labelRed: 0,           // muted dark — user dialed back from terracotta
   labelGlow: 1.0,        // matches the filter dilation baseline
-  beaconImportance: 1.0, // full quadratic spread across importance
+  beaconImportance: 0.6, // landed at 0.6 — full spread was too aggressive on low-imp peaks
   isoOverlayWeight: 1.0, // multiplier on the basic overlay weights
   hachureImportance: 0.6, // density gates at log-scaled local elevation
 };
@@ -169,7 +169,7 @@ const TUNER_SPECS = [
 const UNIVERSAL_TUNER_SPECS = [
   { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
   { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05, locked: true },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 5, step: 0.05 },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 5, step: 0.05, locked: true },
   { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05, locked: true },
 ];
 
