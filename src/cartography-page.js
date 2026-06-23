@@ -83,21 +83,29 @@ const tuners = {
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
   elevationScale: 1.5, // size of the USGS elevation (iso) labels (ho-07.6)
 
-  // ho-A-6.0 hachure renderer (sidequest off ho-06) — dialed against the iso plate.
-  hachureSampleStep: 6,
-  hachureSlopeFloor: 0.012,
-  hachureSlopeRef: 0.35,
-  hachureLenBase: 1.5,
+  // ho-A-6.0 hachure renderer (sidequest off ho-06) — by-feel landings against the
+  // real corpus, screenshot at seed=12345 (Reflect pending).
+  hachureSampleStep: 2,
+  hachureSlopeFloor: 0.005,
+  hachureSlopeRef: 0.05,
+  hachureLenBase: 3.8,
   hachureLenScale: 5,
-  hachureWBase: 0.22,
-  hachureWScale: 0.6,
-  hachurePosJitter: 0.6,
-  hachureAngleJitter: 0.18,
+  hachureWBase: 0.05,
+  hachureWScale: 0.4,
+  hachurePosJitter: 1.05,
+  hachureAngleJitter: 0.15,
 
-  // Label red dial (ho-A-6.0). 0 = muted dark (the pre-A-6.0 baseline),
-  // 1 = terracotta (the new baseline locked in this commit), 1.5 = vivid red.
-  // Live in both iso and hachure panels — labels read across both plates.
-  labelRed: 1.0,
+  // Label dials (ho-A-6.0) — live in both iso and hachure panels.
+  // labelRed: 0 = muted dark, 1 = terracotta, 1.5 = vivid; 0.85 lands a touch
+  // shy of full terracotta.
+  // labelGlow: multiplier on the cream halo around place names (1 = current
+  // baseline: 5 / 4.5 for peak / town).
+  labelRed: 0.85,
+  labelGlow: 1.0,
+
+  // ho-A-6.0 iso overlay (hachure mode only) — multiplier on the basic
+  // overlay weights (regular 0.18, index 0.35 at 1.0).
+  isoOverlayWeight: 1.0,
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -163,7 +171,8 @@ const TUNER_SPECS = [
  * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
  */
 const UNIVERSAL_TUNER_SPECS = [
-  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05, locked: true },
+  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05 },
+  { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05 },
 ];
 
 /**
@@ -182,6 +191,7 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
+  { key: 'isoOverlayWeight', label: 'iso overlay weight', min: 0, max: 3, step: 0.05 },
 ];
 
 let showPeaks = false;
@@ -253,7 +263,7 @@ const peakLabel = (x, y, name, native, scale) => {
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
     `font-size="${(16.5 * scale).toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
   );
 };
 
@@ -327,7 +337,7 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
     `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
@@ -531,8 +541,8 @@ const terrainSvg = (heightfield) => {
     if (showIsos) {
       svg += contourMapSvg(heightfield, {
         interval: 0.62,
-        weightRegular: 0.18,
-        weightIndex: 0.35,
+        weightRegular: 0.18 * tuners.isoOverlayWeight,
+        weightIndex: 0.35 * tuners.isoOverlayWeight,
         paper: 'transparent',
       });
     }
