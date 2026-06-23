@@ -257,13 +257,17 @@ const labelColor = (stops, t) => {
 const peakLabel = (x, y, name, native, scale) => {
   const primary = labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed);
   const natFill = labelColor(LABEL_NATIVE_STOPS, tuners.labelRed);
+  // Hachure mode is far busier than iso; thin per-letter halos leave the
+  // counter-spaces of italic letters filled with strokes. Fatter base in
+  // hachure mode makes the halo merge into a continuous cream card.
+  const haloBase = gate.currentRender() === 'hachure' ? 8 : 5;
   const nat = native
     ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
     `font-size="${(16.5 * scale).toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(haloBase * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
   );
 };
 
@@ -334,10 +338,15 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
   const tspans = lines
     .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
     .join('');
+  // Italic letterforms at this size leave open bowls and counter-spaces; in
+  // hachure mode the strokes inside the bowls of 'd', 'a', 'g' read as broken
+  // letters. A much wider halo base fills the bowls with cream and lets the
+  // letters draw clean.
+  const haloBase = gate.currentRender() === 'hachure' ? 10 : 4.5;
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
     `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(haloBase * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
