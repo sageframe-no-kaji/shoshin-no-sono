@@ -103,9 +103,20 @@ const tuners = {
   labelRed: 0.85,
   labelGlow: 1.0,
 
+  // Beacon importance dial (ho-A-6.0). 0 = every peak gets full beacon weight
+  // (the ho-07.6 baseline). 1 = beacon opacity log-scaled by importance —
+  // 1+log(1+imp)/log(11), so only the high-importance peaks light up bright.
+  // The existing `beacon weight` (beaconOpacity) is the overall level.
+  beaconImportance: 0,
+
   // ho-A-6.0 iso overlay (hachure mode only) — multiplier on the basic
   // overlay weights (regular 0.18, index 0.35 at 1.0).
   isoOverlayWeight: 1.0,
+
+  // Hachure importance dial (ho-A-6.0). 0 = uniform density (current). 1 =
+  // emission probability per sample scales log(1+elev)/log(1+max) — high
+  // peaks radiate denser streamlines, low skirts thin out.
+  hachureImportance: 0,
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -155,7 +166,7 @@ const TUNER_SPECS = [
   { key: 'townLabelScale', label: 'town label size', min: 0.3, max: 1.4, step: 0.05, locked: true },
   { key: 'townLabelGap', label: 'town label gap', min: 0, max: 40, step: 1, locked: true },
   { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
-  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 'beaconOpacity', label: 'beacon weight', min: 0, max: 1, step: 0.05 },
   { key: 'floorMarkerOpacity', label: 'corpus-floor marker', min: 0, max: 0.8, step: 0.05, locked: true },
   { key: 'beatMs', label: 'rise beat (ms)', min: 80, max: 800, step: 20, reseed: true, locked: true },
   { key: 'fadeMs', label: 'terrain cross-fade (ms)', min: 0, max: 900, step: 20, reseed: true, locked: true },
@@ -173,6 +184,7 @@ const TUNER_SPECS = [
 const UNIVERSAL_TUNER_SPECS = [
   { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05 },
   { key: 'labelGlow', label: 'label glow', min: 0, max: 3, step: 0.05 },
+  { key: 'beaconImportance', label: 'beacon by importance', min: 0, max: 1, step: 0.05 },
 ];
 
 /**
@@ -191,6 +203,7 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
+  { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05 },
   { key: 'isoOverlayWeight', label: 'iso overlay weight', min: 0, max: 3, step: 0.05 },
 ];
 
@@ -220,19 +233,26 @@ const peakDotsSvg = (peaks) =>
 const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
 
 /**
- * Background card behind a label (ho-A-6.0). Cream rounded rect that masks the
- * busy hachure ground only OUTSIDE the letterforms — the per-letter stroke halo
- * approach narrowed the colored letters by half its stroke width on each side.
- * Coordinates: (cx, top) is the top-center of the text box; w, h its dims.
- * @param {number} cx @param {number} top @param {number} w @param {number} h @param {number} pad
+ * Textured cream glow filter (ho-A-6.0). Dilates the text alpha (feMorphology)
+ * to grow a halo around the EXTERIOR silhouette of the letterforms, then
+ * displaces that edge by fractal turbulence so the boundary reads as inked-
+ * by-hand rather than geometric. The result composites cream-only outside the
+ * text and leaves the original colored letters untouched.
+ * @param {number} glow `labelGlow` tuner value — scales dilation + roughness.
  */
-const labelCard = (cx, top, w, h, pad) => {
-  const x = cx - w / 2 - pad;
-  const y = top - pad;
-  const ww = w + 2 * pad;
-  const hh = h + 2 * pad;
-  const r = Math.min(pad * 0.5 + 2, 7);
-  return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${ww.toFixed(1)}" height="${hh.toFixed(1)}" rx="${r.toFixed(1)}" ry="${r.toFixed(1)}" fill="#FDFCF9"/>`;
+const labelGlowFilter = (glow) => {
+  const radius = Math.max(0.5, 4 * glow);
+  const displace = Math.max(0.5, 2 * glow);
+  return (
+    `<defs><filter id="lblglow" x="-40%" y="-40%" width="180%" height="180%">` +
+    `<feMorphology in="SourceAlpha" operator="dilate" radius="${radius.toFixed(2)}" result="halo"/>` +
+    `<feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="7" result="noise"/>` +
+    `<feDisplacementMap in="halo" in2="noise" scale="${displace.toFixed(2)}" result="rough"/>` +
+    `<feFlood flood-color="#FDFCF9" result="flood"/>` +
+    `<feComposite in="flood" in2="rough" operator="in" result="glow"/>` +
+    `<feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>` +
+    `</filter></defs>`
+  );
 };
 
 /**
@@ -277,17 +297,16 @@ const peakLabel = (x, y, name, native, scale) => {
   const nat = native
     ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
-  const textEl =
-    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;">${(name || '').toUpperCase()}${nat}</text>`;
-  // Hachure plate: a cream card behind the whole label is the only way to
-  // mask the dense ground without eating the letters. Iso plate retains the
-  // ho-07.6 paint-order stroke halo because it works clean against contours.
+  // Hachure plate: textured cream glow via SVG filter — feMorphology dilates
+  // the OUTER letter silhouette (not per-letter strokes), feDisplacementMap
+  // roughs the edge so it reads inked. Iso plate keeps the ho-07.6
+  // paint-order stroke halo — works clean against contours.
   if (gate.currentRender() === 'hachure') {
-    const chars = (name || '').length;
-    const wide = chars * fs * 0.78 + (native ? fs * 2.6 : 0);
-    const pad = 6 * tuners.labelGlow;
-    return labelCard(x, y - fs * 0.85, wide, fs * 1.0, pad) + textEl;
+    return (
+      `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+      `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
+      `filter="url(#lblglow)">${(name || '').toUpperCase()}${nat}</text>`
+    );
   }
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
@@ -320,13 +339,20 @@ const beaconSvg = (peaks, pulse = false) => {
   const op = tuners.beaconOpacity;
   if (op <= 0) return '';
   const anim = pulse ? ' style="animation:emgBeacon 2800ms ease-in-out infinite;"' : '';
+  const dial = tuners.beaconImportance;
+  // Log-scaled importance: 1+log(1+imp)/log(11) maps imp 0→0, imp 10→1.
+  // `dial` mixes uniform (1) with the log factor — 0 = ho-07.6 baseline.
+  const LOG_MAX = Math.log(11);
   return peaks
-    .map(
-      (p) =>
-        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${BEACON_AMBER}" opacity="${(0.18 * op).toFixed(3)}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${BEACON_AMBER}" opacity="${(0.55 * op).toFixed(3)}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.3" fill="${BEACON_AMBER}" opacity="${Math.min(1, 0.95 * op).toFixed(3)}"/></g>`,
-    )
+    .map((p) => {
+      const logFactor = Math.log(1 + Math.max(0, p.importance)) / LOG_MAX;
+      const scaled = op * (1 - dial + dial * logFactor);
+      return (
+        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${BEACON_AMBER}" opacity="${(0.18 * scaled).toFixed(3)}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.4" fill="${BEACON_AMBER}" opacity="${(0.55 * scaled).toFixed(3)}"/>` +
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="1.3" fill="${BEACON_AMBER}" opacity="${Math.min(1, 0.95 * scaled).toFixed(3)}"/></g>`
+      );
+    })
     .join('');
 };
 
@@ -364,18 +390,14 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
     .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
     .join('');
   const fs = 12.5 * scale;
-  const textEl =
-    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;">${tspans}</text>`;
-  // Hachure plate: card behind the italic label so the cream sits OUTSIDE
-  // the letterforms; the prior thick stroke halo was eating the letter
-  // strokes by drawing inside the path.
+  // Hachure plate: textured glow filter around the italic text silhouette —
+  // exterior boundary only, no per-letter stroke widening.
   if (gate.currentRender() === 'hachure') {
-    const maxc = Math.max(1, ...lines.map((l) => l.length));
-    const wide = maxc * fs * 0.55;
-    const tall = (lines.length - 1) * LABEL_LINE_HEIGHT * scale + fs * 1.15;
-    const pad = 5 * tuners.labelGlow;
-    return labelCard(x, y - fs * 0.85, wide, tall, pad) + textEl;
+    return (
+      `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
+      `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
+      `filter="url(#lblglow)">${tspans}</text>`
+    );
   }
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
@@ -453,11 +475,12 @@ const placeLabels = (items) => {
 const placeNameLayer = (field, towns) => {
   /** @type {LabelItem[]} */
   const items = [];
-  // Hachure mode wraps each label in a cream card; the visible footprint
-  // grows by `pad` on every side. Iso mode keeps the tighter stroke-halo box.
+  // Hachure mode uses an SVG filter that dilates the text alpha by ~4*glow px;
+  // collision boxes grow modestly to match the visible glow footprint. Iso
+  // mode keeps the tighter stroke-halo box.
   const inHachure = gate.currentRender() === 'hachure';
-  const peakCardPad = inHachure ? 6 * tuners.labelGlow : 0;
-  const townCardPad = inHachure ? 5 * tuners.labelGlow : 0;
+  const peakCardPad = inHachure ? 3 * tuners.labelGlow : 0;
+  const townCardPad = inHachure ? 3 * tuners.labelGlow : 0;
   for (const p of field.peaks) {
     const w = indexer.getWork(p.id);
     if (!w) continue;
@@ -580,6 +603,7 @@ const terrainSvg = (heightfield) => {
       wScale: tuners.hachureWScale,
       posJitter: tuners.hachurePosJitter,
       angleJitter: tuners.hachureAngleJitter,
+      importance: tuners.hachureImportance,
       seed: carto.activeSeed(),
     });
     // Optional iso overlay on top of the hachure plate — basic weights, paper
@@ -642,7 +666,8 @@ const render = () => {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
-  let svg = corpusFloorSvg();
+  let svg = gate.currentRender() === 'hachure' ? labelGlowFilter(tuners.labelGlow) : '';
+  svg += corpusFloorSvg();
   svg += terrainSvg(field.heightfield);
   // Iso elevation labels are coupled to contour lines; they only read on the
   // iso renderer (ho-A-6.0 keeps the hachure plate untexted by design).
@@ -719,7 +744,8 @@ const staticRender = () => {
  * @returns {{ terr: Element, towns: Element, names: Element } | null}
  */
 const makeLayers = () => {
-  map.innerHTML = '<g id="emgTerr"></g><g id="emgTowns"></g><g id="emgNames"></g>';
+  const defs = gate.currentRender() === 'hachure' ? labelGlowFilter(tuners.labelGlow) : '';
+  map.innerHTML = defs + '<g id="emgTerr"></g><g id="emgTowns"></g><g id="emgNames"></g>';
   const terr = map.querySelector('#emgTerr');
   const towns = map.querySelector('#emgTowns');
   const names = map.querySelector('#emgNames');

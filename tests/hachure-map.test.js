@@ -183,6 +183,29 @@ describe('hachureMapSvg — slope drives length and weight', () => {
   });
 });
 
+describe('hachureMapSvg — importance gate (ho-A-6.0)', () => {
+  it('importance 0 is identical to the no-importance default', () => {
+    const peak = singlePeak();
+    expect(hachureMapSvg(peak, { importance: 0 })).toBe(hachureMapSvg(peak));
+  });
+
+  it('higher importance thins out the low-elevation skirts', () => {
+    // A single tall peak: the inner ring is high-elevation, the outer ring
+    // is low. With importance > 0, low-elevation samples are skipped more.
+    const peak = singlePeak(61, 61, 8);
+    const uniform = parseLines(hachureMapSvg(peak, { sampleStep: 2 })).length;
+    const gated = parseLines(hachureMapSvg(peak, { sampleStep: 2, importance: 1 })).length;
+    expect(gated).toBeLessThan(uniform);
+  });
+
+  it('importance gate is seed-stable (same seed → identical output)', () => {
+    const peak = singlePeak();
+    const a = hachureMapSvg(peak, { importance: 0.7, seed: 17 });
+    const b = hachureMapSvg(peak, { importance: 0.7, seed: 17 });
+    expect(a).toBe(b);
+  });
+});
+
 describe('hachureMapSvg — determinism and overrides', () => {
   it('same seed yields byte-identical SVG (the ?seed= contract)', () => {
     const peak = singlePeak();

@@ -28,6 +28,9 @@
  * @property {number} [posJitter]  Position jitter half-amplitude in px.
  * @property {number} [angleJitter] Angle jitter half-amplitude in radians.
  * @property {number} [seed]       PRNG seed for the per-sample jitter.
+ * @property {number} [importance] 0..1 — log-scaled density gate. 0 = every
+ *   qualifying sample emits a stroke (uniform density); 1 = emission gated by
+ *   `log(1+elev)/log(1+max)` so high peaks stay dense and low skirts thin out.
  * @property {string} [ink]        Stroke color.
  * @property {string} [paper]      Background fill.
  */
@@ -50,6 +53,7 @@ const DEFAULTS = {
   posJitter: 0.6,
   angleJitter: 0.18,
   seed: 1,
+  importance: 0,
 };
 
 /**
@@ -104,6 +108,7 @@ export function hachureMapSvg(hf, opts = {}) {
   // edge — keeps the central-difference window inside the grid.
   const stride = Math.max(1, Math.round(o.sampleStep / cell));
   const step2 = 2 * stride * cell; // denominator of the central difference, in px
+  const logMax = Math.log(1 + Math.max(0, hf.max) + 1e-9);
 
   for (let j = stride; j < rows - stride; j += stride) {
     for (let i = stride; i < cols - stride; i += stride) {
@@ -113,6 +118,20 @@ export function hachureMapSvg(hf, opts = {}) {
       const mag = Math.hypot(dx, dy);
       if (mag < o.slopeFloor) continue;
 
+      // Seeded jitter, deterministic per (seed, i, j). One stream for the
+      // importance-gated skip + jitter draws, so byte-identical reproduction
+      // survives importance flips at the same seed.
+      const rng = mulberry32(hashIJ(o.seed, i, j));
+
+      // Importance gate (log-scaled): high-elevation samples almost always
+      // pass; low skirts thin out. importance=0 is the uniform baseline.
+      if (o.importance > 0) {
+        const elev = field[j * cols + i];
+        const logElev = Math.log(1 + Math.max(0, elev)) / logMax;
+        const emitProb = 1 - o.importance + o.importance * logElev;
+        if (rng() > emitProb) continue;
+      }
+
       const norm = Math.min(1, mag / o.slopeRef);
       const len = o.lenBase + o.lenScale * norm;
       const w = o.wBase + o.wScale * norm;
@@ -121,8 +140,6 @@ export function hachureMapSvg(hf, opts = {}) {
       const dirX = -dx / mag;
       const dirY = -dy / mag;
 
-      // Seeded jitter, deterministic per (seed, i, j).
-      const rng = mulberry32(hashIJ(o.seed, i, j));
       const angJ = (rng() - 0.5) * 2 * o.angleJitter;
       const cosA = Math.cos(angJ);
       const sinA = Math.sin(angJ);
