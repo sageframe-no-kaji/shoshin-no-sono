@@ -1,6 +1,6 @@
 ---
 created: 2026-05-18
-status: draft
+status: superseded
 type: ho-document
 project: shoshin-no-sono
 ho: "00"
