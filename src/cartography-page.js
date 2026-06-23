@@ -170,6 +170,8 @@ const HACHURE_TUNER_SPECS = [
 ];
 
 let showPeaks = false;
+/** Iso overlay on top of the hachure plate (ho-A-6.0). No effect in iso mode. */
+let showIsos = false;
 
 const themes = chipVocabulary(indexer).themes;
 
@@ -466,7 +468,7 @@ const renderMeta = () => {
  */
 const terrainSvg = (heightfield) => {
   if (gate.currentRender() === 'hachure') {
-    return hachureMapSvg(heightfield, {
+    let svg = hachureMapSvg(heightfield, {
       sampleStep: tuners.hachureSampleStep,
       slopeFloor: tuners.hachureSlopeFloor,
       slopeRef: tuners.hachureSlopeRef,
@@ -478,6 +480,19 @@ const terrainSvg = (heightfield) => {
       angleJitter: tuners.hachureAngleJitter,
       seed: carto.activeSeed(),
     });
+    // Optional iso overlay on top of the hachure plate — basic weights, paper
+    // transparent so the hachures show through. Uses ho-06's validated default
+    // interval (0.62) rather than the iso panel's tuned value, so the overlay
+    // reads as a skeletal contour scaffold over the hachures.
+    if (showIsos) {
+      svg += contourMapSvg(heightfield, {
+        interval: 0.62,
+        weightRegular: 0.18,
+        weightIndex: 0.35,
+        paper: 'transparent',
+      });
+    }
+    return svg;
   }
   return contourMapSvg(heightfield, {
     interval: tuners.interval,
@@ -811,6 +826,11 @@ document.getElementById('reseed')?.addEventListener('click', () => {
 
 document.getElementById('togglePeaks')?.addEventListener('change', (ev) => {
   showPeaks = ev.target instanceof HTMLInputElement ? ev.target.checked : false;
+  staticRender();
+});
+
+document.getElementById('toggleIsos')?.addEventListener('change', (ev) => {
+  showIsos = ev.target instanceof HTMLInputElement ? ev.target.checked : false;
   staticRender();
 });
 
