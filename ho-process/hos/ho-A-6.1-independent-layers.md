@@ -1,6 +1,6 @@
 ---
 created: 2026-06-23
-status: open
+status: complete
 type: ho-document
 project: shoshin-no-sono
 ho: "A-6.1"
@@ -159,8 +159,15 @@ One bounded session — this one. The pivot is mechanical (Gate grammar swap, pa
 
 ## Phase 3 — Reflect
 
-_(open — to be written after the implementation lands and the merge completes.)_
+No major closeout warranted — saw the opportunity in ho-A-6.0's surfacing-5, researched the architectural shape (independent layers, not XOR mode), and the implementation landed the richness the hachure register had been pointing at. The map can now carry both registers at once or either alone; the practitioner's actual visual model is what the Gate now speaks.
+
+One authoring-time correction worth logging here per the merge-closeout note: the Think phase above names the merge target as `main` in several places (Decision 8, Execute sequence's "Step 8 — Merge"). The actual merge correctly targeted `labs`, per the project's `labs`-is-the-working-branch convention in `CLAUDE.md`. Forward-only: the Think text stays as written; this Reflect is the canonical correction. (The wrong-target attempt was caught and reset before any remote push, so no damage propagated.)
+
+The both-layers iso/hachure interaction question raised in Decision 3 — whether iso weights want a thinning multiplier when hachures are also on — sat well enough in practice that no immediate tuning was needed. The locked ho-06.5 weights (0.15 regular / 0.4 index) read cleanly over the hachure ground. Left as a future tuner if a future ho surfaces the need.
+
+The 80 px thumbnail check named in the merge-closeout is still owed — it belongs to whoever ships the public site surface, not to this ho.
 
 ---
 
 _Authored: 2026-06-23 (Think phase, sidequest off ho-A-6.0 closing the hachure arc)._
+_Closed: 2026-06-23 — the hachure arc lands as two co-equal first-class layers; the iso register from ho-06.5 remains the public default, hachure is opt-in until promoted._
