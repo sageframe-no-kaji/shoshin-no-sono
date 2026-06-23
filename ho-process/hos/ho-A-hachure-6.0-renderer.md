@@ -1,6 +1,7 @@
 ---
 created: 2026-06-23
-status: open
+closed: 2026-06-23
+status: complete
 type: ho-document
 project: shoshin-no-sono
 ho: "A-6.0"
@@ -115,8 +116,57 @@ One bounded session. The renderer is small, the seam is already there, and the e
 
 ## Phase 3 — Reflect
 
-_(open — to be written after the spike runs.)_
+**A/B verdict: the hachure plate reads as a more evocative cartographic vocabulary on the same field, and the Samoa-engraving target is hit.** Eyeball loop on `:8788` at `?render=hachure&seed=12345` against the iso plate at the same seed. Downhill streamlines radiating off each peak read as terrain in a way contours don't — the spike's thesis confirmed on real iso-lines now confirmed on hachured lines. The iso register from ho-06.5 stays committed (that decision was sealed); the hachure register joins it as a practitioner-selectable layer, which is the architectural commitment ho-A-6.1 takes (next ho).
+
+**Tuner landings on the real corpus.** The by-feel pass settled, screenshot at `?render=hachure&seed=12345`:
+
+| Tuner                  | Value | Note                                                                                |
+| ---                    | ---   | ---                                                                                 |
+| `sampleStep`           | 2     | Sub–field-cell stride — every two pixels carries a stroke.                          |
+| `slopeFloor`           | 0.005 | Low — the floor mostly catches the corpus-floor zone, almost everything else emits. |
+| `slopeRef`             | 0.05  | Low — slope saturates fast, weight + length spread across the field.                |
+| `lenBase`              | 3.8   | Substantial minimum — strokes read as continuous flow, not dots.                    |
+| `lenScale`             | 5     | Steep faces get notably longer strokes.                                             |
+| `wBase`                | 0.05  | Hair-thin minimum — gentle slopes whisper.                                          |
+| `wScale`               | 0.4   | Steep faces hit ~0.45 — still hair-thin, no blocky strokes.                         |
+| `posJitter`            | 1.05  | Substantial position scatter — the engraved feel.                                   |
+| `angleJitter`          | 0.15  | Modest — streamlines coherent, the printed-grid is broken.                          |
+| `hachureImportance`    | 0.6   | Density gate at 60% spread — important peaks remain dense, low skirts thin out.     |
+| `beaconOpacity`        | 1.85  | Past the SVG opacity cap; radii grow by √(weight) to use the dial range.            |
+| `beaconImportance`     | 0.6   | 60% quadratic spread — low peaks quiet, high peaks bright; readable hierarchy.      |
+| `labelRed`             | 0     | Walked back from terracotta — muted dark reads cleaner over the busy ground.        |
+| `labelGlow`            | 1.0   | The new feMorphology/feDisplacement filter baseline.                                |
+| `isoOverlayWeight`     | 1.0   | Basic 0.18 / 0.35 weights — the overlay reads as a thin scaffold over the hachures. |
+
+All landed values are committed in `src/cartography-page.js` `tuners` and `src/hachure-map.js` `DEFAULTS`. The hachure module's defaults are kept *original* (sampleStep 6, slopeFloor 0.012, etc.) so the renderer's unit tests keep their semantics; the page-level `tuners` override is what users see.
+
+**Surfacings logged during execution.**
+
+1. **Card vs. stroke for labels.** `paint-order="stroke"` draws the cream halo centered on the letter path — half outside, half *inside*. At the widths needed to mask dense hachures, the inner half eats letter strokes from inside (italic 'd', 'a', 'g' bowls fill with cream, letters narrow to fragments). Two attempts before the third settled it: (a) bumping halo base failed for the same reason — wider stroke eats more letter. (b) Geometric `<rect>` card behind the text *worked* visually but read as "rectangle pasted on map", not cartographic. (c) **The landing**: SVG filter — `feMorphology` dilates SourceAlpha (text shape's exterior), `feDisplacementMap` roughs the edge via fractal noise, `feFlood` pours cream into the resulting shape, `feMerge` lays SourceGraphic untouched on top. Letters draw at full weight; the cream sits *only* outside the letterforms with inked-by-hand edges. The lesson: when the halo width approaches the letter weight, paint-order stroke is structurally wrong.
+
+2. **Beacon importance: log compressed too aggressively at the high end.** First-pass `log(1+imp)/log(11)` was the user's stated request, but on the real corpus peaks 5–10 all landed at 0.58–1.00 with little spread — no readable hierarchy. **Quadratic `(imp/10)²`** drops imp-3 to 9%, imp-5 to 25%, imp-7 to 49%, imp-9 to 81% — peaks now read as a clear importance ladder. The lesson: log scaling for *visual* hierarchy compresses the wrong end; quadratic spreads.
+
+3. **Beacon weight slider hit the SVG opacity cap.** Past `weight=1` the three stacked circle opacities all clamp to 1 in the renderer, so the dial became a no-op. Fix: above 1, scale the *radii* by `√(weight)` — opacity saturates, presence grows. The dial now extends to 5 with real visual range.
+
+4. **Iso elevation labels are coupled to iso lines.** They hide cleanly in hachure mode here because the labels are placed *on* the contour rings. In ho-A-6.1 (independent layers), they show whenever the iso layer is on.
+
+5. **The `?render=` toggle is a XOR.** It served the sidequest fine, but the practitioner's actual visual model is "iso layer on/off, hachure layer on/off." Recorded as the canonical architectural finding driving ho-A-6.1.
+
+6. **Stale-server / browser-module-cache bite at the start of the spike.** A pre-existing `python -m http.server 8788` from a prior directory was serving an old `cartography-page.js` and 404'ing on the new `hachure-map.js`; the browser silently used cached modules. Not a code problem, but the lesson is logged: when adding ESM modules to a no-build project, always verify the served file via `curl http://localhost:8788/src/<new-module>.js` before debugging in the browser.
+
+**What didn't land** (deferred, not failed).
+
+- **The 80 px thumbnail check** named in the original feedback. Whether hachure streamlines collapse to fog at thumbnail scale where isos didn't is still an open eyeball check. Not a blocker for landing the renderer; it's a finding for the practitioner when they render thumbnails for the public site. Logged for ho-A-6.1 / shipped surface.
+- **Performance measurement at high `hachureImportance`.** Each sample now consumes one `rng()` call before the slope-floor check (it was conditional, only when `importance > 0`, but it shifts work). On the real corpus the emergence cross-fade has not visibly degraded; no measurement was taken. Not a blocker; flagged.
+- **The architectural pivot to independent layers** is explicitly the next ho's work, not this ho's.
+
+**Followups.**
+
+- **ho-A-6.1** — independent iso / hachure layer flags in the Gate (`?iso=1&hachure=1`), comprehensive tuner panel, drop `isoOverlayWeight`, merge `huaraches → main`. The decision recorded in surfacing 5; the architectural commitment that closes the sidequest with the hachure plate as a first-class layer alongside the iso register.
+- **80 px thumbnail check** — owed to the public site work, not to this ho.
+- **No field ho spawned** — the field stayed untouched; the hachure renderer reads the same `Heightfield` ho-05 produces. The Gaussian family from ho-06's verdict still stands.
 
 ---
 
-_Authored: 2026-06-23 (Think phase, sidequest off ho-06)._
+_Authored: 2026-06-23 (Think phase). Executed and closed: 2026-06-23 — twelve incremental landings on `huaraches`._
+_Surfacing: hachure renderer ships as a practitioner-selectable layer; SVG filter glow is the right approach for thick halos on busy grounds; quadratic spreads importance hierarchy where log compresses it; iso/hachure XOR is the wrong model — independent layers is — taken in ho-A-6.1._
