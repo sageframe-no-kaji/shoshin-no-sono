@@ -169,18 +169,19 @@ const UNIVERSAL_TUNER_SPECS = [
 /**
  * Hachure renderer tuners (ho-A-6.0 sidequest). Shown only when `?render=hachure`
  * is active so the panel doesn't sprawl; the iso tuners hide in turn under hachure.
- * @type {{ key: string, label: string, min: number, max: number, step: number }[]}
+ * All locked as the landed baseline of this sidequest — still movable.
+ * @type {{ key: string, label: string, min: number, max: number, step: number, locked?: boolean, reseed?: boolean }[]}
  */
 const HACHURE_TUNER_SPECS = [
-  { key: 'hachureSampleStep', label: 'sample stride (px)', min: 2, max: 14, step: 1 },
-  { key: 'hachureSlopeFloor', label: 'flat threshold', min: 0, max: 0.05, step: 0.001 },
-  { key: 'hachureSlopeRef', label: 'steep ceiling', min: 0.05, max: 0.8, step: 0.01 },
-  { key: 'hachureLenBase', label: 'stroke length (min)', min: 0, max: 6, step: 0.1 },
-  { key: 'hachureLenScale', label: 'stroke length (slope)', min: 0, max: 12, step: 0.1 },
-  { key: 'hachureWBase', label: 'stroke weight (min)', min: 0.05, max: 1, step: 0.01 },
-  { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05 },
-  { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05 },
-  { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01 },
+  { key: 'hachureSampleStep', label: 'sample stride (px)', min: 2, max: 14, step: 1, locked: true },
+  { key: 'hachureSlopeFloor', label: 'flat threshold', min: 0, max: 0.05, step: 0.001, locked: true },
+  { key: 'hachureSlopeRef', label: 'steep ceiling', min: 0.05, max: 0.8, step: 0.01, locked: true },
+  { key: 'hachureLenBase', label: 'stroke length (min)', min: 0, max: 6, step: 0.1, locked: true },
+  { key: 'hachureLenScale', label: 'stroke length (slope)', min: 0, max: 12, step: 0.1, locked: true },
+  { key: 'hachureWBase', label: 'stroke weight (min)', min: 0.05, max: 1, step: 0.01, locked: true },
+  { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05, locked: true },
+  { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
+  { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
 ];
 
 let showPeaks = false;
@@ -807,10 +808,7 @@ const playEmergence = () => {
 
 /** Render the active mode's tuner specs into the panel (ho-A-6.0). */
 const renderTuners = () => {
-  const modeSpecs =
-    gate.currentRender() === 'hachure'
-      ? HACHURE_TUNER_SPECS.map((t) => ({ ...t, locked: false, reseed: false }))
-      : TUNER_SPECS;
+  const modeSpecs = gate.currentRender() === 'hachure' ? HACHURE_TUNER_SPECS : TUNER_SPECS;
   const specs = [...modeSpecs, ...UNIVERSAL_TUNER_SPECS];
   tunersEl.innerHTML = specs
     .map(
