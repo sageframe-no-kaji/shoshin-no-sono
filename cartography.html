@@ -133,6 +133,20 @@
         gap: 0.35rem;
         cursor: pointer;
       }
+      .rendertoggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.15rem 0.6rem;
+        border: 1px solid #c7c1b4;
+        border-radius: 2px;
+      }
+      .rendertoggle .rname {
+        font-size: 0.72rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #9a958b;
+      }
       .plate {
         border: 1px solid #e7e3da;
         background: #fdfcf9;
@@ -194,6 +208,11 @@
       <div class="controls">
         <span class="seedline">seed <code id="seed">—</code> <span id="pinned"></span></span>
         <label class="toggle"><input type="checkbox" id="togglePeaks" /> peak ids</label>
+        <span class="rendertoggle">
+          <span class="rname">render</span>
+          <label class="toggle"><input type="radio" name="render" value="contour" checked /> isos</label>
+          <label class="toggle"><input type="radio" name="render" value="hachure" /> hachures</label>
+        </span>
       </div>
       <p class="tunerlegend">
         <span style="opacity: 0.4">greyed</span> = landed in an earlier ho (still movable) ·

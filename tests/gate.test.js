@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseState, serializeState, parseSeed, createGate } from '../src/gate.js';
+import { parseState, serializeState, parseSeed, parseRender, createGate } from '../src/gate.js';
 
 describe('the URL grammar (parse/serialize)', () => {
   it('parses a full door', () => {
@@ -131,5 +131,60 @@ describe('createGate over a stub window', () => {
     const gate = createGate(win);
     gate.setState({ media: ['writing'] });
     expect(win.location.search).toBe('?theme=craft&media=writing');
+  });
+});
+
+describe('the render channel (parseRender, ho-A-6.0)', () => {
+  it('parses ?render=hachure into the hachure mode', () => {
+    expect(parseRender('?render=hachure')).toBe('hachure');
+    expect(parseRender('?theme=craft&render=hachure')).toBe('hachure');
+  });
+
+  it('defaults to contour for missing or unrecognized values', () => {
+    expect(parseRender('')).toBe('contour');
+    expect(parseRender('?')).toBe('contour');
+    expect(parseRender('?render=contour')).toBe('contour');
+    expect(parseRender('?render=oil')).toBe('contour');
+    expect(parseRender('?render=')).toBe('contour');
+  });
+});
+
+describe('createGate render state (ho-A-6.0)', () => {
+  it('currentRender reads the URL and defaults to contour', () => {
+    expect(createGate(stubWindow('')).currentRender()).toBe('contour');
+    expect(createGate(stubWindow('?render=hachure')).currentRender()).toBe('hachure');
+  });
+
+  it('setRender swaps the renderer and notifies', () => {
+    const win = stubWindow('?theme=craft');
+    const gate = createGate(win);
+    const seen = vi.fn();
+    gate.onChange(seen);
+    gate.setRender('hachure');
+    expect(win.location.search).toBe('?theme=craft&render=hachure');
+    expect(gate.currentRender()).toBe('hachure');
+    expect(seen).toHaveBeenCalled();
+  });
+
+  it('setRender to the default omits the param from the URL', () => {
+    const win = stubWindow('?theme=craft&render=hachure');
+    const gate = createGate(win);
+    gate.setRender('contour');
+    expect(win.location.search).toBe('?theme=craft');
+  });
+
+  it('preserves render mode across filter changes', () => {
+    const win = stubWindow('?render=hachure&theme=craft');
+    const gate = createGate(win);
+    gate.setState({ media: ['writing'] });
+    expect(win.location.search).toBe('?theme=craft&media=writing&render=hachure');
+    expect(gate.currentRender()).toBe('hachure');
+  });
+
+  it('preserves render mode and seed together', () => {
+    const win = stubWindow('?seed=42&render=hachure');
+    const gate = createGate(win);
+    gate.setState({ themes: ['craft'] });
+    expect(win.location.search).toBe('?theme=craft&seed=42&render=hachure');
   });
 });

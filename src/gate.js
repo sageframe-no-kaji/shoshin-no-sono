@@ -80,16 +80,34 @@ export function parseSeed(search) {
 }
 
 /**
+ * Parse the terrain render mode (ho-A-6.0). Either `contour` (the iso renderer
+ * committed in ho-06) or `hachure` (the sidequest renderer). Anything missing
+ * or unrecognized falls back to `contour` — the iso register stays the default.
+ * @typedef {'contour' | 'hachure'} RenderMode
+ * @param {string} search
+ * @returns {RenderMode}
+ */
+export function parseRender(search) {
+  const raw = new URLSearchParams(search).get('render');
+  return raw === 'hachure' ? 'hachure' : 'contour';
+}
+
+/**
  * Compose the query string for a URL: the filter grammar plus the seed param
- * when one is present.
+ * when one is present plus the render mode when it diverges from the default.
  * @param {FilterState} state
  * @param {number | null} seed
+ * @param {RenderMode} render
  * @returns {string}
  */
-function serializeURL(state, seed) {
+function serializeURL(state, seed, render) {
+  /** @type {string[]} */
+  const tail = [];
+  if (seed != null) tail.push(`seed=${seed}`);
+  if (render !== 'contour') tail.push(`render=${render}`);
   const filters = serializeState(state);
-  if (seed == null) return filters;
-  return filters ? `${filters}&seed=${seed}` : `?seed=${seed}`;
+  if (tail.length === 0) return filters;
+  return filters ? `${filters}&${tail.join('&')}` : `?${tail.join('&')}`;
 }
 
 /**
@@ -122,9 +140,15 @@ export function createGate(win) {
     return parseSeed(win.location.search);
   }
 
+  /** The active terrain renderer. @returns {RenderMode} */
+  function currentRender() {
+    return parseRender(win.location.search);
+  }
+
   /**
    * Merge a partial state, push the new URL (so back walks filter history),
-   * and notify listeners. An existing seed is preserved across the change.
+   * and notify listeners. An existing seed and render mode are preserved
+   * across the change.
    * @param {Partial<FilterState>} partial
    */
   function setState(partial) {
@@ -132,7 +156,21 @@ export function createGate(win) {
     win.history.pushState(
       null,
       '',
-      `${win.location.pathname}${serializeURL(next, currentSeed())}`,
+      `${win.location.pathname}${serializeURL(next, currentSeed(), currentRender())}`,
+    );
+    notify();
+  }
+
+  /**
+   * Switch the terrain renderer; the filter state and seed are preserved.
+   * Listeners notify so the page re-renders.
+   * @param {RenderMode} mode
+   */
+  function setRender(mode) {
+    win.history.pushState(
+      null,
+      '',
+      `${win.location.pathname}${serializeURL(currentState(), currentSeed(), mode)}`,
     );
     notify();
   }
@@ -149,5 +187,13 @@ export function createGate(win) {
 
   win.addEventListener('popstate', notify);
 
-  return Object.freeze({ currentState, currentSeed, setState, shareableURL, onChange });
+  return Object.freeze({
+    currentState,
+    currentSeed,
+    currentRender,
+    setState,
+    setRender,
+    shareableURL,
+    onChange,
+  });
 }

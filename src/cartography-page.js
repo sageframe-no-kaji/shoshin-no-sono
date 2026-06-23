@@ -19,6 +19,7 @@ import { createIndexer, loadWorks } from './indexer.js';
 import { createGate } from './gate.js';
 import { createCartographer, computeField, computeTowns } from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
+import { hachureMapSvg } from './hachure-map.js';
 import { extractContour } from './contours.js';
 import { settlementSvg } from './settlement-map.js';
 import { revealedBlocks } from './settlements.js';
@@ -81,6 +82,17 @@ const tuners = {
   beaconOpacity: 1, // the per-peak signal-fire beacon weight (ho-07.6 Decision 5)
   floorMarkerOpacity: 0.45, // the 2025-11-11 corpus-floor horizon marker weight
   elevationScale: 1.5, // size of the USGS elevation (iso) labels (ho-07.6)
+
+  // ho-A-6.0 hachure renderer (sidequest off ho-06) — dialed against the iso plate.
+  hachureSampleStep: 6,
+  hachureSlopeFloor: 0.012,
+  hachureSlopeRef: 0.35,
+  hachureLenBase: 1.5,
+  hachureLenScale: 5,
+  hachureWBase: 0.22,
+  hachureWScale: 0.6,
+  hachurePosJitter: 0.6,
+  hachureAngleJitter: 0.18,
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -138,6 +150,23 @@ const TUNER_SPECS = [
   { key: 'nameFadeMs', label: 'name: fade (ms)', min: 40, max: 4000, step: 20, reseed: true, locked: true },
   { key: 'holdMs', label: 'world→writing breath (ms)', min: 0, max: 2000, step: 50, reseed: true, locked: true },
   { key: 'perHouseMs', label: 'build: ms / house', min: 4, max: 120, step: 2, reseed: true, locked: true },
+];
+
+/**
+ * Hachure renderer tuners (ho-A-6.0 sidequest). Shown only when `?render=hachure`
+ * is active so the panel doesn't sprawl; the iso tuners hide in turn under hachure.
+ * @type {{ key: string, label: string, min: number, max: number, step: number }[]}
+ */
+const HACHURE_TUNER_SPECS = [
+  { key: 'hachureSampleStep', label: 'sample stride (px)', min: 2, max: 14, step: 1 },
+  { key: 'hachureSlopeFloor', label: 'flat threshold', min: 0, max: 0.05, step: 0.001 },
+  { key: 'hachureSlopeRef', label: 'steep ceiling', min: 0.05, max: 0.8, step: 0.01 },
+  { key: 'hachureLenBase', label: 'stroke length (min)', min: 0, max: 6, step: 0.1 },
+  { key: 'hachureLenScale', label: 'stroke length (slope)', min: 0, max: 12, step: 0.1 },
+  { key: 'hachureWBase', label: 'stroke weight (min)', min: 0.05, max: 1, step: 0.01 },
+  { key: 'hachureWScale', label: 'stroke weight (slope)', min: 0, max: 2, step: 0.05 },
+  { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05 },
+  { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01 },
 ];
 
 let showPeaks = false;
@@ -428,6 +457,36 @@ const renderMeta = () => {
 };
 
 /**
+ * Render the terrain SVG for the active mode (ho-A-6.0). The iso renderer is
+ * the committed register from ho-06; the hachure renderer is the sidequest
+ * A/B. Both consume the same Heightfield; this wrapper picks which one and
+ * passes the right tuner slice.
+ * @param {import('./field.js').Heightfield} heightfield
+ * @returns {string}
+ */
+const terrainSvg = (heightfield) => {
+  if (gate.currentRender() === 'hachure') {
+    return hachureMapSvg(heightfield, {
+      sampleStep: tuners.hachureSampleStep,
+      slopeFloor: tuners.hachureSlopeFloor,
+      slopeRef: tuners.hachureSlopeRef,
+      lenBase: tuners.hachureLenBase,
+      lenScale: tuners.hachureLenScale,
+      wBase: tuners.hachureWBase,
+      wScale: tuners.hachureWScale,
+      posJitter: tuners.hachurePosJitter,
+      angleJitter: tuners.hachureAngleJitter,
+      seed: carto.activeSeed(),
+    });
+  }
+  return contourMapSvg(heightfield, {
+    interval: tuners.interval,
+    weightRegular: tuners.weightRegular,
+    weightIndex: tuners.weightIndex,
+  });
+};
+
+/**
  * The terrain for one reveal step — corpus-floor marker, contours, beacons. NO
  * peak names (those live in the persistent overlay so their fades can outlast a
  * beat) and NO towns (the writing phase owns those). Returns the SVG and the
@@ -441,11 +500,7 @@ const stepTerrain = (step) => {
     emergenceScale: scaleFn(step),
   });
   let svg = corpusFloorSvg();
-  svg += contourMapSvg(field.heightfield, {
-    interval: tuners.interval,
-    weightRegular: tuners.weightRegular,
-    weightIndex: tuners.weightIndex,
-  });
+  svg += terrainSvg(field.heightfield);
   svg += beaconSvg(field.peaks); // steady during the cross-fade (no reset)
   if (showPeaks) svg += peakDotsSvg(field.peaks);
   return { svg, peaks: field.peaks };
@@ -471,12 +526,10 @@ const render = () => {
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
   });
   let svg = corpusFloorSvg();
-  svg += contourMapSvg(field.heightfield, {
-    interval: tuners.interval,
-    weightRegular: tuners.weightRegular,
-    weightIndex: tuners.weightIndex,
-  });
-  svg += elevationLabelsSvg(field.heightfield); // USGS elevation labels on the index rings
+  svg += terrainSvg(field.heightfield);
+  // Iso elevation labels are coupled to contour lines; they only read on the
+  // iso renderer (ho-A-6.0 keeps the hachure plate untexted by design).
+  if (gate.currentRender() === 'contour') svg += elevationLabelsSvg(field.heightfield);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
@@ -577,12 +630,8 @@ const playWriting = (writeSteps, token, layers) => {
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
   layers.terr.innerHTML =
     corpusFloorSvg() +
-    contourMapSvg(field.heightfield, {
-      interval: tuners.interval,
-      weightRegular: tuners.weightRegular,
-      weightIndex: tuners.weightIndex,
-    }) +
-    elevationLabelsSvg(field.heightfield) +
+    terrainSvg(field.heightfield) +
+    (gate.currentRender() === 'contour' ? elevationLabelsSvg(field.heightfield) : '') +
     beaconSvg(field.peaks, true) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
 
@@ -698,13 +747,23 @@ const playEmergence = () => {
   else worldTick();
 };
 
-tunersEl.innerHTML = TUNER_SPECS.map(
-  (t) =>
-    `<label class="tuner${t.locked ? ' locked' : ''}">` +
-    `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
-    `<input type="range" data-key="${t.key}" min="${t.min}" max="${t.max}" step="${t.step}" value="${tuners[t.key]}" />` +
-    `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`,
-).join('');
+/** Render the active mode's tuner specs into the panel (ho-A-6.0). */
+const renderTuners = () => {
+  const specs =
+    gate.currentRender() === 'hachure'
+      ? HACHURE_TUNER_SPECS.map((t) => ({ ...t, locked: false, reseed: false }))
+      : TUNER_SPECS;
+  tunersEl.innerHTML = specs
+    .map(
+      (t) =>
+        `<label class="tuner${t.locked ? ' locked' : ''}">` +
+        `<span class="tname">${t.reseed ? '<span class="star">★</span> ' : ''}${t.label}</span>` +
+        `<input type="range" data-key="${t.key}" min="${t.min}" max="${t.max}" step="${t.step}" value="${tuners[t.key]}" />` +
+        `<span class="tval" data-val="${t.key}">${tuners[t.key]}</span></label>`,
+    )
+    .join('');
+};
+renderTuners();
 
 tunersEl.addEventListener('input', (ev) => {
   const el = ev.target;
@@ -717,6 +776,28 @@ tunersEl.addEventListener('input', (ev) => {
   // re-watch the emergence with a new value via Reseed (Decision 7 workflow).
   staticRender();
 });
+
+/** Render-mode toggle (ho-A-6.0). Re-renders tuners + map for the new mode. */
+const wireRenderToggle = () => {
+  const radios = /** @type {NodeListOf<HTMLInputElement>} */ (
+    document.querySelectorAll('input[name="render"]')
+  );
+  const sync = () => {
+    const mode = gate.currentRender();
+    radios.forEach((r) => (r.checked = r.value === mode));
+  };
+  radios.forEach((r) =>
+    r.addEventListener('change', () => {
+      if (r.checked) gate.setRender(/** @type {'contour' | 'hachure'} */ (r.value));
+    }),
+  );
+  gate.onChange(() => {
+    sync();
+    renderTuners();
+  });
+  sync();
+};
+wireRenderToggle();
 
 // Filter changes are exploration, not re-narration — render statically and snap
 // any in-flight emergence to the final state (Decision 6).
