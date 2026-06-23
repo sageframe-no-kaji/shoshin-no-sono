@@ -93,6 +93,11 @@ const tuners = {
   hachureWScale: 0.6,
   hachurePosJitter: 0.6,
   hachureAngleJitter: 0.18,
+
+  // Label red dial (ho-A-6.0). 0 = muted dark (the pre-A-6.0 baseline),
+  // 1 = terracotta (the new baseline locked in this commit), 1.5 = vivid red.
+  // Live in both iso and hachure panels — labels read across both plates.
+  labelRed: 1.0,
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -153,6 +158,15 @@ const TUNER_SPECS = [
 ];
 
 /**
+ * Universal tuners (ho-A-6.0). Shown in *both* iso and hachure panels because
+ * they affect overlays that span both renderers (labels, etc.).
+ * @type {{ key: string, label: string, min: number, max: number, step: number }[]}
+ */
+const UNIVERSAL_TUNER_SPECS = [
+  { key: 'labelRed', label: 'label red', min: 0, max: 1.5, step: 0.05 },
+];
+
+/**
  * Hachure renderer tuners (ho-A-6.0 sidequest). Shown only when `?render=hachure`
  * is active so the panel doesn't sprawl; the iso tuners hide in turn under hachure.
  * @type {{ key: string, label: string, min: number, max: number, step: number }[]}
@@ -195,6 +209,33 @@ const peakDotsSvg = (peaks) =>
 const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
 
 /**
+ * Label color dial (ho-A-6.0). Three-stop gradient so the slider's 1.0
+ * default lands exactly on terracotta — linear between 0..1 (warm dark →
+ * terracotta) and 1..1.5 (terracotta → vivid red). Native script tracks the
+ * primary color but in a slightly lighter parallel gradient so the visual
+ * hierarchy survives the dial.
+ */
+const LABEL_PRIMARY_STOPS = [
+  [0x2b, 0x2b, 0x2b],
+  [0x9a, 0x5b, 0x3c],
+  [0xc5, 0x3d, 0x24],
+];
+const LABEL_NATIVE_STOPS = [
+  [0x5c, 0x5c, 0x5c],
+  [0xb5, 0x72, 0x55],
+  [0xd8, 0x6a, 0x52],
+];
+
+/** @param {number[][]} stops 3 RGB stops at 0 / 1 / 1.5 @param {number} t */
+const labelColor = (stops, t) => {
+  const clamped = Math.max(0, Math.min(1.5, t));
+  const [a, b] = clamped <= 1 ? [stops[0], stops[1]] : [stops[1], stops[2]];
+  const u = clamped <= 1 ? clamped : (clamped - 1) / 0.5;
+  const c = a.map((v, i) => Math.round(v + (b[i] - v) * u));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+};
+
+/**
  * Peak label — typography variant B (peak): wide-tracked roman caps with the
  * native script set beside at near-equal optical size, a cream halo so it reads
  * over the rings. A minimal static render pulled forward so the assembled map
@@ -203,13 +244,15 @@ const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif
  * @param {number} x @param {number} y @param {string} name @param {string|null} native @param {number} scale
  */
 const peakLabel = (x, y, name, native, scale) => {
+  const primary = labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed);
+  const natFill = labelColor(LABEL_NATIVE_STOPS, tuners.labelRed);
   const nat = native
-    ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="#5C5C5C" style="letter-spacing:0.10em;">${native}</tspan>`
+    ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
     : '';
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="${(16.5 * scale).toFixed(1)}" fill="#2B2B2B" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3.5 * scale).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
+    `font-size="${(16.5 * scale).toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
   );
 };
 
@@ -282,8 +325,8 @@ const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {
     .join('');
   return (
     `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(3 * scale).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
+    `font-style="italic" font-size="${(12.5 * scale).toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
+    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
   );
 };
 
@@ -764,10 +807,14 @@ const playEmergence = () => {
 
 /** Render the active mode's tuner specs into the panel (ho-A-6.0). */
 const renderTuners = () => {
-  const specs =
+  const modeSpecs =
     gate.currentRender() === 'hachure'
       ? HACHURE_TUNER_SPECS.map((t) => ({ ...t, locked: false, reseed: false }))
       : TUNER_SPECS;
+  const specs = [
+    ...modeSpecs,
+    ...UNIVERSAL_TUNER_SPECS.map((t) => ({ ...t, locked: false, reseed: false })),
+  ];
   tunersEl.innerHTML = specs
     .map(
       (t) =>
