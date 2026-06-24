@@ -77,9 +77,8 @@
         margin-bottom: 0.5rem;
       }
       .tuners {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem 1.5rem;
+        column-count: 2;
+        column-gap: 1.5rem;
         margin: 0.25rem 0 0.9rem;
         padding: 0.75rem 0.9rem;
         border: 1px solid #e7e3da;
@@ -114,14 +113,17 @@
         color: #9a5b3c;
         font-size: 0.7em;
       }
-      /* ho-A-6.1: section headers inside the comprehensive tuner panel. Each
-         section flows its rows below the title; the panel itself stays in
-         flex-wrap so iso/hachure/universal pack into the available width. */
+      /* Section headers inside the comprehensive tuner panel. Each section
+         flows its rows below the title; the panel uses CSS multi-column so
+         sections pack vertically through columns without leaving empty space
+         when one section is shorter than another. `break-inside: avoid`
+         keeps a section whole — it never splits across columns. */
       .tunersection {
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
-        margin: 0 0.5rem 0.4rem 0;
+        margin: 0 0 0.9rem 0;
+        break-inside: avoid;
       }
       .tunersection .tsectiontitle {
         font-size: 0.62rem;
