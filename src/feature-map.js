@@ -75,7 +75,59 @@ function gradAt(hf, x, y) {
  * @property {number} [iters]    Relaxation iterations.
  * @property {number} [maxDrift] Lateral clamp from the chord in px (keeps a route a route).
  * @property {number} [slopeRef] Slope magnitude at which the sideways push saturates.
+ * @property {{ x: number, y: number }[][]} [avoid] Polylines to keep clear of (road corridors).
+ * @property {number} [minSep]   Minimal separation from `avoid` polylines in px.
  */
+
+/**
+ * Nearest point on any of the given polylines to (x, y), with its distance.
+ * @param {number} x @param {number} y
+ * @param {{ x: number, y: number }[][]} lines
+ * @returns {{ x: number, y: number, d: number } | null}
+ */
+function nearestOnPolylines(x, y, lines) {
+  let best = null;
+  for (const line of lines) {
+    for (let i = 1; i < line.length; i++) {
+      const a = line[i - 1];
+      const b = line[i];
+      const abx = b.x - a.x;
+      const aby = b.y - a.y;
+      const ab2 = abx * abx + aby * aby || 1e-12;
+      let t = ((x - a.x) * abx + (y - a.y) * aby) / ab2;
+      t = Math.max(0, Math.min(1, t));
+      const qx = a.x + abx * t;
+      const qy = a.y + aby * t;
+      const d = Math.hypot(x - qx, y - qy);
+      if (!best || d < best.d) best = { x: qx, y: qy, d };
+    }
+  }
+  return best;
+}
+
+/**
+ * Chaikin corner-cutting, endpoint-preserving — smooths a routed polyline into
+ * a drawable curve (each pass replaces interior vertices with 1/4–3/4 points).
+ * @param {{ x: number, y: number }[]} pts @param {number} passes
+ * @returns {{ x: number, y: number }[]}
+ */
+function chaikin(pts, passes) {
+  let p = pts;
+  for (let k = 0; k < passes; k++) {
+    if (p.length < 3) return p;
+    /** @type {{ x: number, y: number }[]} */
+    const out = [p[0]];
+    for (let i = 0; i < p.length - 1; i++) {
+      const a = p[i];
+      const b = p[i + 1];
+      out.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25 });
+      out.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75 });
+    }
+    out.push(p[p.length - 1]);
+    p = out;
+  }
+  return p;
+}
 
 /**
  * Least-resistance route between two points over the heightfield: waypoints
@@ -107,26 +159,31 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
   const cny = (x2 - x1) / len;
   const step = follow * spacing * 0.5;
   const slopeRef = opts.slopeRef ?? 0.02; // any real slope pushes at full strength
+  const avoid = opts.avoid ?? [];
+  const minSep = opts.minSep ?? 7;
   const smooth = 0.2;
   for (let k = 0; k < iters; k++) {
     for (let i = 1; i < n; i++) {
       const p = pts[i];
-      const g = gradAt(hf, p.x, p.y);
-      const gm = Math.hypot(g.x, g.y);
-      if (gm < 1e-9) continue;
       const tx = pts[i + 1].x - pts[i - 1].x;
       const ty = pts[i + 1].y - pts[i - 1].y;
       const tm = Math.hypot(tx, ty) || 1;
       const nx = -ty / tm;
       const ny = tx / tm;
-      // Slide toward lower ground along the local normal. The push responds to
-      // the DIRECTION of the slope at full strength once the slope is real
-      // (gm/slopeRef saturates) — raw-magnitude pushes were so weak the
-      // smoothing pass erased them and every route relaxed back to its chord.
-      const toward = (g.x * nx + g.y * ny) / gm;
-      const slide = -toward * Math.min(1, gm / slopeRef) * step;
-      let px = p.x + nx * slide;
-      let py = p.y + ny * slide;
+      let px = p.x;
+      let py = p.y;
+      const g = gradAt(hf, px, py);
+      const gm = Math.hypot(g.x, g.y);
+      if (gm >= 1e-9) {
+        // Slide toward lower ground along the local normal. The push responds
+        // to the DIRECTION of the slope at full strength once the slope is
+        // real (gm/slopeRef saturates) — raw-magnitude pushes were so weak the
+        // smoothing pass erased them and every route relaxed to its chord.
+        const toward = (g.x * nx + g.y * ny) / gm;
+        const slide = -toward * Math.min(1, gm / slopeRef) * step;
+        px += nx * slide;
+        py += ny * slide;
+      }
       const drift = (px - x1) * cnx + (py - y1) * cny;
       if (drift > maxDrift) {
         px -= cnx * (drift - maxDrift);
@@ -134,6 +191,22 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
       } else if (drift < -maxDrift) {
         px -= cnx * (drift + maxDrift);
         py -= cny * (drift + maxDrift);
+      }
+      // Minimal separation from road corridors — a trail may run alongside a
+      // road, never on it (roads eat trails; the paint order does the eating,
+      // this keeps the parallel stretch legible). Applied last so it wins.
+      if (avoid.length > 0) {
+        const q = nearestOnPolylines(px, py, avoid);
+        if (q && q.d < minSep) {
+          if (q.d < 1e-6) {
+            px += nx * minSep;
+            py += ny * minSep;
+          } else {
+            const s = (minSep - q.d) / q.d;
+            px += (px - q.x) * s;
+            py += (py - q.y) * s;
+          }
+        }
       }
       p.x = px;
       p.y = py;
@@ -275,13 +348,14 @@ export function trailTickLadderSvg(x1, y1, x2, y2, sign, opts = {}) {
  * rail (same curve family as roads, shallower bow).
  * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
  * @param {number} sign 1 or -1
+ * @param {number} [bowFraction] bow as a fraction of chord length
  * @returns {{ x: number, y: number }[]}
  */
-function bowedPoints(x1, y1, x2, y2, sign) {
+function bowedPoints(x1, y1, x2, y2, sign, bowFraction = 0.06) {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy);
-  const bow = len * 0.06 * sign;
+  const bow = len * bowFraction * sign;
   const px = -dy / len;
   const py = dx / len;
   const c1x = x1 + dx / 3 + px * bow;
@@ -364,12 +438,49 @@ function railAndRungsSvg(pts, opts = {}) {
  */
 
 /**
- * SVG fragment for all roads (`companion_to` edges, town ↔ town).
- * With `hf`, the road routes by least resistance over the terrain
- * (terrainRoutedPath — swings through valleys, around hills); `opts.follow`
- * sets how strongly it hunts low ground. Without a heightfield it falls back
- * to the gentle id-signed bow. `footRadius` pulls the endpoint back from the
- * destination centre.
+ * @typedef {{ pts: { x: number, y: number }[], strength: number, id: string }} RoadRoute
+ */
+
+/**
+ * Route every road (`companion_to` edges, town ↔ town) and return the raw
+ * waypoint polylines — exposed separately from the render so the page can hand
+ * road corridors to the trail router as `avoid` obstacles (roads eat trails;
+ * trails keep clear). With `hf` the route is least-resistance
+ * (terrainRoutedPath); without one, the gentle id-signed bow.
+ * @param {RoadEdge[]} edges
+ * @param {Heightfield} [hf]
+ * @param {RouteOpts} [opts]
+ * @returns {RoadRoute[]}
+ */
+export function computeRoadRoutes(edges, hf, opts = {}) {
+  return edges.map((e) => {
+    const foot = e.footRadius
+      ? peakFootPoint(e.from.x, e.from.y, e.to.x, e.to.y, e.footRadius)
+      : e.to;
+    const pts = hf
+      ? terrainRoutedPath(hf, e.from.x, e.from.y, foot.x, foot.y, {
+          follow: opts.follow ?? 0.7,
+          maxDrift: opts.maxDrift ?? 70,
+        })
+      : bowedPoints(e.from.x, e.from.y, foot.x, foot.y, strHash(e.id), 0.12);
+    return { pts, strength: e.strength ?? 1, id: e.id };
+  });
+}
+
+/**
+ * Render routed roads — Chaikin-smoothed into drawn curves, then the cased
+ * double-line per route.
+ * @param {RoadRoute[]} routes
+ * @returns {string}
+ */
+export function roadsSvgFromRoutes(routes) {
+  return routes.map((r) => roadPathSvg(pointsToPath(chaikin(r.pts, 3)), r.strength)).join('');
+}
+
+/**
+ * SVG fragment for all roads — route + render in one call (see
+ * computeRoadRoutes / roadsSvgFromRoutes for the two-step form the page uses
+ * to feed road corridors into the trail router).
  * @param {RoadEdge[]} edges
  * @param {Heightfield} [hf] heightfield for least-resistance routing
  * @param {RouteOpts} [opts]
@@ -377,24 +488,7 @@ function railAndRungsSvg(pts, opts = {}) {
  */
 export function roadsSvg(edges, hf, opts = {}) {
   if (edges.length === 0) return '';
-  return edges
-    .map((e) => {
-      const foot = e.footRadius
-        ? peakFootPoint(e.from.x, e.from.y, e.to.x, e.to.y, e.footRadius)
-        : e.to;
-      let d;
-      if (hf) {
-        const pts = terrainRoutedPath(hf, e.from.x, e.from.y, foot.x, foot.y, {
-          follow: opts.follow ?? 0.7,
-          maxDrift: opts.maxDrift ?? 70,
-        });
-        d = pointsToPath(pts);
-      } else {
-        d = curvedPath(e.from.x, e.from.y, foot.x, foot.y, 0.12, strHash(e.id));
-      }
-      return roadPathSvg(d, e.strength ?? 1);
-    })
-    .join('');
+  return roadsSvgFromRoutes(computeRoadRoutes(edges, hf, opts));
 }
 
 /**
@@ -429,8 +523,10 @@ export function trailsSvg(edges, hf, opts = {}) {
       const pts = terrainRoutedPath(hf, start.x, start.y, foot.x, foot.y, {
         follow: opts.follow ?? 0.35,
         maxDrift: opts.maxDrift ?? 45,
+        avoid: opts.avoid,
+        minSep: opts.minSep,
       });
-      out += railAndRungsSvg(pts, opts);
+      out += railAndRungsSvg(chaikin(pts, 2), opts);
     } else {
       out += trailTickLadderSvg(start.x, start.y, foot.x, foot.y, strHash(e.id), opts);
     }

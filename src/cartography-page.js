@@ -38,7 +38,7 @@ import { settlementSvg, settlementClearingSvg, townInkColor } from './settlement
 import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
 import { buildEmergenceTimeline, emergencePlan, scaleFn } from './emergence.js';
-import { roadsSvg, trailsSvg } from './feature-map.js';
+import { computeRoadRoutes, roadsSvgFromRoutes, trailsSvg } from './feature-map.js';
 import { wavesSvg } from './water-map.js';
 import { REGISTER } from './register.js';
 import {
@@ -418,14 +418,23 @@ const nameEl = (p) => {
  * @param {import('./cartographer.js').CartographyTown[]} towns
  * @returns {string}
  */
-const featuresSvg = (field, towns) =>
-  roadsSvg(computeRoadEdges(indexer, towns), field.heightfield, { follow: tuners.roadFollow }) +
-  trailsSvg(computeTrailEdges(indexer, towns, field.peaks), field.heightfield, {
-    follow: tuners.trailFollow,
-    weight: tuners.trailWeight,
-    tickHalf: tuners.trailTick,
-    clear: tuners.trailClear,
+const featuresSvg = (field, towns) => {
+  const roadRoutes = computeRoadRoutes(computeRoadEdges(indexer, towns), field.heightfield, {
+    follow: tuners.roadFollow,
   });
+  // Trails draw FIRST and roads paint over them — roads eat trails; the trail
+  // router also keeps a minimal separation from the road corridors, so a trail
+  // may run alongside a road but never on it.
+  return (
+    trailsSvg(computeTrailEdges(indexer, towns, field.peaks), field.heightfield, {
+      follow: tuners.trailFollow,
+      weight: tuners.trailWeight,
+      tickHalf: tuners.trailTick,
+      clear: tuners.trailClear,
+      avoid: roadRoutes.map((r) => r.pts),
+    }) + roadsSvgFromRoutes(roadRoutes)
+  );
+};
 
 const render = () => {
   // The resting / static path (filter toggles, reseed-less re-render). A fully

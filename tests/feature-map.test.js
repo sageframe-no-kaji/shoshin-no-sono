@@ -251,6 +251,23 @@ describe('terrainRoutedPath', () => {
     };
     expect(drift(1)).toBeGreaterThan(drift(0.2));
   });
+
+  it('keeps a minimal separation from avoid polylines (a trail never sits on a road)', () => {
+    // Flat field (no slope pull), trail chord lying exactly ON a road corridor.
+    const flat = tiltedHf();
+    flat.field.fill(0);
+    const road = [
+      { x: 0, y: 100 },
+      { x: 300, y: 100 },
+    ];
+    const pts = terrainRoutedPath(flat, 0, 100, 300, 100, {
+      follow: 1,
+      avoid: [road],
+      minSep: 8,
+    });
+    const interior = pts.slice(2, -2); // near-endpoint points can't fully separate
+    for (const p of interior) expect(Math.abs(p.y - 100)).toBeGreaterThan(4);
+  });
 });
 
 // ── roadsSvg ──────────────────────────────────────────────────────────────────
