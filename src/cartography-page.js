@@ -132,7 +132,7 @@ const tuners = {
   // ho-08 features (session-5 register)
   margin: 110, // field keep-out border — padded up from ho-05's 70 so a sea exists (ho-08 datum)
   waveThreshold: 0.18,
-  waveOpacity: 0.18,
+  waveOpacity: 0.5,
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
   roadClear: 1.25, // road cream casing beyond the rails, per side
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
@@ -140,6 +140,11 @@ const tuners = {
   trailTick: 2.2, // rung half-length in px
   trailClear: 1.6, // cream halo width — 0 is the session-5 uncased lock; >0 is the legibility dial
 };
+
+/** Every field computation shares this opts slice: the tuners plus the ho-08
+ * sea datum (sea level as a fraction of the raw field max — the heightfield
+ * arrives with the sea already flattened to zero). */
+const fieldOpts = () => ({ ...tuners, seaFraction: tuners.waveThreshold });
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
 const TOWN_GAP_MS = 140;
@@ -367,8 +372,6 @@ const terrainSvg = (heightfield) => {
       interval: tuners.interval,
       weightRegular: tuners.weightRegular,
       weightIndex: tuners.weightIndex,
-      // The datum (ho-08): isos climb from sea level; nothing rings the sea.
-      base: tuners.waveThreshold * heightfield.max,
       // When hachures are also on, suppress the iso paper rect so the hachure
       // ground shows through.
       paper: layers.hachure ? 'transparent' : undefined,
@@ -387,7 +390,7 @@ const terrainSvg = (heightfield) => {
  */
 const stepTerrain = (step) => {
   const field = computeField(indexer, gate.currentState(), carto.activeSeed(), {
-    ...tuners,
+    ...fieldOpts(),
     emergenceScale: scaleFn(step),
   });
   let svg = corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
@@ -423,8 +426,10 @@ const nameEl = (p) => {
  * @returns {string}
  */
 const featuresSvg = (field, towns) => {
+  const floor = tuners.waveThreshold > 0 ? 0.02 * field.heightfield.max : undefined;
   const roadRoutes = computeRoadRoutes(computeRoadEdges(indexer, towns), field.heightfield, {
     follow: tuners.roadFollow,
+    floor,
   });
   // Trails draw FIRST and roads paint over them — roads eat trails; the trail
   // router also keeps a minimal separation from the road corridors, so a trail
@@ -436,6 +441,7 @@ const featuresSvg = (field, towns) => {
       tickHalf: tuners.trailTick,
       clear: tuners.trailClear,
       avoid: roadRoutes.map((r) => r.pts),
+      floor,
     }) + roadsSvgFromRoutes(roadRoutes, { clear: tuners.roadClear })
   );
 };
@@ -445,7 +451,7 @@ const render = () => {
   // revealed map: every peak at scale 1, so this equals the emergence end frame.
   const seed = carto.activeSeed();
   const state = gate.currentState();
-  const field = computeField(indexer, state, seed, tuners);
+  const field = computeField(indexer, state, seed, fieldOpts());
   const towns = computeTowns(indexer, state, field, {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
@@ -456,14 +462,11 @@ const render = () => {
   svg += terrainSvg(field.heightfield);
   // The sea paints over the terrain below the waterline, so it draws right
   // after the terrain; the corpus-floor marker and labels ride above it.
-  svg += waterSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity });
+  svg += waterSvg(field.heightfield, { opacity: tuners.waveOpacity });
   svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   // Iso elevation labels are placed on iso lines — they only read when the
   // iso layer is on, regardless of hachures.
-  if (layers.iso) svg += elevationLabelsSvg(field.heightfield, {
-      elevationScale: tuners.elevationScale,
-      base: tuners.waveThreshold * field.heightfield.max,
-    });
+  if (layers.iso) svg += elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale });
   svg += featuresSvg(field, towns);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   // signal-fire beacons, breathing at rest
@@ -562,7 +565,7 @@ const makeLayers = () => {
 const playWriting = (writeSteps, token, layers) => {
   const seed = carto.activeSeed();
   const state = gate.currentState();
-  const field = computeField(indexer, state, seed, tuners); // full terrain, once
+  const field = computeField(indexer, state, seed, fieldOpts()); // full terrain, once
   const allTowns = computeTowns(indexer, state, field, {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
@@ -572,13 +575,10 @@ const playWriting = (writeSteps, token, layers) => {
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
   layers.terr.innerHTML =
     terrainSvg(field.heightfield) +
-    waterSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity }) +
+    waterSvg(field.heightfield, { opacity: tuners.waveOpacity }) +
     corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     (gate.currentLayers().iso
-      ? elevationLabelsSvg(field.heightfield, {
-      elevationScale: tuners.elevationScale,
-      base: tuners.waveThreshold * field.heightfield.max,
-    })
+      ? elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale })
       : '') +
     featuresSvg(field, allTowns) +
     beaconSvg(field.peaks, {
@@ -719,7 +719,7 @@ const TUNER_SECTIONS = [
   { title: 'features', specs: [
     { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5 },
     { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
-    { key: 'waveOpacity', label: 'wave marks', min: 0, max: 0.5, step: 0.01 },
+    { key: 'waveOpacity', label: 'waterline ink', min: 0, max: 1, step: 0.02 },
     { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },
     { key: 'roadClear', label: 'road clearing', min: 0, max: 6, step: 0.05 },
     { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05 },

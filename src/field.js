@@ -285,3 +285,23 @@ export function buildHeightfield(peaks, seed, opts) {
   }
   return { field, cols, rows, cell: o.cell, width: o.width, height: o.height, max };
 }
+
+/**
+ * Apply the sea datum (ho-08): subtract sea level from every sample and clamp
+ * at zero, so the shore is EXACTLY elevation 0 and the sea is dead flat. A
+ * flat sea means the terrain renderers have nothing to say below the
+ * coastline — no iso crossing, no hachure gradient — without any renderer
+ * knowing the sea exists. Mutates the freshly-built heightfield and returns it.
+ * @param {Heightfield} hf
+ * @param {number} fraction sea level as a fraction of the field max (0 = no sea)
+ * @returns {Heightfield}
+ */
+export function applySeaDatum(hf, fraction) {
+  if (fraction <= 0 || hf.max <= 0) return hf;
+  const sl = fraction * hf.max;
+  for (let i = 0; i < hf.field.length; i++) {
+    hf.field[i] = Math.max(0, hf.field[i] - sl);
+  }
+  hf.max = Math.max(0, hf.max - sl);
+  return hf;
+}

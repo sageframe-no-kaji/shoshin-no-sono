@@ -1,18 +1,19 @@
 /**
- * Water map (ho-08) — the sea at the map's edges: coastline, waterlining,
- * wave marks.
+ * Water map (ho-08) — the sea at the map's edges: coastline and waterlining.
  *
- * The field falls toward zero at the margins, so the low ground CONNECTED TO
- * THE MAP BOUNDARY reads as sea — a coastline where the terrain settles down
- * at the edges. Interior basins below sea level stay land: lakes were
- * rejected in session 2 (no meaning in the grammar), so the sea mask is a
- * flood fill from the boundary, never a bare threshold.
+ * The heightfield arrives datumed (src/field.js applySeaDatum): the shore is
+ * exactly elevation 0 and the sea is dead flat, so the terrain renderers have
+ * nothing to say below the coastline — no iso crossings, no hachure gradients.
+ * This module draws everything the sea carries. The sea is the flat-zero
+ * region CONNECTED TO THE MAP BOUNDARY (flood fill — interior flat basins are
+ * valley floors, not lakes; session 2 rejected lakes).
  *
- * The register is the survey-chart waterline (the Upolu reference plate):
- * a cream paint-over of the sea region (the clearing-as-paint-over mechanism
- * — terrain marks below the waterline settle to paper), a cased coastline
- * stroke at sea level, waterlining — coast-parallel sub-level contours
- * thinning and fading seaward — and sparse wave marks in the deep zone.
+ * The register is the survey-chart waterline (the Upolu reference plate, and
+ * the old-map water treatments the practitioner pointed at): a cream-cased
+ * ink coastline at the shore, then waterlining — smooth coast-parallel offset
+ * lines whose spacing grows and ink thins seaward, drawn as iso-lines of a
+ * smoothed distance-from-shore field, so they parallel every shore including
+ * islands. No scattered wave squiggles.
  *
  * Pure: a heightfield in, an SVG string out. No DOM, no Indexer, no Gate,
  * no URL.
@@ -25,26 +26,25 @@ import { extractContour, segsToPath } from './contours.js';
 
 /**
  * @typedef {Object} WaterOpts
- * @property {number} [threshold]  Sea level as a fraction of the field max (default 0.18).
- * @property {number} [opacity]    Wave-mark opacity in the deep zone (default 0.18; 0 hides).
- * @property {number} [waterlines] Number of waterlining contours below the coast (default 4).
+ * @property {number} [opacity]    Waterline ink strength at the coast (default 0.5; 0 hides all waterlines).
+ * @property {number} [waterlines] Number of waterline offsets (default 6).
  */
 
 /**
- * The sea mask: grid cells below sea level AND connected to the map boundary
- * (4-neighbor flood fill). Interior basins stay unmasked — land, not lakes.
+ * The sea mask: flat-zero cells connected to the map boundary (4-neighbor
+ * flood fill). Enclosed flat basins stay unmasked — land, not lakes.
  * @param {Heightfield} hf
- * @param {number} seaLevel absolute elevation of the waterline
+ * @param {number} [seaLevel] elevation at/below which a cell can be sea (default ~0)
  * @returns {Uint8Array} cols×rows, 1 = sea
  */
-export function seaMask(hf, seaLevel) {
+export function seaMask(hf, seaLevel = 1e-9) {
   const { field, cols, rows } = hf;
   const mask = new Uint8Array(cols * rows);
   /** @type {number[]} */
   const queue = [];
   const push = (/** @type {number} */ i, /** @type {number} */ j) => {
     const k = j * cols + i;
-    if (!mask[k] && field[k] < seaLevel) {
+    if (!mask[k] && field[k] <= seaLevel) {
       mask[k] = 1;
       queue.push(k);
     }
@@ -70,119 +70,129 @@ export function seaMask(hf, seaLevel) {
 }
 
 /**
- * Keep only contour segments whose midpoint touches the sea mask (any of the
- * surrounding grid cells) — drops the rings of interior basins.
- * @param {import('./contours.js').Segment[]} segs
- * @param {Uint8Array} mask
+ * Distance-from-shore over the sea (px): land cells are 0, sea cells carry
+ * their BFS distance from the nearest land, softened by two smoothing passes
+ * so the waterline offsets read as drawn curves rather than city blocks.
  * @param {Heightfield} hf
- * @returns {import('./contours.js').Segment[]}
+ * @param {Uint8Array} mask the sea mask
+ * @returns {Float64Array}
  */
-function seawardSegs(segs, mask, hf) {
+export function seaDistance(hf, mask) {
   const { cols, rows, cell } = hf;
-  return segs.filter((s) => {
-    const mx = (s[0].x + s[1].x) / 2;
-    const my = (s[0].y + s[1].y) / 2;
-    const i0 = Math.max(0, Math.min(cols - 1, Math.floor(mx / cell)));
-    const j0 = Math.max(0, Math.min(rows - 1, Math.floor(my / cell)));
-    for (const [di, dj] of [
-      [0, 0],
-      [1, 0],
-      [0, 1],
-      [1, 1],
-    ]) {
-      const i = Math.min(cols - 1, i0 + di);
-      const j = Math.min(rows - 1, j0 + dj);
-      if (mask[j * cols + i]) return true;
+  const dist = new Float64Array(cols * rows);
+  /** @type {number[]} */
+  let frontier = [];
+  for (let k = 0; k < dist.length; k++) {
+    if (mask[k]) dist[k] = Infinity;
+    else frontier.push(k); // land seeds the shore at distance 0
+  }
+  while (frontier.length > 0) {
+    /** @type {number[]} */
+    const next = [];
+    for (const k of frontier) {
+      const i = k % cols;
+      const j = (k - i) / cols;
+      for (const n of [
+        i > 0 ? k - 1 : -1,
+        i < cols - 1 ? k + 1 : -1,
+        j > 0 ? k - cols : -1,
+        j < rows - 1 ? k + cols : -1,
+      ]) {
+        if (n >= 0 && dist[n] === Infinity) {
+          dist[n] = dist[k] + cell;
+          next.push(n);
+        }
+      }
     }
-    return false;
-  });
+    frontier = next;
+  }
+  // Two smoothing passes soften the 4-neighbor diamonds into drawn curves;
+  // land stays anchored at 0 so the first offsets keep hugging the shore.
+  for (let pass = 0; pass < 2; pass++) {
+    const buf = Float64Array.from(dist);
+    for (let j = 1; j < rows - 1; j++) {
+      for (let i = 1; i < cols - 1; i++) {
+        const k = j * cols + i;
+        if (!mask[k]) continue;
+        dist[k] = (buf[k] + buf[k - 1] + buf[k + 1] + buf[k - cols] + buf[k + cols]) / 5;
+      }
+    }
+  }
+  return dist;
 }
 
 /**
- * The full water treatment for a heightfield. Empty string when the field is
- * empty or sea level is not positive.
+ * The full water treatment for a datumed heightfield: the coastline stroke at
+ * the shore and the waterlining seaward of it. Empty string when there is no
+ * field or no sea.
  * @param {Heightfield} hf
  * @param {WaterOpts} [opts]
  * @returns {string}
  */
 export function waterSvg(hf, opts = {}) {
   if (hf.max <= 0) return '';
-  const threshold = opts.threshold ?? 0.18;
-  const waveOpacity = opts.opacity ?? 0.18;
-  const waterlines = opts.waterlines ?? 4;
-  const seaLevel = threshold * hf.max;
-  if (seaLevel <= 0) return '';
+  const inkOpacity = opts.opacity ?? 0.5;
+  const lineCount = opts.waterlines ?? 6;
 
-  const mask = seaMask(hf, seaLevel);
-  const { field, cols, rows, cell } = hf;
+  const mask = seaMask(hf);
+  let hasSea = false;
+  for (let k = 0; k < mask.length; k++) {
+    if (mask[k]) {
+      hasSea = true;
+      break;
+    }
+  }
+  if (!hasSea) return '';
+
+  const { cols, rows, cell, width, height } = hf;
   let svg = '';
 
-  // 1. The sea settles to paper: cream paint-over of the masked region (run-
-  //    length rects per row), covering the terrain marks below the waterline.
-  //    The coastline's cream casing hides the half-cell seam at the edge.
-  for (let j = 0; j < rows; j++) {
-    let run = -1;
-    for (let i = 0; i <= cols; i++) {
-      const sea = i < cols && mask[j * cols + i] === 1;
-      if (sea && run < 0) run = i;
-      if (!sea && run >= 0) {
-        const x = (run - 0.5) * cell;
-        const w = (i - run) * cell;
-        svg +=
-          `<rect x="${x.toFixed(1)}" y="${((j - 0.5) * cell).toFixed(1)}" ` +
-          `width="${w.toFixed(1)}" height="${cell.toFixed(1)}" fill="${REGISTER.paper}"/>`;
-        run = -1;
-      }
+  // The coastline — the shore is ZERO; the ring hugs it just above, cream-
+  // cased so it stays crisp against the last hachures on the land side. Only
+  // sea-adjacent segments draw: an inland flat-zero pocket (clamped noise)
+  // must not grow a lake outline.
+  const nearSea = (/** @type {import('./contours.js').Segment} */ s) => {
+    const i0 = Math.max(0, Math.min(cols - 1, Math.floor((s[0].x + s[1].x) / 2 / cell)));
+    const j0 = Math.max(0, Math.min(rows - 1, Math.floor((s[0].y + s[1].y) / 2 / cell)));
+    for (const [di, dj] of [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ]) {
+      if (mask[Math.min(rows - 1, j0 + dj) * cols + Math.min(cols - 1, i0 + di)]) return true;
     }
+    return false;
+  };
+  const coastSegs = extractContour(hf, 0.02 * hf.max).filter(nearSea);
+  if (coastSegs.length > 0) {
+    const d = segsToPath(coastSegs);
+    svg +=
+      `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="2.6" stroke-linecap="round"/>` +
+      `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="0.5" stroke-linecap="round"/>`;
   }
 
-  // 2. The coastline and the waterlining: level 0 is the coast (cream-cased
-  //    ink stroke); levels below march seaward, thinning and fading — the
-  //    survey-chart waterline register.
-  for (let k = 0; k <= waterlines; k++) {
-    const level = seaLevel * (1 - k / (waterlines + 1));
-    if (level <= 0) break;
-    const segs = seawardSegs(extractContour(hf, level), mask, hf);
-    if (segs.length === 0) continue;
-    const d = segsToPath(segs);
-    if (k === 0) {
-      svg +=
-        `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="2.6" stroke-linecap="round"/>` +
-        `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="0.5" stroke-linecap="round"/>`;
-    } else {
-      const t = k / (waterlines + 1);
-      const w = (0.35 * (1 - t) + 0.1).toFixed(2);
-      const op = (0.75 * (1 - 0.6 * t)).toFixed(2);
-      svg +=
-        `<path d="${d}" fill="none" stroke="${REGISTER.waterInk}" stroke-width="${w}" ` +
-        `opacity="${op}" stroke-linecap="round"/>`;
-    }
-  }
-
-  // 3. Sparse wave marks in the deep zone (below the coast), staggered.
-  if (waveOpacity > 0) {
-    const deep = seaLevel * 0.7;
-    const stride = Math.max(1, Math.round(22 / cell));
-    const W = 9;
-    const H = 1.5;
-    let rowIndex = 0;
-    for (let j = stride; j < rows - 1; j += stride) {
-      const xStagger = ((rowIndex % 2) * stride * cell) / 2;
-      for (let i = stride; i < cols - 1; i += stride) {
-        const k = j * cols + i;
-        if (!mask[k] || field[k] >= deep) continue;
-        const cx = i * cell + xStagger;
-        const cy = j * cell;
-        const path =
-          `M${(cx - W).toFixed(2)},${cy.toFixed(2)} ` +
-          `C${(cx - W * 0.5).toFixed(2)},${(cy - H).toFixed(2)} ` +
-          `${(cx + W * 0.5).toFixed(2)},${(cy + H).toFixed(2)} ` +
-          `${(cx + W).toFixed(2)},${cy.toFixed(2)}`;
+  // Waterlining: iso-lines of the distance-from-shore field, spacing growing
+  // and ink thinning seaward — every line parallels every shore, islands
+  // included, and no line can exist over land.
+  if (inkOpacity > 0 && lineCount > 0) {
+    const dist = seaDistance(hf, mask);
+    /** @type {Heightfield} */
+    const distHf = { field: dist, cols, rows, cell, width, height, max: Infinity };
+    let offset = 6;
+    let gap = 7;
+    for (let k = 0; k < lineCount; k++) {
+      const segs = extractContour(distHf, offset);
+      if (segs.length > 0) {
+        const t = k / lineCount;
+        const w = (0.4 * (1 - t) + 0.12).toFixed(2);
+        const op = (inkOpacity * (1 - 0.7 * t)).toFixed(2);
         svg +=
-          `<path d="${path}" fill="none" stroke="${REGISTER.waterInk}" ` +
-          `stroke-width="0.35" stroke-linecap="round" opacity="${waveOpacity.toFixed(3)}"/>`;
+          `<path d="${segsToPath(segs)}" fill="none" stroke="${REGISTER.waterInk}" ` +
+          `stroke-width="${w}" opacity="${op}" stroke-linecap="round"/>`;
       }
-      rowIndex++;
+      offset += gap;
+      gap *= 1.28;
     }
   }
 

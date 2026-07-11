@@ -13,7 +13,7 @@
  */
 
 import { matchesFilter } from './filter.js';
-import { computePositions, buildHeightfield, hashSeed } from './field.js';
+import { computePositions, buildHeightfield, hashSeed, applySeaDatum } from './field.js';
 import {
   townSeat,
   seatDownhill,
@@ -76,8 +76,14 @@ export function relevance(work, state, floor) {
 /**
  * @typedef {FieldOpts & {
  *   relevanceFloor?: number,
- *   emergenceScale?: (id: string) => number
+ *   emergenceScale?: (id: string) => number,
+ *   seaFraction?: number
  * }} CartographyOpts
+ * `seaFraction` (ho-08's datum): sea level as a fraction of the raw field max.
+ * The datum is applied to the heightfield itself — subtract and clamp at zero
+ * (src/field.js applySeaDatum) — so the shore is exactly 0, the sea is flat,
+ * and every downstream consumer sees a world where negative ground simply
+ * does not exist.
  * `emergenceScale` (ho-07.2) is an additive, optional per-peak amplitude factor
  * the emergence player passes to grow the terrain as peaks rise: it folds into a
  * peak's amplitude alongside importance and filter relevance. A peak that scales
@@ -125,7 +131,7 @@ export function computeField(indexer, state, seed, opts = {}) {
   // default scale every real peak has amplitude > 0 (importance ≥ 1, floor > 0),
   // so this is a no-op for existing callers.
   const active = weighted.filter((p) => p.amplitude > 0);
-  const heightfield = buildHeightfield(active, seed, opts);
+  const heightfield = applySeaDatum(buildHeightfield(active, seed, opts), opts.seaFraction ?? 0);
   return { peaks: active, heightfield, seed };
 }
 
@@ -145,11 +151,10 @@ export function computeField(indexer, state, seed, opts = {}) {
  * @typedef {CartographyOpts & {
  *   anchorBias?: number, strengthFull?: number, secondaryStrength?: number,
  *   footOffset?: number, elongK?: number, elongCap?: number, contourFollow?: number,
- *   density?: number, extentScale?: number, thresholds?: number[],
- *   seaFraction?: number
+ *   density?: number, extentScale?: number, thresholds?: number[]
  * }} TownOpts
- * `seaFraction` (ho-08's datum): sea level as a fraction of the field max —
- * town seats never descend below it (negative ground prohibits settlement).
+ * With a `seaFraction` datum in force the heightfield's sea is flat zero, and
+ * town seats stop just above the shore (negative ground prohibits settlement).
  */
 
 /**
@@ -211,8 +216,9 @@ export function computeTowns(indexer, state, field, opts = {}) {
         .map((e) => ({ pos: /** @type {{x:number,y:number}} */ (peakPos.get(e.target)), strength: secondaryStrength }));
     }
 
-    // The datum floor: seats stop at the coast, never in the sea (ho-08).
-    const floor = opts.seaFraction != null ? opts.seaFraction * hf.max : -Infinity;
+    // The datum floor (ho-08): the heightfield is already datumed (sea = flat
+    // 0), so seats stop a small standoff above the shore, never in the sea.
+    const floor = (opts.seaFraction ?? 0) > 0 ? 0.02 * hf.max : -Infinity;
     const seat = seatDownhill(townSeat(anchors, centroid, opts), hf, footOffset, floor);
     const weight = indexer.settlementWeight(town.id);
     const level = sizeBand(weight, thresholds);
