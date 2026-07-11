@@ -133,6 +133,7 @@ const tuners = {
   // ho-08 features (session-5 register)
   margin: 110, // field keep-out border — padded up from ho-05's 70 so a sea exists (ho-08 datum)
   waveThreshold: 0.18,
+  coastRuggedness: 0.3, // coast-band noise: islets and inlets; 0 = the smooth Gaussian shore
   coastWeight: 0.7, // coastline stroke weight
   waterlineCount: 4, // waterline offsets hugging the coast
   waveOpacity: 0.5, // waterline ink strength
@@ -735,6 +736,7 @@ const TUNER_SECTIONS = [
   { title: 'features', specs: [
     { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5 },
     { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
+    { key: 'coastRuggedness', label: 'coast ruggedness (islands, inlets)', min: 0, max: 1, step: 0.02 },
     { key: 'coastWeight', label: 'coastline weight', min: 0.2, max: 2.5, step: 0.05 },
     { key: 'waterlineCount', label: 'waterlines (count)', min: 0, max: 10, step: 1 },
     { key: 'waveOpacity', label: 'waterline ink', min: 0, max: 1, step: 0.02 },

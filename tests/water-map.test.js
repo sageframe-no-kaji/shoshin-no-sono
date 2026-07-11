@@ -58,6 +58,31 @@ describe('applySeaDatum', () => {
     applySeaDatum(raw, 0);
     expect(Array.from(raw.field)).toEqual(Array.from(before));
   });
+
+  it('coast ruggedness roughens the shore, reproducibly, without moving the summit', () => {
+    const cone = () =>
+      hfFrom((x, y) => Math.max(0, 10 * (1 - Math.hypot(x - 80, y - 80) / 70)));
+    const smooth = applySeaDatum(cone(), 0.18);
+    const ruggedA = applySeaDatum(cone(), 0.18, { ruggedness: 0.6, seed: 42 });
+    const ruggedB = applySeaDatum(cone(), 0.18, { ruggedness: 0.6, seed: 42 });
+    // Deterministic: same seed → the exact same archipelago.
+    expect(Array.from(ruggedA.field)).toEqual(Array.from(ruggedB.field));
+    // The coast band changed…
+    let changed = 0;
+    for (let k = 0; k < smooth.field.length; k++) {
+      if (Math.abs(ruggedA.field[k] - smooth.field[k]) > 0.01) changed++;
+    }
+    expect(changed).toBeGreaterThan(20);
+    // …and at least one islet rose from the former sea.
+    let islets = 0;
+    for (let k = 0; k < smooth.field.length; k++) {
+      if (smooth.field[k] === 0 && ruggedA.field[k] > 0.05) islets++;
+    }
+    expect(islets).toBeGreaterThan(0);
+    // The summit stays put — the envelope dies far above the waterline.
+    const centre = Math.round(ruggedA.rows / 2) * ruggedA.cols + Math.round(ruggedA.cols / 2);
+    expect(ruggedA.field[centre]).toBeCloseTo(smooth.field[centre], 6);
+  });
 });
 
 // ── seaMask ───────────────────────────────────────────────────────────────────

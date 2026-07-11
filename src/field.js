@@ -222,31 +222,51 @@ export function heightAt(x, y, peaks, noise, opts) {
  * @returns {(u: number, v: number) => number}
  */
 export function makeNoise(seed) {
-  const octave = (/** @type {number} */ s, /** @type {number} */ cols, /** @type {number} */ rows) => {
-    const rnd = mulberry32(s >>> 0);
-    const g = new Float64Array(cols * rows);
-    for (let i = 0; i < g.length; i++) g[i] = rnd() * 2 - 1;
-    return (/** @type {number} */ u, /** @type {number} */ v) => {
-      const x = u * (cols - 1);
-      const y = v * (rows - 1);
-      let i0 = Math.floor(x);
-      let j0 = Math.floor(y);
-      const fx = x - i0;
-      const fy = y - j0;
-      i0 = Math.max(0, Math.min(cols - 2, i0));
-      j0 = Math.max(0, Math.min(rows - 2, j0));
-      const a = g[j0 * cols + i0];
-      const b = g[j0 * cols + i0 + 1];
-      const c = g[(j0 + 1) * cols + i0];
-      const dd = g[(j0 + 1) * cols + i0 + 1];
-      const sx = fx * fx * (3 - 2 * fx);
-      const sy = fy * fy * (3 - 2 * fy);
-      return (a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + dd * sx) * sy;
-    };
+  const coarse = valueOctave(seed ^ 0x9e3779b9, 9, 6);
+  const fine = valueOctave(seed ^ 0x85ebca77, 17, 11);
+  return (/** @type {number} */ u, /** @type {number} */ v) => coarse(u, v) * 0.9 + fine(u, v) * 0.4;
+}
+
+/**
+ * A single value-noise octave over normalized [0,1]², bilinearly interpolated
+ * with a smoothstep — the shared sampler under makeNoise and makeCoastNoise.
+ * @param {number} s seed @param {number} cols @param {number} rows
+ * @returns {(u: number, v: number) => number}
+ */
+function valueOctave(s, cols, rows) {
+  const rnd = mulberry32(s >>> 0);
+  const g = new Float64Array(cols * rows);
+  for (let i = 0; i < g.length; i++) g[i] = rnd() * 2 - 1;
+  return (/** @type {number} */ u, /** @type {number} */ v) => {
+    const x = u * (cols - 1);
+    const y = v * (rows - 1);
+    let i0 = Math.floor(x);
+    let j0 = Math.floor(y);
+    const fx = x - i0;
+    const fy = y - j0;
+    i0 = Math.max(0, Math.min(cols - 2, i0));
+    j0 = Math.max(0, Math.min(rows - 2, j0));
+    const a = g[j0 * cols + i0];
+    const b = g[j0 * cols + i0 + 1];
+    const c = g[(j0 + 1) * cols + i0];
+    const dd = g[(j0 + 1) * cols + i0 + 1];
+    const sx = fx * fx * (3 - 2 * fx);
+    const sy = fy * fy * (3 - 2 * fy);
+    return (a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + dd * sx) * sy;
   };
-  const coarse = octave(seed ^ 0x9e3779b9, 9, 6);
-  const fine = octave(seed ^ 0x85ebca77, 17, 11);
-  return (u, v) => coarse(u, v) * 0.9 + fine(u, v) * 0.4;
+}
+
+/**
+ * Island-scale value noise — two octaves finer than makeNoise, for the coast
+ * ruggedness term (ho-08): coastline wobble, inlets, and the islets a chart
+ * scatters offshore live at a smaller wavelength than the terrain crenellation.
+ * @param {number} seed
+ * @returns {(u: number, v: number) => number}
+ */
+export function makeCoastNoise(seed) {
+  const mid = valueOctave(seed ^ 0xc2b2ae35, 23, 15);
+  const fine = valueOctave(seed ^ 0x27d4eb2f, 45, 29);
+  return (/** @type {number} */ u, /** @type {number} */ v) => mid(u, v) * 0.7 + fine(u, v) * 0.5;
 }
 
 /**
@@ -291,17 +311,42 @@ export function buildHeightfield(peaks, seed, opts) {
  * at zero, so the shore is EXACTLY elevation 0 and the sea is dead flat. A
  * flat sea means the terrain renderers have nothing to say below the
  * coastline — no iso crossing, no hachure gradient — without any renderer
- * knowing the sea exists. Mutates the freshly-built heightfield and returns it.
+ * knowing the sea exists.
+ *
+ * `ruggedness` adds the coast noise term: island-scale seeded noise whose
+ * Gaussian envelope peaks AT the waterline and dies off above and below it.
+ * Near the coast it wobbles the shoreline (inlets) and pushes bumps over the
+ * datum (islets); at the summits the envelope is ~0 so the peaks never move;
+ * in the deep sea the clamp eats it. Deterministic from the seed — `?seed=`
+ * reproduces the exact archipelago. Mutates the freshly-built heightfield and
+ * returns it.
  * @param {Heightfield} hf
  * @param {number} fraction sea level as a fraction of the field max (0 = no sea)
+ * @param {{ ruggedness?: number, seed?: number }} [opts]
  * @returns {Heightfield}
  */
-export function applySeaDatum(hf, fraction) {
+export function applySeaDatum(hf, fraction, opts = {}) {
   if (fraction <= 0 || hf.max <= 0) return hf;
   const sl = fraction * hf.max;
-  for (let i = 0; i < hf.field.length; i++) {
-    hf.field[i] = Math.max(0, hf.field[i] - sl);
+  const ruggedness = opts.ruggedness ?? 0;
+  const noise = ruggedness > 0 ? makeCoastNoise((opts.seed ?? 0) >>> 0) : null;
+  const amp = ruggedness * sl * 1.2;
+  const w = 0.5 * sl; // envelope half-width in elevation units — the coast band
+  const { cols, rows } = hf;
+  let max = 0;
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      const k = j * cols + i;
+      let v = hf.field[k] - sl;
+      if (noise) {
+        const env = Math.exp(-(v * v) / (2 * w * w));
+        v += amp * noise(i / (cols - 1), j / (rows - 1)) * env;
+      }
+      v = Math.max(0, v);
+      hf.field[k] = v;
+      if (v > max) max = v;
+    }
   }
-  hf.max = Math.max(0, hf.max - sl);
+  hf.max = max;
   return hf;
 }

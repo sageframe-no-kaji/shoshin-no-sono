@@ -77,7 +77,8 @@ export function relevance(work, state, floor) {
  * @typedef {FieldOpts & {
  *   relevanceFloor?: number,
  *   emergenceScale?: (id: string) => number,
- *   seaFraction?: number
+ *   seaFraction?: number,
+ *   coastRuggedness?: number
  * }} CartographyOpts
  * `seaFraction` (ho-08's datum): sea level as a fraction of the raw field max.
  * The datum is applied to the heightfield itself — subtract and clamp at zero
@@ -131,7 +132,10 @@ export function computeField(indexer, state, seed, opts = {}) {
   // default scale every real peak has amplitude > 0 (importance ≥ 1, floor > 0),
   // so this is a no-op for existing callers.
   const active = weighted.filter((p) => p.amplitude > 0);
-  const heightfield = applySeaDatum(buildHeightfield(active, seed, opts), opts.seaFraction ?? 0);
+  const heightfield = applySeaDatum(buildHeightfield(active, seed, opts), opts.seaFraction ?? 0, {
+    ruggedness: opts.coastRuggedness ?? 0,
+    seed,
+  });
   return { peaks: active, heightfield, seed };
 }
 

@@ -221,40 +221,47 @@ export function waterSvg(hf, opts = {}) {
     }
   }
 
-  // Wave texture: rows of fine horizontal water strokes filling the open sea
-  // beyond the waterlined shore band — the old-map horizontal ruling the
-  // practitioner pointed at. A slow sine wobble keeps the rows hand-ruled
-  // rather than mechanical; strokes exist only where the sea is (never on
-  // land, never inside the waterline band).
+  // Wave texture: the engraved rolling bands of the 16th-century charts the
+  // practitioner pointed at — fewer, bolder wavy lines with a layered wobble
+  // and per-band weight variation, flowing across the open sea. Bands exist
+  // only in the water, standing off the waterlined shore; the wobble and the
+  // weights derive from the row index, so the sea reproduces exactly.
   if (waveIntensity > 0) {
-    const rowStep = Math.max(1, Math.round(9 / cell));
+    const rowStep = Math.max(1, Math.round(13 / cell));
     const standoff = 5 + 5.5 * Math.min(lineCount, 2); // clear the tightest waterlines
-    let wavePath = '';
-    for (let j = rowStep; j < rows - 1; j += rowStep) {
+    const GOLD = 2.399963;
+    let band = 0;
+    for (let j = rowStep; j < rows - 1; j += rowStep, band++) {
       const y = j * cell;
+      const phase = band * GOLD;
+      const bandW = (0.22 + 0.16 * (0.5 + 0.5 * Math.sin(band * 1.7 + 1))).toFixed(2);
+      let d = '';
       /** @type {number} */
       let runStart = -1;
       for (let i = 0; i <= cols; i++) {
         const inWater = i < cols && mask[j * cols + i] === 1 && dist[j * cols + i] > standoff;
         if (inWater && runStart < 0) runStart = i;
         if (!inWater && runStart >= 0) {
-          // One wobbled polyline per run, sampled every other cell.
-          if (i - runStart >= 3) {
+          if (i - runStart >= 4) {
             const pts = [];
-            for (let s = runStart; s <= i - 1; s += 2) {
+            for (let s = runStart; s <= i - 1; s++) {
               const x = s * cell;
-              pts.push(`${x.toFixed(1)},${(y + Math.sin(x * 0.045 + j * 1.7) * 1.2).toFixed(1)}`);
+              const yy =
+                y +
+                Math.sin(x * 0.021 + phase) * 3.1 +
+                Math.sin(x * 0.052 + phase * 1.7) * 1.2;
+              pts.push(`${x.toFixed(1)},${yy.toFixed(1)}`);
             }
-            if (pts.length >= 2) wavePath += `M${pts[0]} L${pts.slice(1).join(' L')} `;
+            d += `M${pts[0]} L${pts.slice(1).join(' L')} `;
           }
           runStart = -1;
         }
       }
-    }
-    if (wavePath) {
-      svg +=
-        `<path d="${wavePath.trim()}" fill="none" stroke="${REGISTER.waterInk}" ` +
-        `stroke-width="0.3" opacity="${(0.65 * waveIntensity).toFixed(2)}" stroke-linecap="round"/>`;
+      if (d) {
+        svg +=
+          `<path d="${d.trim()}" fill="none" stroke="${REGISTER.waterInk}" ` +
+          `stroke-width="${bandW}" opacity="${(0.65 * waveIntensity).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+      }
     }
   }
 
