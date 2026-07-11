@@ -7,6 +7,8 @@ import {
   relevance,
   computeField,
   computeTowns,
+  computeRoadEdges,
+  computeTrailEdges,
   createCartographer,
   TOWN_GROUP,
 } from '../src/cartographer.js';
@@ -223,6 +225,117 @@ describe('computeTowns', () => {
     expect(t(filtered, 'the-same-lever').match).toBe(false);
     // seats are filter-independent (positions are seed-only)
     expect(t(filtered, 'three-hours').seat).toEqual(t(open, 'three-hours').seat);
+  });
+});
+
+describe('edge assembly — computeRoadEdges / computeTrailEdges (ho-08)', () => {
+  /**
+   * Two peaks and two towns. The towns are companions of each other (declared
+   * once, on three-hours — symmetric edges answer from both endpoints), and
+   * three-hours is ALSO a companion of the peak kanyo (a town↔peak companion
+   * is not a road). Each town documents one peak.
+   * @type {any}
+   */
+  const edgeData = {
+    work_groups: [
+      { id: 'methodology', number: 1, name: 'Methodology', intro: '' },
+      { id: 'writing', number: 4, name: 'Writing', intro: '' },
+    ],
+    theme_vocabulary: {},
+    works: [
+      {
+        id: 'ho-system',
+        group: 'methodology',
+        importance: 9,
+        themes: ['craft'],
+        media: ['methodology'],
+        status: 'shipped',
+        sort_order_within_group: 10,
+        relationships: [],
+      },
+      {
+        id: 'kanyo',
+        group: 'production-systems',
+        importance: 8,
+        themes: ['agency'],
+        media: ['software'],
+        status: 'shipped',
+        sort_order_within_group: 20,
+        relationships: [],
+      },
+      {
+        id: 'three-hours',
+        name: 'Three Hours',
+        group: 'writing',
+        importance: 6,
+        themes: ['craft'],
+        media: ['writing'],
+        status: 'published',
+        sort_order_within_group: 10,
+        relationships: [
+          { target: 'ho-system', type: 'documents', strength: 3 },
+          { target: 'the-same-lever', type: 'companion_to' },
+          { target: 'kanyo', type: 'companion_to' },
+        ],
+      },
+      {
+        id: 'the-same-lever',
+        name: 'The Same Lever',
+        group: 'writing',
+        importance: 6,
+        themes: ['agency'],
+        media: ['writing'],
+        status: 'published',
+        sort_order_within_group: 20,
+        relationships: [{ target: 'kanyo', type: 'documents', strength: 2 }],
+      },
+    ],
+  };
+  const idx = createIndexer(edgeData);
+  const field = computeField(idx, empty, 42);
+  const towns = computeTowns(idx, empty, field);
+  const seatOf = (/** @type {string} */ id) => towns.find((t) => t.id === id)?.seat;
+
+  it('builds one road per companion pair, deduplicated by sorted id pair', () => {
+    const roads = computeRoadEdges(idx, towns);
+    // The symmetric edge answers from BOTH towns' outgoing sets — one road results.
+    expect(roads).toHaveLength(1);
+    expect(roads[0].id).toBe('the-same-lever|three-hours');
+    expect(roads[0].strength).toBe(2);
+  });
+
+  it('road endpoints are the two towns’ seats', () => {
+    const [road] = computeRoadEdges(idx, towns);
+    expect(road.from).toEqual(seatOf('three-hours'));
+    expect(road.to).toEqual(seatOf('the-same-lever'));
+  });
+
+  it('skips companion edges whose far endpoint is a peak, not a settlement', () => {
+    const roads = computeRoadEdges(idx, towns);
+    expect(roads.some((r) => r.id.includes('kanyo'))).toBe(false);
+  });
+
+  it('returns no roads for no towns', () => {
+    expect(computeRoadEdges(idx, [])).toEqual([]);
+  });
+
+  it('builds one trail per documents edge, town seat → peak position', () => {
+    const trails = computeTrailEdges(idx, towns, field.peaks);
+    expect(trails.map((t) => t.id)).toEqual(['three-hours→ho-system', 'the-same-lever→kanyo']);
+    const ho = field.peaks.find((p) => p.id === 'ho-system');
+    expect(trails[0].from).toEqual(seatOf('three-hours'));
+    expect(trails[0].to).toEqual({ x: ho?.x, y: ho?.y });
+  });
+
+  it('skips documents edges to peaks absent from the field (mid-emergence)', () => {
+    // Only ho-system has risen — the-same-lever's trail to kanyo has no endpoint yet.
+    const risen = field.peaks.filter((p) => p.id === 'ho-system');
+    const trails = computeTrailEdges(idx, towns, risen);
+    expect(trails.map((t) => t.id)).toEqual(['three-hours→ho-system']);
+  });
+
+  it('returns no trails for no towns', () => {
+    expect(computeTrailEdges(idx, [], field.peaks)).toEqual([]);
   });
 });
 

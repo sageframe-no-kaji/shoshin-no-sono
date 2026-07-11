@@ -1,9 +1,17 @@
 /**
- * Debug page entry for the cartography (ho-06 contours + ho-07 towns) —
- * browser-only wiring, no logic, excluded from coverage (vitest.config.mjs) like
- * src/main.js. Boots the Indexer + Gate + Cartographer and renders, in register
- * order: paper → contour map (src/contour-map.js) → settlements
- * (src/settlement-map.js) → labels.
+ * Cartography page entry (ho-06 contours + ho-07 towns, grown through ho-08
+ * features and the ho-A hachure sidequest) — browser wiring plus the
+ * timer-driven emergence player, excluded from coverage (vitest.config.mjs)
+ * like src/main.js. The pure logic that had accumulated here now lives in
+ * tested modules: labels, the glow filter, and collision placement in
+ * src/label-map.js; beacons and the corpus-floor marker in src/beacon-map.js;
+ * road/trail edge assembly in src/cartographer.js; the settlement ink lerp in
+ * src/settlement-map.js. What remains is genuinely wiring: DOM lookups, the
+ * tuner panel + layer/chip event handlers, render orchestration that passes
+ * explicit tuner/Gate values into the pure modules, and the emergence player's
+ * timers / rAF / playToken state machine. Boots the Indexer + Gate +
+ * Cartographer and renders, in register order: paper → contour map
+ * (src/contour-map.js) → settlements (src/settlement-map.js) → labels.
  *
  * It carries the by-feel tuner instruments: the ho-06 field controls (interval,
  * summit sharpness, crenellation, radius scaling, sink floor) and the ho-07 town
@@ -17,16 +25,31 @@
  */
 import { createIndexer, loadWorks } from './indexer.js';
 import { createGate } from './gate.js';
-import { createCartographer, computeField, computeTowns } from './cartographer.js';
+import {
+  createCartographer,
+  computeField,
+  computeTowns,
+  computeRoadEdges,
+  computeTrailEdges,
+} from './cartographer.js';
 import { contourMapSvg } from './contour-map.js';
 import { hachureMapSvg } from './hachure-map.js';
-import { extractContour } from './contours.js';
-import { settlementSvg, settlementClearingSvg } from './settlement-map.js';
+import { settlementSvg, settlementClearingSvg, townInkColor } from './settlement-map.js';
 import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
-import { buildEmergenceTimeline, emergencePlan, scaleFn, CORPUS_FLOOR } from './emergence.js';
+import { buildEmergenceTimeline, emergencePlan, scaleFn } from './emergence.js';
 import { roadsSvg, trailsSvg } from './feature-map.js';
 import { wavesSvg } from './water-map.js';
+import { REGISTER } from './register.js';
+import {
+  labelGlowFilter,
+  peakLabel,
+  peakNameScale,
+  townLabelSvg,
+  placeNameLayer,
+  elevationLabelsSvg,
+} from './label-map.js';
+import { beaconSvg, corpusFloorSvg } from './beacon-map.js';
 
 const indexer = createIndexer(await loadWorks('./works.json'));
 const gate = createGate(window);
@@ -113,17 +136,29 @@ const tuners = {
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
 const TOWN_GAP_MS = 140;
-/** The signal-fire beacon hue (brand Amber — flame, NOT the reserved terracotta). */
-const BEACON_AMBER = '#D4952A';
+/** Annotation grey for the debug peak-id text — NOT a register color. */
+const ANNOTATION_GREY = '#6B6B6B';
 
-/** Settlement building fill: lerp from register ink to a light warm grey by `townInk`. */
-const INK_DARK = [0x2b, 0x2b, 0x2b];
-const INK_LIGHT = [0xa8, 0xa2, 0x97];
-const townInkColor = () => {
-  const t = Math.max(0, Math.min(1, tuners.townInk));
-  const c = INK_DARK.map((d, i) => Math.round(d + (INK_LIGHT[i] - d) * t));
-  return `rgb(${c[0]},${c[1]},${c[2]})`;
-};
+/**
+ * The label opts every label renderer reads (src/label-map.js) — the tuner
+ * dials plus the Gate's hachure-layer flag, resolved here because only the
+ * page talks to the Gate.
+ * @returns {import('./label-map.js').LabelOpts}
+ */
+const labelOpts = () => ({
+  labelRed: tuners.labelRed,
+  labelGlow: tuners.labelGlow,
+  hachure: gate.currentLayers().hachure,
+});
+
+/** The full opts slice for the place-name layer and town labels. @returns {import('./label-map.js').PlaceNameOpts} */
+const nameLayerOpts = () => ({
+  ...labelOpts(),
+  peakLabelScale: tuners.peakLabelScale,
+  importanceScale: tuners.importanceScale,
+  townLabelScale: tuners.townLabelScale,
+  townLabelGap: tuners.townLabelGap,
+});
 
 /**
  * Tuner spec shape. `locked`: landed in a prior ho (frozen register / ho-06.5
@@ -221,207 +256,19 @@ const peakDotsSvg = (peaks) =>
   peaks
     .map(
       (p) =>
-        `<g opacity="0.75"><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="#9A5B3C"/>` +
-        `<text x="${(p.x + 5).toFixed(1)}" y="${(p.y + 3).toFixed(1)}" font-family="Spectral, Georgia, serif" font-size="9" fill="#6B6B6B">${p.id}</text></g>`,
+        `<g opacity="0.75"><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="${REGISTER.terra}"/>` +
+        `<text x="${(p.x + 5).toFixed(1)}" y="${(p.y + 3).toFixed(1)}" font-family="Spectral, Georgia, serif" font-size="9" fill="${ANNOTATION_GREY}">${p.id}</text></g>`,
     )
     .join('');
-
-const NATIVE_STACK = "'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
-
-/**
- * Textured cream glow filter (ho-A-6.0). Dilates the text alpha (feMorphology)
- * to grow a halo around the EXTERIOR silhouette of the letterforms, then
- * displaces that edge by fractal turbulence so the boundary reads as inked-
- * by-hand rather than geometric. The result composites cream-only outside the
- * text and leaves the original colored letters untouched.
- * @param {number} glow `labelGlow` tuner value — scales dilation + roughness.
- */
-const labelGlowFilter = (glow) => {
-  const radius = Math.max(0.5, 4 * glow);
-  const displace = Math.max(0.5, 2 * glow);
-  return (
-    `<defs><filter id="lblglow" x="-40%" y="-40%" width="180%" height="180%">` +
-    `<feMorphology in="SourceAlpha" operator="dilate" radius="${radius.toFixed(2)}" result="halo"/>` +
-    `<feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="7" result="noise"/>` +
-    `<feDisplacementMap in="halo" in2="noise" scale="${displace.toFixed(2)}" result="rough"/>` +
-    `<feFlood flood-color="#FDFCF9" result="flood"/>` +
-    `<feComposite in="flood" in2="rough" operator="in" result="glow"/>` +
-    `<feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>` +
-    `</filter></defs>`
-  );
-};
-
-/**
- * Label color dial (ho-A-6.0). Three-stop gradient so the slider's 1.0
- * default lands exactly on terracotta — linear between 0..1 (warm dark →
- * terracotta) and 1..1.5 (terracotta → vivid red). Native script tracks the
- * primary color but in a slightly lighter parallel gradient so the visual
- * hierarchy survives the dial.
- */
-const LABEL_PRIMARY_STOPS = [
-  [0x2b, 0x2b, 0x2b],
-  [0x9a, 0x5b, 0x3c],
-  [0xc5, 0x3d, 0x24],
-];
-const LABEL_NATIVE_STOPS = [
-  [0x5c, 0x5c, 0x5c],
-  [0xb5, 0x72, 0x55],
-  [0xd8, 0x6a, 0x52],
-];
-
-/** @param {number[][]} stops 3 RGB stops at 0 / 1 / 1.5 @param {number} t */
-const labelColor = (stops, t) => {
-  const clamped = Math.max(0, Math.min(1.5, t));
-  const [a, b] = clamped <= 1 ? [stops[0], stops[1]] : [stops[1], stops[2]];
-  const u = clamped <= 1 ? clamped : (clamped - 1) / 0.5;
-  const c = a.map((v, i) => Math.round(v + (b[i] - v) * u));
-  return `rgb(${c[0]},${c[1]},${c[2]})`;
-};
-
-/**
- * Peak label — typography variant B (peak): wide-tracked roman caps with the
- * native script set beside at near-equal optical size, a cream halo so it reads
- * over the rings. A minimal static render pulled forward so the assembled map
- * is legible during the by-feel pass; ho-09 owns the interactive label layer
- * (cards, hover-dim, collision/leadering).
- * @param {number} x @param {number} y @param {string} name @param {string|null} native @param {number} scale
- */
-const peakLabel = (x, y, name, native, scale) => {
-  const primary = labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed);
-  const natFill = labelColor(LABEL_NATIVE_STOPS, tuners.labelRed);
-  const fs = 16.5 * scale;
-  const nat = native
-    ? `<tspan dx="${(8 * scale).toFixed(1)}" font-family="${NATIVE_STACK}" font-size="${(14 * scale).toFixed(1)}" fill="${natFill}" style="letter-spacing:0.10em;">${native}</tspan>`
-    : '';
-  // When the hachure layer is on, labels read over a busy ground; use the
-  // textured cream glow via SVG filter — feMorphology dilates the OUTER
-  // letter silhouette (not per-letter strokes), feDisplacementMap roughs
-  // the edge so it reads inked. Otherwise the ho-07.6 paint-order stroke
-  // halo works clean over contours-or-empty.
-  if (gate.currentLayers().hachure) {
-    return (
-      `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-      `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
-      `filter="url(#lblglow)">${(name || '').toUpperCase()}${nat}</text>`
-    );
-  }
-  return (
-    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-size="${fs.toFixed(1)}" fill="${primary}" style="letter-spacing:0.16em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${(name || '').toUpperCase()}${nat}</text>`
-  );
-};
-
-/**
- * A peak's label scale: the base size dialed up or down by its importance, like a
- * real map where the big places carry the big type (ho-07.6). `importanceScale` 0
- * makes every peak the same; higher spreads them — importance 10 reaches
- * (1 + importanceScale)× an importance-2 peak. Floored so the smallest stays legible.
- * @param {number} importance
- */
-const peakNameScale = (importance) =>
-  tuners.peakLabelScale * Math.max(0.4, 1 + tuners.importanceScale * ((importance - 2) / 8));
-
-/**
- * The signal-fire beacon (ho-07.6 Decision 5): a soft amber glow at each risen
- * peak's summit — the beacons of Gondor, lit as the peak rises. Three stacked
- * circles (wide faint halo, mid glow, bright core) in flame amber, never
- * terracotta. When `pulse` is set (resting / writing phase, where the container is
- * stable) the beacon breathes via `emgBeacon`; during the world cross-fade it
- * stays steady so the per-beat re-render can't reset the breath. Weight by
- * `beaconOpacity` (0 hides it).
- * @param {import('./field.js').PositionedPeak[]} peaks @param {boolean} [pulse]
- */
-const beaconSvg = (peaks, pulse = false) => {
-  const op = tuners.beaconOpacity;
-  if (op <= 0) return '';
-  const anim = pulse ? ' style="animation:emgBeacon 2800ms ease-in-out infinite;"' : '';
-  const dial = tuners.beaconImportance;
-  // Quadratic spread by importance: factor = (imp/10)^2. Log compressed the
-  // high end so peaks 5–10 all read at ~60–100% — not enough contrast. The
-  // power curve drops imp 3 to ~10% and lets imp 9 sit at ~80%, so the
-  // hierarchy reads. `dial` lerps from uniform (0) to fully spread (1).
-  return peaks
-    .map((p) => {
-      const norm = Math.max(0, Math.min(1, p.importance / 10));
-      const factor = norm * norm;
-      const scaled = op * (1 - dial + dial * factor);
-      // Opacity caps at 1 (SVG). Past `scaled=1` the dial keeps amplifying via
-      // radius growth — sqrt so a 5× weight ~doubles the visible glow, not 5×.
-      const sizeMul = scaled > 1 ? Math.sqrt(scaled) : 1;
-      const rHalo = (9 * sizeMul).toFixed(1);
-      const rGlow = (3.4 * sizeMul).toFixed(1);
-      const rCore = (1.3 * sizeMul).toFixed(1);
-      const opHalo = Math.min(1, 0.18 * scaled).toFixed(3);
-      const opGlow = Math.min(1, 0.55 * scaled).toFixed(3);
-      const opCore = Math.min(1, 0.95 * scaled).toFixed(3);
-      return (
-        `<g${anim}><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rHalo}" fill="${BEACON_AMBER}" opacity="${opHalo}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rGlow}" fill="${BEACON_AMBER}" opacity="${opGlow}"/>` +
-        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rCore}" fill="${BEACON_AMBER}" opacity="${opCore}"/></g>`
-      );
-    })
-    .join('');
-};
-
-const LABEL_MAX_CHARS = 20; // wrap long titles to a carriage return at word boundaries
-const LABEL_LINE_HEIGHT = 14;
-
-/** Word-wrap a label (case preserved) to lines of at most LABEL_MAX_CHARS. @param {string} name @returns {string[]} */
-const wrapLabel = (name) => {
-  const words = (name || '').split(/\s+/).filter(Boolean);
-  /** @type {string[]} */
-  const lines = [];
-  let cur = '';
-  for (const w of words) {
-    if (cur && cur.length + 1 + w.length > LABEL_MAX_CHARS) {
-      lines.push(cur);
-      cur = w;
-    } else {
-      cur = cur ? `${cur} ${w}` : w;
-    }
-  }
-  if (cur) lines.push(cur);
-  return lines;
-};
-
-/**
- * Town label — the *authorial voice* (ho-07.6 Decision 4, brand-grounded): italic,
- * mixed-case, muted ink, tightly tracked — distinct from the peak's monumental
- * upright caps. Writing about the work speaks in italic; terracotta stays reserved
- * for the cathedral landmark and ho-09 interaction. Cream halo so it reads clear of
- * the contours.
- */
-const townLabel = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ name, /** @type {number} */ scale) => {
-  const lines = wrapLabel(name);
-  const tspans = lines
-    .map((ln, i) => `<tspan x="${x.toFixed(1)}" dy="${i === 0 ? 0 : (LABEL_LINE_HEIGHT * scale).toFixed(1)}">${ln}</tspan>`)
-    .join('');
-  const fs = 12.5 * scale;
-  // Hachure layer on: textured glow filter around the italic text silhouette
-  // — exterior boundary only, no per-letter stroke widening.
-  if (gate.currentLayers().hachure) {
-    return (
-      `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-      `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
-      `filter="url(#lblglow)">${tspans}</text>`
-    );
-  }
-  return (
-    `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-family="Spectral, Georgia, serif" ` +
-    `font-style="italic" font-size="${fs.toFixed(1)}" fill="${labelColor(LABEL_PRIMARY_STOPS, tuners.labelRed)}" style="letter-spacing:0.04em;" ` +
-    `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(4.5 * scale * tuners.labelGlow).toFixed(1)}" stroke-linejoin="round">${tspans}</text>`
-  );
-};
 
 /**
  * One town at a build fraction (ho-07.6 Decision 1). Houses appear in build order
  * (cathedral last, via revealedBlocks) and each one *fades* in rather than popping:
  * the fully-built houses draw solid, and the one currently going up draws at the
- * fractional opacity between houses — so construction reads smooth. The label
- * appears once the town essentially stands. Non-matching towns dim and drop their
- * the label appears once the town essentially stands. `drawLabel` false omits it, so the
- * resting render can place all labels on one collision-checked layer above everything.
+ * fractional opacity between houses — so construction reads smooth. Non-matching
+ * towns dim; the label appears once the town essentially stands. `drawLabel` false
+ * omits it, so the resting render can place all labels on one collision-checked
+ * layer above everything.
  * @param {import('./cartographer.js').CartographyTown} t @param {number} fraction @param {boolean} [drawLabel]
  */
 const oneTownSvg = (t, fraction, drawLabel = true) => {
@@ -430,7 +277,7 @@ const oneTownSvg = (t, fraction, drawLabel = true) => {
   const pos = Math.max(0, Math.min(1, fraction)) * n;
   const fullCount = Math.floor(pos);
   const fade = pos - fullCount; // the in-progress house's opacity
-  const ink = townInkColor();
+  const ink = townInkColor(tuners.townInk);
   const visible = ordered.slice(0, fullCount);
   let inner = settlementClearingSvg(visible, 4) + settlementSvg(visible, { ink });
   if (fullCount < n && fade > 0.001) {
@@ -438,151 +285,35 @@ const oneTownSvg = (t, fraction, drawLabel = true) => {
   }
   const g = `<g transform="translate(${t.seat.x.toFixed(1)},${t.seat.y.toFixed(1)})">${inner}</g>`;
   if (!t.match) return `<g opacity="0.1">${g}</g>`;
-  return drawLabel && fraction >= 0.999 ? g + townLabelSvg(t) : g;
+  return drawLabel && fraction >= 0.999 ? g + townLabelSvg(t, nameLayerOpts()) : g;
 };
-
-/** The y of a town's label — below the settlement's outer edge plus the gap (ho-07.6). */
-const townLabelY = (/** @type {import('./cartographer.js').CartographyTown} */ t) =>
-  t.seat.y + t.extent + tuners.townLabelGap;
-
-/** A town's label markup. @param {import('./cartographer.js').CartographyTown} t */
-const townLabelSvg = (t) => `<g>${townLabel(t.seat.x, townLabelY(t), t.name, tuners.townLabelScale)}</g>`;
 
 /** All town buildings at full, no labels (the resting render places labels on top). @param {import('./cartographer.js').CartographyTown[]} towns */
 const townsSvg = (towns) => towns.map((t) => oneTownSvg(t, 1, false)).join('');
 
 /**
- * @typedef {Object} LabelItem
- * @property {number} cx center x @property {number} top box top y
- * @property {number} w box width @property {number} h box height
- * @property {number} priority higher wins a collision @property {string} svg
+ * The collision-checked place-name layer for the resting map (src/label-map.js):
+ * this wrapper resolves each peak's and town's work via the Indexer — name,
+ * native script, importance — and hands label-map the pure inputs.
+ * @param {import('./cartographer.js').CartographyField} field @param {import('./cartographer.js').CartographyTown[]} towns
  */
-
-/**
- * Greedy label placement (ho-07.6): place labels by priority, dropping any whose box
- * overlaps one already placed — so text never lands on text. A pragmatic stand-in
- * for ho-09's full collision/leadering layer; here a colliding label is simply
- * omitted rather than nudged or leadered.
- * @param {LabelItem[]} items @returns {string}
- */
-const placeLabels = (items) => {
-  const ranked = [...items].sort((a, b) => b.priority - a.priority);
-  /** @type {{x1:number,y1:number,x2:number,y2:number}[]} */
-  const placed = [];
-  let out = '';
-  for (const it of ranked) {
-    const box = { x1: it.cx - it.w / 2, y1: it.top, x2: it.cx + it.w / 2, y2: it.top + it.h };
-    const hit = placed.some((p) => !(box.x2 < p.x1 || box.x1 > p.x2 || box.y2 < p.y1 || box.y1 > p.y2));
-    if (hit) continue;
-    placed.push(box);
-    out += it.svg;
-  }
-  return out;
-};
-
-/** The collision-checked place-name layer for the resting map: peaks and towns, sized by importance, biggest first. @param {import('./cartographer.js').CartographyField} field @param {import('./cartographer.js').CartographyTown[]} towns */
-const placeNameLayer = (field, towns) => {
-  /** @type {LabelItem[]} */
-  const items = [];
-  // Hachure layer on: SVG filter dilates the text alpha by ~4*glow px;
-  // collision boxes grow modestly to match the visible glow footprint.
-  // Hachure layer off: tighter stroke-halo box.
-  const hasHachure = gate.currentLayers().hachure;
-  const peakCardPad = hasHachure ? 3 * tuners.labelGlow : 0;
-  const townCardPad = hasHachure ? 3 * tuners.labelGlow : 0;
+const placeNamesSvg = (field, towns) => {
+  /** @type {import('./label-map.js').PeakLabelInput[]} */
+  const peakInputs = [];
   for (const p of field.peaks) {
     const w = indexer.getWork(p.id);
     if (!w) continue;
-    const sc = peakNameScale(p.importance);
-    const fs = 16.5 * sc;
-    const chars = (w.name || '').length;
-    const wide = chars * fs * 0.78 + (w.native_script ? fs * 2.6 : 0); // caps + tracking + native
-    items.push({
-      cx: p.x,
-      top: p.y - 12 - fs,
-      w: wide + 6 + 2 * peakCardPad,
-      h: fs + 6 + 2 * peakCardPad,
-      priority: p.importance + 0.5, // a work edges out an equal-importance town
-      svg: peakLabel(p.x, p.y - 12, w.name, w.native_script, sc),
-    });
+    peakInputs.push({ x: p.x, y: p.y, name: w.name, native: w.native_script, importance: p.importance });
   }
-  for (const t of towns) {
-    if (!t.match) continue;
-    const fs = 12.5 * tuners.townLabelScale;
-    const lines = wrapLabel(t.name);
-    const maxc = Math.max(1, ...lines.map((l) => l.length));
-    const h = (lines.length - 1) * LABEL_LINE_HEIGHT * tuners.townLabelScale + fs;
-    items.push({
-      cx: t.seat.x,
-      top: townLabelY(t) - fs,
-      w: maxc * fs * 0.5 + 6 + 2 * townCardPad,
-      h: h + 6 + 2 * townCardPad,
-      priority: indexer.getWork(t.id)?.importance ?? 0,
-      svg: townLabelSvg(t),
-    });
-  }
-  return placeLabels(items);
-};
-
-/**
- * The corpus-floor marker (ho-07.2 Decision 5): a faint dashed horizon near the
- * field's base with a small caption, marking 2025-11-11 — where the dense record
- * begins. Present from the first emergence frame and at rest; the 2022 floor work
- * (aspirational-intelligence) is a real peak and renders through the field. Weight
- * is by-feel (tuner `floorMarkerOpacity`); 0 hides it.
- */
-const corpusFloorSvg = () => {
-  const op = tuners.floorMarkerOpacity;
-  if (op <= 0) return '';
-  // Pulled up off the bottom edge and given a readable caption so it can actually
-  // be seen and judged (ho-07.6 Decision 6 — it was invisible at y≈610).
-  const y = 588;
-  return (
-    `<g opacity="${op}">` +
-    `<line x1="60" y1="${y}" x2="940" y2="${y}" stroke="#9A958B" stroke-width="0.8" stroke-dasharray="1 6" stroke-linecap="round"/>` +
-    `<text x="60" y="${y - 6}" font-family="Spectral, Georgia, serif" font-style="italic" font-size="9.5" fill="#9A958B" ` +
-    `style="letter-spacing:0.12em;">${CORPUS_FLOOR.label} · 2025</text>` +
-    `</g>`
-  );
-};
-
-/** Heightfield units → feet: an importance-9 summit (height ≈ 9) reads ≈ 9000 ft. */
-const FEET_PER_UNIT = 1000;
-/** Elevation labels land on ROUND contours (every 1000 ft), like a real topo map. */
-const ELEVATION_STEP_FT = 1000;
-
-/**
- * USGS-style elevation labels (ho-07.6). Iso-lines are extracted at *round* 1000-ft
- * elevations — independent of the visual contour interval — so the numbers read
- * 1000, 2000, 3000… rather than the rendered rings' off values. Each carries its
- * elevation in feet, set inline with a cream halo and rotated along the line. A
- * couple per level. Rendered only in the resting / frozen-terrain views (computed
- * once), not per world beat.
- * @param {import('./field.js').Heightfield} hf
- */
-const elevationLabelsSvg = (hf) => {
-  const maxFeet = hf.max * FEET_PER_UNIT;
-  let svg = '';
-  for (let feet = ELEVATION_STEP_FT; feet < maxFeet; feet += ELEVATION_STEP_FT) {
-    const segs = extractContour(hf, feet / FEET_PER_UNIT);
-    if (segs.length < 8) continue;
-    const stride = Math.max(8, Math.floor(segs.length / 2)); // ~a couple labels per level
-    for (let i = Math.floor(stride / 2); i < segs.length; i += stride) {
-      const [a, b] = segs[i];
-      const mx = (a.x + b.x) / 2;
-      const my = (a.y + b.y) / 2;
-      let ang = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-      if (ang > 90) ang -= 180;
-      if (ang < -90) ang += 180; // keep the numerals upright
-      const sz = 6 * tuners.elevationScale;
-      svg +=
-        `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="central" ` +
-        `transform="rotate(${ang.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})" ` +
-        `font-family="Spectral, Georgia, serif" font-size="${sz.toFixed(1)}" fill="#6B6B6B" style="letter-spacing:0.04em;" ` +
-        `paint-order="stroke" stroke="#FDFCF9" stroke-width="${(2.4 * tuners.elevationScale).toFixed(1)}" stroke-linejoin="round">${feet}</text>`;
-    }
-  }
-  return svg;
+  /** @type {import('./label-map.js').TownLabelInput[]} */
+  const townInputs = towns.map((t) => ({
+    seat: t.seat,
+    extent: t.extent,
+    name: t.name,
+    match: t.match,
+    importance: indexer.getWork(t.id)?.importance ?? 0,
+  }));
+  return placeNameLayer(peakInputs, townInputs, nameLayerOpts());
 };
 
 /** Update the seed / pinned readouts and the theme chips. */
@@ -650,9 +381,13 @@ const stepTerrain = (step) => {
     ...tuners,
     emergenceScale: scaleFn(step),
   });
-  let svg = corpusFloorSvg();
+  let svg = corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   svg += terrainSvg(field.heightfield);
-  svg += beaconSvg(field.peaks); // steady during the cross-fade (no reset)
+  // steady during the cross-fade (no reset)
+  svg += beaconSvg(field.peaks, {
+    beaconOpacity: tuners.beaconOpacity,
+    beaconImportance: tuners.beaconImportance,
+  });
   if (showPeaks) svg += peakDotsSvg(field.peaks);
   return { svg, peaks: field.peaks };
 };
@@ -661,59 +396,26 @@ const stepTerrain = (step) => {
 const nameEl = (p) => {
   const w = indexer.getWork(p.id);
   if (!w) return '';
-  const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, peakNameScale(p.importance));
+  const scale = peakNameScale(p.importance, {
+    peakLabelScale: tuners.peakLabelScale,
+    importanceScale: tuners.importanceScale,
+  });
+  const label = peakLabel(p.x, p.y - 12, w.name, w.native_script, scale, labelOpts());
   // ease-in-out for a smooth swell rather than a quick pop (ho-07.6).
   return `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-in-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`;
 };
 
 /**
- * Roads and trails for the current field + towns.
+ * Roads and trails for the current field + towns. Edge assembly (Indexer
+ * queries, road dedup, trail construction) is the Cartographer's job
+ * (src/cartographer.js); src/feature-map.js renders the edges.
  * @param {import('./cartographer.js').CartographyField} field
  * @param {import('./cartographer.js').CartographyTown[]} towns
  * @returns {string}
  */
-const featuresSvg = (field, towns) => {
-  const peakMap = new Map(field.peaks.map(p => [p.id, { x: p.x, y: p.y }]));
-  const townSet = new Set(towns.map(t => t.id));
-  const townSeat = new Map(towns.map(t => [t.id, t.seat]));
-
-  // Roads: companion_to edges where BOTH endpoints are settlements.
-  // Town-to-town connections sit flat in the valleys.
-  /** @type {import('./feature-map.js').RoadEdge[]} */
-  const roadEdges = [];
-  const seenRoads = new Set();
-  for (const t of towns) {
-    for (const e of indexer.getOutgoing(t.id, 'companion_to')) {
-      if (!townSet.has(e.target)) continue;
-      const key = [t.id, e.target].sort().join('|');
-      if (seenRoads.has(key)) continue;
-      seenRoads.add(key);
-      const dest = townSeat.get(e.target);
-      if (!dest) continue;
-      roadEdges.push({ from: t.seat, to: dest, id: key, strength: 2 });
-    }
-  }
-
-  // Trails: documents edges from settlements to their documented peaks.
-  // Each trail climbs from the town up to the peak's foot.
-  /** @type {import('./feature-map.js').TrailEdge[]} */
-  const trailEdges = [];
-  for (const t of towns) {
-    for (const e of indexer.getOutgoing(t.id, 'documents')) {
-      const peak = peakMap.get(e.target);
-      if (!peak) continue;
-      // No footRadius — the town seat is already placed at the peak foot by
-      // the seating algorithm. Pulling it back further collapses the path.
-      trailEdges.push({
-        from: t.seat,
-        to: peak,
-        id: `${t.id}→${e.target}`,
-      });
-    }
-  }
-
-  return roadsSvg(roadEdges, field.heightfield) + trailsSvg(trailEdges);
-};
+const featuresSvg = (field, towns) =>
+  roadsSvg(computeRoadEdges(indexer, towns), field.heightfield) +
+  trailsSvg(computeTrailEdges(indexer, towns, field.peaks));
 
 const render = () => {
   // The resting / static path (filter toggles, reseed-less re-render). A fully
@@ -727,17 +429,22 @@ const render = () => {
   });
   const layers = gate.currentLayers();
   let svg = layers.hachure ? labelGlowFilter(tuners.labelGlow) : '';
-  svg += corpusFloorSvg();
+  svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   svg += terrainSvg(field.heightfield);
   // Iso elevation labels are placed on iso lines — they only read when the
   // iso layer is on, regardless of hachures.
-  if (layers.iso) svg += elevationLabelsSvg(field.heightfield);
+  if (layers.iso) svg += elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale });
   svg += wavesSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity });
   svg += featuresSvg(field, towns);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
-  svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
+  // signal-fire beacons, breathing at rest
+  svg += beaconSvg(field.peaks, {
+    beaconOpacity: tuners.beaconOpacity,
+    beaconImportance: tuners.beaconImportance,
+    pulse: true,
+  });
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
-  svg += placeNameLayer(field, towns); // ALL place names, above everything, collision-checked
+  svg += placeNamesSvg(field, towns); // ALL place names, above everything, collision-checked
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
   pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';
@@ -834,12 +541,18 @@ const playWriting = (writeSteps, token, layers) => {
   const byId = new Map(allTowns.map((t) => [t.id, t]));
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
   layers.terr.innerHTML =
-    corpusFloorSvg() +
+    corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     terrainSvg(field.heightfield) +
-    (gate.currentLayers().iso ? elevationLabelsSvg(field.heightfield) : '') +
+    (gate.currentLayers().iso
+      ? elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale })
+      : '') +
     wavesSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity }) +
     featuresSvg(field, allTowns) +
-    beaconSvg(field.peaks, true) +
+    beaconSvg(field.peaks, {
+      beaconOpacity: tuners.beaconOpacity,
+      beaconImportance: tuners.beaconImportance,
+      pulse: true,
+    }) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
 
   /** @type {import('./cartographer.js').CartographyTown[]} */

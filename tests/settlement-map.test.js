@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { settlementSvg, settlementClearingSvg } from '../src/settlement-map.js';
+import { settlementSvg, settlementClearingSvg, townInkColor } from '../src/settlement-map.js';
 
 describe('settlementSvg', () => {
   it('renders nothing for an empty block list', () => {
@@ -74,5 +74,24 @@ describe('settlementClearingSvg', () => {
       { x: 20, y: 0, w: 8, h: 8, a: 0 },
     ]);
     expect(svg.match(/<rect/g)).toHaveLength(2);
+  });
+});
+
+describe('townInkColor', () => {
+  it('is pure register ink at 0', () => {
+    expect(townInkColor(0)).toBe('rgb(43,43,43)'); // #2B2B2B
+  });
+
+  it('is the light warm grey at 1', () => {
+    expect(townInkColor(1)).toBe('rgb(168,162,151)'); // #A8A297
+  });
+
+  it('lerps each channel at the midpoint (rounded)', () => {
+    expect(townInkColor(0.5)).toBe('rgb(106,103,97)');
+  });
+
+  it('clamps the dial to [0, 1]', () => {
+    expect(townInkColor(-2)).toBe(townInkColor(0));
+    expect(townInkColor(3.5)).toBe(townInkColor(1));
   });
 });

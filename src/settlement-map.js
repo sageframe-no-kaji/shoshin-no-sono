@@ -21,6 +21,24 @@ const round2 = (n) => Math.round(n * 100) / 100;
  * stroke weight, not a color, so it stays local; colors come from src/register.js. */
 const SEP = 0.4;
 
+/** REGISTER.ink (#2B2B2B) as RGB channels — the dark end of the building lerp. */
+const INK_DARK = [0x2b, 0x2b, 0x2b];
+/** The light end of the building lerp — a light warm grey, deliberately NOT a
+ * register color; it exists only as the far pole of the `townInk` dial. */
+const INK_LIGHT = [0xa8, 0xa2, 0x97];
+
+/**
+ * Settlement building fill: lerp from register ink to a light warm grey by the
+ * page's `townInk` dial (ho-07.6). Clamped to [0, 1]; 0 is pure register ink.
+ * @param {number} t building lightness 0 (ink) → 1 (light warm grey)
+ * @returns {string} an `rgb(r,g,b)` fill value
+ */
+export function townInkColor(t) {
+  const u = Math.max(0, Math.min(1, t));
+  const c = INK_DARK.map((d, i) => Math.round(d + (INK_LIGHT[i] - d) * u));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
 /**
  * @typedef {{ ink?: string, paper?: string, terra?: string, sep?: number }} SettlementMapOpts
  */

@@ -229,6 +229,66 @@ export function computeTowns(indexer, state, field, opts = {}) {
 }
 
 /**
+ * Road edges for a set of placed towns (ho-08): `companion_to` edges where BOTH
+ * endpoints are settlements — town-to-town connections sit flat in the valleys.
+ * Symmetric edges answer from both endpoints, so each road is deduplicated by
+ * its sorted id pair. Querying the Indexer for the edges is the Cartographer's
+ * job (CLAUDE.md boundary); src/feature-map.js renders the returned shapes.
+ * @param {Indexer} indexer
+ * @param {CartographyTown[]} towns
+ * @returns {import('./feature-map.js').RoadEdge[]}
+ */
+export function computeRoadEdges(indexer, towns) {
+  const townSet = new Set(towns.map((t) => t.id));
+  /** @type {Map<string, { x: number, y: number }>} */
+  const townSeat = new Map(towns.map((t) => [t.id, t.seat]));
+  /** @type {import('./feature-map.js').RoadEdge[]} */
+  const roadEdges = [];
+  const seenRoads = new Set();
+  for (const t of towns) {
+    for (const e of indexer.getOutgoing(t.id, 'companion_to')) {
+      if (!townSet.has(e.target)) continue;
+      const key = [t.id, e.target].sort().join('|');
+      if (seenRoads.has(key)) continue;
+      seenRoads.add(key);
+      const dest = townSeat.get(e.target);
+      if (!dest) continue;
+      roadEdges.push({ from: t.seat, to: dest, id: key, strength: 2 });
+    }
+  }
+  return roadEdges;
+}
+
+/**
+ * Trail edges for a set of placed towns (ho-08): `documents` edges from
+ * settlements to their documented peaks. Each trail climbs from the town up to
+ * the peak. No footRadius — the town seat is already placed at the peak foot by
+ * the seating algorithm; pulling it back further collapses the path.
+ * @param {Indexer} indexer
+ * @param {CartographyTown[]} towns
+ * @param {import('./field.js').PositionedPeak[]} peaks
+ * @returns {import('./feature-map.js').TrailEdge[]}
+ */
+export function computeTrailEdges(indexer, towns, peaks) {
+  /** @type {Map<string, { x: number, y: number }>} */
+  const peakMap = new Map(peaks.map((p) => [p.id, { x: p.x, y: p.y }]));
+  /** @type {import('./feature-map.js').TrailEdge[]} */
+  const trailEdges = [];
+  for (const t of towns) {
+    for (const e of indexer.getOutgoing(t.id, 'documents')) {
+      const peak = peakMap.get(e.target);
+      if (!peak) continue;
+      trailEdges.push({
+        from: t.seat,
+        to: peak,
+        id: `${t.id}→${e.target}`,
+      });
+    }
+  }
+  return trailEdges;
+}
+
+/**
  * Live component over an Indexer + Gate. Holds the ephemeral seed used when the
  * URL carries none, so a plain reload produces a novel layout while `?seed=N`
  * reproduces a fixed one. `randomSeed` is injectable for tests.
