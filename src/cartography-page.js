@@ -134,6 +134,9 @@ const tuners = {
   waveOpacity: 0.18,
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
+  trailWeight: 0.7, // single stroke weight, rail and rungs alike
+  trailTick: 2.2, // rung half-length in px
+  trailClear: 1.6, // cream halo width — 0 is the session-5 uncased lock; >0 is the legibility dial
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -419,6 +422,9 @@ const featuresSvg = (field, towns) =>
   roadsSvg(computeRoadEdges(indexer, towns), field.heightfield, { follow: tuners.roadFollow }) +
   trailsSvg(computeTrailEdges(indexer, towns, field.peaks), field.heightfield, {
     follow: tuners.trailFollow,
+    weight: tuners.trailWeight,
+    tickHalf: tuners.trailTick,
+    clear: tuners.trailClear,
   });
 
 const render = () => {
@@ -692,6 +698,9 @@ const TUNER_SECTIONS = [
     { key: 'waveOpacity', label: 'wave opacity', min: 0, max: 0.5, step: 0.01 },
     { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },
     { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05 },
+    { key: 'trailWeight', label: 'trail weight', min: 0.2, max: 2, step: 0.05 },
+    { key: 'trailTick', label: 'trail tick length', min: 0, max: 6, step: 0.1 },
+    { key: 'trailClear', label: 'trail clearing (0 = uncased lock)', min: 0, max: 6, step: 0.1 },
   ]},
 ];
 

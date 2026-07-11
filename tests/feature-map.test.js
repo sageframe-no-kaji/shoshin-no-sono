@@ -173,6 +173,24 @@ describe('trailTickLadderSvg', () => {
     expect(svg).toContain('M10.0,20.0');
     expect(svg).toContain('200.0,150.0"');
   });
+
+  it('clear > 0 paints a cream halo under the ladder (rail + rungs)', () => {
+    const svg = trailTickLadderSvg(0, 0, 200, 0, 1, { clear: 2 });
+    expect((svg.match(/<path /g) ?? []).length).toBe(4); // clearing ×2 + ink ×2
+    const creamWidths = Array.from(
+      svg.matchAll(/stroke="#FDFCF9" stroke-width="([\d.]+)"/g),
+      (m) => parseFloat(m[1]),
+    );
+    expect(creamWidths).toHaveLength(2);
+    expect(creamWidths[0]).toBeCloseTo(0.6 + 2 * 2, 6); // weight + 2·clear
+  });
+
+  it('weight and tick length opts change the mark', () => {
+    const base = trailTickLadderSvg(0, 0, 200, 0, 1);
+    const heavy = trailTickLadderSvg(0, 0, 200, 0, 1, { weight: 1.4, tickHalf: 4 });
+    expect(heavy).not.toBe(base);
+    expect(heavy).toContain('stroke-width="1.40"');
+  });
 });
 
 // ── terrainRoutedPath ─────────────────────────────────────────────────────────

@@ -74,6 +74,7 @@ function gradAt(hf, x, y) {
  * @property {number} [spacing]  Waypoint spacing along the chord in px.
  * @property {number} [iters]    Relaxation iterations.
  * @property {number} [maxDrift] Lateral clamp from the chord in px (keeps a route a route).
+ * @property {number} [slopeRef] Slope magnitude at which the sideways push saturates.
  */
 
 /**
@@ -105,18 +106,25 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
   const cnx = -(y2 - y1) / len;
   const cny = (x2 - x1) / len;
   const step = follow * spacing * 0.5;
-  const smooth = 0.3;
+  const slopeRef = opts.slopeRef ?? 0.02; // any real slope pushes at full strength
+  const smooth = 0.2;
   for (let k = 0; k < iters; k++) {
     for (let i = 1; i < n; i++) {
       const p = pts[i];
       const g = gradAt(hf, p.x, p.y);
+      const gm = Math.hypot(g.x, g.y);
+      if (gm < 1e-9) continue;
       const tx = pts[i + 1].x - pts[i - 1].x;
       const ty = pts[i + 1].y - pts[i - 1].y;
       const tm = Math.hypot(tx, ty) || 1;
       const nx = -ty / tm;
       const ny = tx / tm;
-      // Slide toward lower ground along the local normal.
-      const slide = -(g.x * nx + g.y * ny) * step;
+      // Slide toward lower ground along the local normal. The push responds to
+      // the DIRECTION of the slope at full strength once the slope is real
+      // (gm/slopeRef saturates) — raw-magnitude pushes were so weak the
+      // smoothing pass erased them and every route relaxed back to its chord.
+      const toward = (g.x * nx + g.y * ny) / gm;
+      const slide = -toward * Math.min(1, gm / slopeRef) * step;
       let px = p.x + nx * slide;
       let py = p.y + ny * slide;
       const drift = (px - x1) * cnx + (py - y1) * cny;
@@ -226,12 +234,20 @@ export function roadPathSvg(d, strength = 1) {
   );
 }
 
-/** Tick-ladder geometry (session-5 lock): rung spacing along the path, and the
- * rung half-length. Register values, not tuners. */
-const TICK_SPACING = 9;
-const TICK_HALF = 1.8;
-/** Single trail stroke weight — rail and rungs alike (uncased, single-weight ink). */
-const TRAIL_WEIGHT = 0.6;
+/**
+ * Tick-ladder mark parameters. Session 5 locked the mark's SHAPE (a rail with
+ * perpendicular rungs, single-weight ink); the real plate re-opened its
+ * legibility, so the dimensions are tuners, not frozen register (the lock
+ * predates the corpus-density hachure ground). `clear` is the cream halo
+ * width — 0 is the session-5 uncased lock; the practitioner dials the
+ * legibility compromise and the landing gets recorded at ho-08 close.
+ * @typedef {Object} TrailMarkOpts
+ * @property {number} [tickSpacing] Rung spacing along the path in px.
+ * @property {number} [tickHalf]    Rung half-length in px.
+ * @property {number} [weight]      Single stroke weight — rail and rungs alike.
+ * @property {number} [clear]       Cream clearing stroke width under the ladder (0 = uncased).
+ */
+const TRAIL_DEFAULTS = { tickSpacing: 9, tickHalf: 1.8, weight: 0.6, clear: 0 };
 
 /**
  * Tick-ladder trail from (x1,y1) to (x2,y2) — the session-5 locked register:
@@ -245,12 +261,13 @@ const TRAIL_WEIGHT = 0.6;
  * @param {number} x1 @param {number} y1 start (town seat)
  * @param {number} x2 @param {number} y2 end (peak foot)
  * @param {number} sign 1 or -1 — which side the rail bows
+ * @param {TrailMarkOpts} [opts]
  * @returns {string} SVG path elements (rail + rungs)
  */
-export function trailTickLadderSvg(x1, y1, x2, y2, sign) {
+export function trailTickLadderSvg(x1, y1, x2, y2, sign, opts = {}) {
   const len = Math.hypot(x2 - x1, y2 - y1);
   if (len < 20) return '';
-  return railAndRungsSvg(bowedPoints(x1, y1, x2, y2, sign));
+  return railAndRungsSvg(bowedPoints(x1, y1, x2, y2, sign), opts);
 }
 
 /**
@@ -288,14 +305,19 @@ function bowedPoints(x1, y1, x2, y2, sign) {
 /**
  * Rail + perpendicular rungs over a waypoint polyline — the locked trail mark
  * drawn along ANY route (bowed fallback or terrain-routed). Rungs are placed
- * by arc length every TICK_SPACING px, perpendicular to the local segment.
+ * by arc length every `tickSpacing` px, perpendicular to the local segment.
+ * When `clear` > 0, a cream halo paints under the whole ladder first (the
+ * clearing-as-paint-over mechanism, applied to the trail by the practitioner's
+ * legibility dial).
  * @param {{ x: number, y: number }[]} pts
- * @returns {string} SVG path elements (rail + rungs)
+ * @param {TrailMarkOpts} [opts]
+ * @returns {string} SVG path elements (optional clearing, rail, rungs)
  */
-function railAndRungsSvg(pts) {
+function railAndRungsSvg(pts, opts = {}) {
+  const o = { ...TRAIL_DEFAULTS, ...opts };
   const d = pointsToPath(pts);
   let rungs = '';
-  let carry = TICK_SPACING; // no rung at the very start point
+  let carry = o.tickSpacing; // no rung at the very start point
   for (let i = 1; i < pts.length; i++) {
     const ax = pts[i - 1].x;
     const ay = pts[i - 1].y;
@@ -312,15 +334,24 @@ function railAndRungsSvg(pts) {
       const bx = ax + ux * along;
       const by = ay + uy * along;
       rungs +=
-        `M${(bx - nx * TICK_HALF).toFixed(1)},${(by - ny * TICK_HALF).toFixed(1)} ` +
-        `L${(bx + nx * TICK_HALF).toFixed(1)},${(by + ny * TICK_HALF).toFixed(1)} `;
-      along += TICK_SPACING;
+        `M${(bx - nx * o.tickHalf).toFixed(1)},${(by - ny * o.tickHalf).toFixed(1)} ` +
+        `L${(bx + nx * o.tickHalf).toFixed(1)},${(by + ny * o.tickHalf).toFixed(1)} `;
+      along += o.tickSpacing;
     }
     carry = along - seg;
   }
+  const w = o.weight.toFixed(2);
+  let svg = '';
+  if (o.clear > 0) {
+    const cw = (o.weight + 2 * o.clear).toFixed(2);
+    svg +=
+      `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${cw}" stroke-linecap="round" stroke-linejoin="round"/>` +
+      `<path d="${rungs.trim()}" fill="none" stroke="${REGISTER.paper}" stroke-width="${cw}" stroke-linecap="round"/>`;
+  }
   return (
-    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="${rungs.trim()}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round"/>`
+    svg +
+    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="${w}" opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${rungs.trim()}" fill="none" stroke="${TRAIL_INK}" stroke-width="${w}" opacity="0.8" stroke-linecap="round"/>`
   );
 }
 
@@ -375,7 +406,7 @@ export function roadsSvg(edges, hf, opts = {}) {
  * its foot; `startRadius` pulls the origin forward off its summit.
  * @param {TrailEdge[]} edges
  * @param {Heightfield} [hf] heightfield for least-resistance routing
- * @param {RouteOpts} [opts]
+ * @param {RouteOpts & TrailMarkOpts} [opts]
  * @returns {string}
  */
 export function trailsSvg(edges, hf, opts = {}) {
@@ -399,9 +430,9 @@ export function trailsSvg(edges, hf, opts = {}) {
         follow: opts.follow ?? 0.35,
         maxDrift: opts.maxDrift ?? 45,
       });
-      out += railAndRungsSvg(pts);
+      out += railAndRungsSvg(pts, opts);
     } else {
-      out += trailTickLadderSvg(start.x, start.y, foot.x, foot.y, strHash(e.id));
+      out += trailTickLadderSvg(start.x, start.y, foot.x, foot.y, strHash(e.id), opts);
     }
   }
   return out;
