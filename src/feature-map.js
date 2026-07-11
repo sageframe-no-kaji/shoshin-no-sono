@@ -4,13 +4,15 @@
  *
  * Roads represent `companion_to` edges (town ↔ town): a cased double-line that
  * clears the hachures in its lane and leaves two thin dark rails, sitting flat
- * in the valleys. Trails represent `documents` edges (town → peak): a dashed
- * switchback that climbs from the town seat to the peak's foot — no casing
- * weight of its own, it sits in the hachure texture where roads sit above it.
+ * in the valleys. Trails represent `documents` edges (town → peak): a
+ * perpendicular tick-ladder climbing from the town seat to the peak's foot —
+ * uncased, single-weight ink, sitting in the hachure texture where roads sit
+ * above it. The casing omission is the load-bearing rule (session-5 lock):
+ * roads are cased, trails are uncased.
  *
  * Road paths are cubic Béziers whose bow sign is terrain-aware (or id-derived
- * without a heightfield); trail zigzags take their side from the edge id — so
- * each mark is unique but stable across redraws.
+ * without a heightfield); trail rails bow gently by the edge id — so each mark
+ * is unique but stable across redraws.
  *
  * Pure: SVG strings in, SVG strings out. No DOM, no Indexer, no Gate, no URL.
  */
@@ -154,56 +156,68 @@ export function roadPathSvg(d, strength = 1) {
   );
 }
 
+/** Tick-ladder geometry (session-5 lock): rung spacing along the path, and the
+ * rung half-length. Register values, not tuners. */
+const TICK_SPACING = 9;
+const TICK_HALF = 1.8;
+/** Single trail stroke weight — rail and rungs alike (uncased, single-weight ink). */
+const TRAIL_WEIGHT = 0.6;
+
 /**
- * Switchback trail path from (x1,y1) to (x2,y2). Zigzags across the direct
- * line: each leg traverses `spread` px to one side then hairpins back. The
- * number of switchback pairs scales with path length. Rendered as a single
- * dashed path — no casing (trails sit in the hachure texture, roads sit above
- * it). Returns empty string for paths shorter than 20 px.
+ * Tick-ladder trail from (x1,y1) to (x2,y2) — the session-5 locked register:
+ * a fine continuous rail with perpendicular ticks crossing it every
+ * ~TICK_SPACING px, uncased, single-weight ink. Trails sit IN the hachure
+ * texture; roads sit above it — the casing omission is what encodes the
+ * hierarchy. The rail bows gently by the edge id (trails climb direct; the
+ * bow only keeps parallel trails from stacking). Returns empty string for
+ * paths shorter than 20 px.
  *
  * @param {number} x1 @param {number} y1 start (town seat)
  * @param {number} x2 @param {number} y2 end (peak foot)
- * @param {number} sign 1 or -1 — which side the first traverse goes
- * @returns {string} SVG path element
+ * @param {number} sign 1 or -1 — which side the rail bows
+ * @returns {string} SVG path elements (rail + rungs)
  */
-export function trailSwitchbackSvg(x1, y1, x2, y2, sign) {
+export function trailTickLadderSvg(x1, y1, x2, y2, sign) {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy);
   if (len < 20) return '';
 
-  // Unit vectors: along the direct line and perpendicular to it.
-  const ux = dx / len;
-  const uy = dy / len;
-  const px = -uy;
-  const py = ux;
+  // The rail: same cubic form as roads, shallower bow.
+  const bow = len * 0.06 * sign;
+  const px = -dy / len;
+  const py = dx / len;
+  const c1x = x1 + dx / 3 + px * bow;
+  const c1y = y1 + dy / 3 + py * bow;
+  const c2x = x1 + (dx * 2) / 3 + px * bow;
+  const c2y = y1 + (dy * 2) / 3 + py * bow;
+  const d =
+    `M${x1.toFixed(1)},${y1.toFixed(1)} ` +
+    `C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ` +
+    `${x2.toFixed(1)},${y2.toFixed(1)}`;
 
-  // Number of switchback pairs: 1 pair per ~55px of path length (minimum 1).
-  const pairs = Math.max(1, Math.round(len / 55));
-  // Traverse width: how far to either side of the direct line each leg goes.
-  const spread = Math.min(18, len * 0.18);
-
-  // Build zigzag waypoints along the direct line.
-  /** @type {{x:number,y:number}[]} */
-  const pts = [{ x: x1, y: y1 }];
-  const segs = pairs * 2; // each pair = 2 traverses
-  for (let i = 1; i <= segs; i++) {
-    const t = i / (segs + 1); // evenly spaced along the direct line
-    const along = { x: x1 + ux * len * t, y: y1 + uy * len * t };
-    // Alternate sides: odd segments go sign side, even go -sign side.
-    const side = i % 2 === 1 ? sign : -sign;
-    pts.push({ x: along.x + px * spread * side, y: along.y + py * spread * side });
+  // The rungs: sample the cubic at even parameter steps (point + tangent →
+  // normal), one perpendicular tick per step. Endpoints carry no rung.
+  let rungs = '';
+  const n = Math.max(2, Math.round(len / TICK_SPACING));
+  for (let i = 1; i < n; i++) {
+    const t = i / n;
+    const u = 1 - t;
+    const bx = u * u * u * x1 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x2;
+    const by = u * u * u * y1 + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * y2;
+    const tx = 3 * u * u * (c1x - x1) + 6 * u * t * (c2x - c1x) + 3 * t * t * (x2 - c2x);
+    const ty = 3 * u * u * (c1y - y1) + 6 * u * t * (c2y - c1y) + 3 * t * t * (y2 - c2y);
+    const tm = Math.hypot(tx, ty) || 1;
+    const nx = -ty / tm;
+    const ny = tx / tm;
+    rungs +=
+      `M${(bx - nx * TICK_HALF).toFixed(1)},${(by - ny * TICK_HALF).toFixed(1)} ` +
+      `L${(bx + nx * TICK_HALF).toFixed(1)},${(by + ny * TICK_HALF).toFixed(1)} `;
   }
-  pts.push({ x: x2, y: y2 });
-
-  // Build path string: M then L segments.
-  const d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)} ` +
-    pts.slice(1).map(p => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
   return (
-    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="0.9" opacity="0.7" ` +
-    `stroke-dasharray="5 3" stroke-linecap="round" stroke-linejoin="round"/>`
+    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round"/>` +
+    `<path d="${rungs.trim()}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round"/>`
   );
 }
 
@@ -260,7 +274,7 @@ export function trailsSvg(edges) {
       ? peakFootPoint(e.from.x, e.from.y, e.to.x, e.to.y, e.footRadius)
       : e.to;
     const sign = strHash(e.id);
-    out += trailSwitchbackSvg(e.from.x, e.from.y, foot.x, foot.y, sign);
+    out += trailTickLadderSvg(e.from.x, e.from.y, foot.x, foot.y, sign);
   }
   return out;
 }

@@ -3,7 +3,7 @@ import {
   strHash,
   curvedPath,
   roadPathSvg,
-  trailSwitchbackSvg,
+  trailTickLadderSvg,
   roadsSvg,
   trailsSvg,
 } from '../src/feature-map.js';
@@ -116,43 +116,61 @@ describe('roadPathSvg', () => {
   });
 });
 
-// ── trailSwitchbackSvg ────────────────────────────────────────────────────────
+// ── trailTickLadderSvg ────────────────────────────────────────────────────────
 
-describe('trailSwitchbackSvg', () => {
+describe('trailTickLadderSvg', () => {
   it('returns empty string for a short path (< 20 px)', () => {
-    expect(trailSwitchbackSvg(0, 0, 10, 0, 1)).toBe('');
-    expect(trailSwitchbackSvg(0, 0, 0, 15, -1)).toBe('');
+    expect(trailTickLadderSvg(0, 0, 10, 0, 1)).toBe('');
+    expect(trailTickLadderSvg(0, 0, 0, 15, -1)).toBe('');
   });
 
-  it('emits path elements for a long path', () => {
-    const svg = trailSwitchbackSvg(0, 0, 200, 0, 1);
-    expect(svg).toContain('<path ');
+  it('emits a rail path and a rungs path', () => {
+    const svg = trailTickLadderSvg(0, 0, 200, 0, 1);
+    expect((svg.match(/<path /g) ?? []).length).toBe(2);
   });
 
-  it('renders a cream casing path and a dashed dark path', () => {
-    const svg = trailSwitchbackSvg(0, 0, 200, 0, 1);
-    expect(svg).toContain('stroke="#FDFCF9"');
+  it('is uncased: single-weight trail ink, no cream, no dashes (session-5 lock)', () => {
+    const svg = trailTickLadderSvg(0, 0, 200, 0, 1);
     expect(svg).toContain('stroke="#4B4B4B"');
-    expect(svg).toContain('stroke-dasharray="5 3"');
+    expect(svg).not.toContain('#FDFCF9');
+    expect(svg).not.toContain('stroke-dasharray');
+    const widths = Array.from(svg.matchAll(/stroke-width="([\d.]+)"/g), (m) => m[1]);
+    expect(widths).toHaveLength(2);
+    expect(widths[0]).toBe(widths[1]); // rail and rungs share one weight
   });
 
-  it('sign flips the zigzag to the opposite side', () => {
-    const pos = trailSwitchbackSvg(0, 0, 200, 0, 1);
-    const neg = trailSwitchbackSvg(0, 0, 200, 0, -1);
+  it('rungs cross the rail perpendicular to it (horizontal rail → vertical ticks)', () => {
+    // Straight horizontal rail (bow 0 not possible via sign, but at y=0→y=0 the
+    // bow is symmetric; sample a tick and check it spans in y around the rail).
+    const svg = trailTickLadderSvg(0, 0, 200, 0, 1);
+    const rungs = svg.split('<path ')[2];
+    // Every rung is an M x,y L x,y pair whose two y values differ (vertical-ish).
+    const pair = rungs.match(/M([\d.-]+),([\d.-]+) L([\d.-]+),([\d.-]+)/);
+    expect(pair).not.toBeNull();
+    if (pair) {
+      expect(Math.abs(parseFloat(pair[4]) - parseFloat(pair[2]))).toBeGreaterThan(2);
+    }
+  });
+
+  it('sign flips the rail bow to the opposite side', () => {
+    const pos = trailTickLadderSvg(0, 0, 200, 0, 1);
+    const neg = trailTickLadderSvg(0, 0, 200, 0, -1);
     expect(pos).not.toBe(neg);
   });
 
-  it('longer path produces more zigzag waypoints than a shorter one', () => {
-    const countL = (/** @type {string} */ svg) => (svg.match(/L/g) ?? []).length;
-    const short = countL(trailSwitchbackSvg(0, 0, 60, 0, 1));
-    const long = countL(trailSwitchbackSvg(0, 0, 300, 0, 1));
+  it('longer path carries more rungs (~9 px spacing)', () => {
+    const countRungs = (/** @type {string} */ svg) =>
+      (svg.split('<path ')[2]?.match(/M/g) ?? []).length;
+    const short = countRungs(trailTickLadderSvg(0, 0, 60, 0, 1));
+    const long = countRungs(trailTickLadderSvg(0, 0, 300, 0, 1));
     expect(long).toBeGreaterThan(short);
+    expect(long).toBeGreaterThan(20); // ~300/9 ≈ 33 rungs, minus endpoints
   });
 
-  it('path starts at the from point and ends at the to point', () => {
-    const svg = trailSwitchbackSvg(10, 20, 200, 150, 1);
+  it('rail starts at the from point and ends at the to point', () => {
+    const svg = trailTickLadderSvg(10, 20, 200, 150, 1);
     expect(svg).toContain('M10.0,20.0');
-    expect(svg).toContain('L200.0,150.0');
+    expect(svg).toContain('200.0,150.0"');
   });
 });
 
