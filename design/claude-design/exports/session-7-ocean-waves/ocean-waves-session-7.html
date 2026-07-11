@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocean Waves — Procedural Engraving</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#EFE7D4;}
+  *{box-sizing:border-box;}
+  .tuner input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:#CBBE9F;border-radius:2px;outline:none;margin:0;}
+  .tuner input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#3A2E19;border:2px solid #EFE7D4;box-shadow:0 0 0 1px #A08F6C;cursor:pointer;}
+  .tuner input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#3A2E19;border:2px solid #EFE7D4;box-shadow:0 0 0 1px #A08F6C;cursor:pointer;}
+  .reseed{font:500 11px Spectral,Georgia,serif;letter-spacing:0.13em;text-transform:uppercase;color:#6A5B3C;background:#EFE7D4;border:1px solid #CBBE9F;border-radius:2px;padding:5px 11px;cursor:pointer;transition:background .12s,color .12s;}
+  .reseed:hover{background:#3A2E19;color:#EFE7D4;border-color:#3A2E19;}
+</style>
+</head>
+<body>
+<div style="min-height:100vh;background:#EFE7D4;padding:56px 40px 72px;font-family:Spectral,Georgia,serif;">
+  <div style="max-width:1220px;margin:0 auto;">
+
+    <header style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;border-bottom:1px solid #D8CBAB;padding-bottom:24px;">
+      <div style="font:500 12px Spectral,Georgia,serif;letter-spacing:0.34em;text-transform:uppercase;color:#9A8A66;">Procedural cartography · ocean fill</div>
+      <h1 style="margin:0;font:300 34px/1.15 Spectral,Georgia,serif;color:#2C2213;letter-spacing:0.005em;">Engraved waves for the sea, drawn by rule and by chance.</h1>
+      <p style="margin:0;max-width:800px;font:400 15px/1.6 Spectral,Georgia,serif;color:#5C4E33;">
+        After the old copperplate manner: bold sinuous <strong style="font-weight:500;color:#3A2E19;">crest lines</strong> run <em>parallel to the shore</em> — each band an offset copy of the coast, relaxing toward an open swell as it marches out to sea — and off each swell a comb of fine hair&#8209;strokes rides the coast normal, so it always meets the crest square-on. A rounded headland bends the shoreline mid-frame; watch the waves and their combs swing to follow its normal. Every stroke carries a little jitter of position, length and curve, so no two are alike. Six characters of sea below; each has a tuner, and <em>Reseed</em> rolls fresh randomness while keeping the character.
+      </p>
+    </header>
+
+    <div id="grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:30px 30px;margin-top:36px;"></div>
+
+    <div style="margin-top:46px;font:italic 400 13px/1.6 Spectral,Georgia,serif;color:#A5946E;border-top:1px dashed #D8CBAB;padding-top:18px;max-width:940px;">
+      One coastline in every frame; the ocean side is filled by the generator. Bands are offset copies of the shore, each blended a step further toward a straight swell, so the sea calms as it opens out. Every feather points from its crest to the next band along the shared normal and is auto&#8209;capped by that gap — which is why the comb thickens where bands spread (the headland tip) and thins where they pinch, exactly as the burin laid it. Palette is ink on warm rag; no colour but the sea. Drop any option's SVG into your map as the water layer. Parked: closed bays/lakes, wave interaction with islands, and concave inlets where offset bands would need to be trimmed for self&#8209;crossing.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var PAPER='#EFE7D4', INK='#2C2213', COAST='#241C0F';
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function f1(n){return Math.round(n*10)/10;}
+  var W=560, H=400;
+
+  // coastline: a shore on the left with a rounded headland bulging seaward mid-height,
+  // so the normal fans out and we can show the waves staying perpendicular to it.
+  var STRAIGHTX=168;
+  function coastShape(y, ph){
+    var t=(y - H*0.5)/(H*0.30);
+    return 60 + 58*Math.exp(-t*t)                    // headland protruding into the sea
+             + 8*Math.sin(y/64 + ph) + 4*Math.sin(y/25 + ph*1.6);
+  }
+  function coastPath(ph){
+    var d='M'+f1(coastShape(0,ph))+' 0';
+    for(var y=6;y<=H;y+=6) d+=' L'+f1(coastShape(y,ph))+' '+f1(y);
+    return d;
+  }
+
+  // ---- the generator -------------------------------------------------------
+  // Each band is an offset copy of the coast, relaxed toward a straight swell as it
+  // marches out to sea; the wave undulation and the feather comb both ride the coast
+  // normal, so crests stay parallel to the shore and combs stay perpendicular to it.
+  // p: {wl, amp, band, fstep, flen, weight, dark, wildness}
+  function generate(p, seed){
+    var rng=mulberry32(seed>>>0), coastPh=(rng()*2.0-1.0);
+    var DY=2.5, RELAX=0.82, coastGap=13;
+    // base (undulation-free) x of band k at height y
+    function baseX(y,k){
+      var decay=Math.pow(RELAX,k);
+      return (coastShape(y,coastPh)*decay + STRAIGHTX*(1-decay)) + coastGap + k*p.band;
+    }
+    // per-band wave parameters
+    function bandParam(k){
+      var r=mulberry32((seed*2654435761 ^ (k*40503))>>>0);
+      var wl = p.wl*(1+(r()-0.5)*0.5*p.wildness);
+      var amp= p.amp*(1+(r()-0.5)*0.9*p.wildness);
+      return {wl:wl, wl2:wl*(0.5+0.12*r()), amp:amp, amp2:amp*(0.4+0.2*r()),
+              ph1:r()*6.28, ph2:r()*6.28, jit:r};
+    }
+
+    // build every band as a polyline of points (base + undulation along the coast normal)
+    var bands=[], nb=0;
+    for(var k=0; k<60; k++){
+      var bp=bandParam(k), pts=[], anyOn=false, minx=1e9;
+      for(var y=-4; y<=H+4; y+=DY){
+        var bx0=baseX(y-DY,k), bx1=baseX(y+DY,k);           // tangent of the base curve
+        var tx=bx1-bx0, ty=2*DY, tl=Math.hypot(tx,ty);
+        var nx=ty/tl, ny=-tx/tl;                            // unit normal, +x (seaward)
+        var u = bp.amp*Math.sin(y*2*Math.PI/bp.wl + bp.ph1)
+              + bp.amp2*Math.sin(y*2*Math.PI/bp.wl2 + bp.ph2);
+        var bx=baseX(y,k);
+        var px=bx + nx*u, py=y + ny*u;
+        pts.push({x:px, y:py, nx:nx, ny:ny});
+        if(px<minx) minx=px;
+        if(px>=coastShape(py,coastPh) && px<=W) anyOn=true;
+      }
+      if(!anyOn && minx>W) break;
+      bands.push(pts); nb++;
+    }
+    // virtual band just seaward of the last, so its combs have a target too
+    var last=bands[nb-1], virt=last.map(function(pt){ return {x:pt.x+pt.nx*p.band, y:pt.y+pt.ny*p.band}; });
+
+    var crestD='', featherD='', featherFaint='';
+    for(var b=0; b<nb; b++){
+      var pts=bands[b], nextPts=(b+1<nb)?bands[b+1]:virt;
+      // --- crest line (pen lifts where it leaves the visible sea)
+      var pen=false, cd='';
+      for(var i=0;i<pts.length;i++){
+        var P=pts[i], cs=coastShape(P.y,coastPh);
+        var on = P.x>=cs+2 && P.x<=W-2 && P.y>=-2 && P.y<=H+2;
+        if(on){
+          var jy=(pts[i].nx*0)+(rng()-0.5)*0.9;             // tiny hand jitter
+          cd+=(pen?' L':'M')+f1(P.x)+' '+f1(P.y+jy);
+          pen=true;
+        } else pen=false;
+      }
+      crestD+=cd+' ';
+      // --- feather comb: walk the crest, emit strokes toward the next band (along normal)
+      var acc=0, target=p.fstep*(0.72+0.56*rng());
+      for(var j=1;j<pts.length;j++){
+        var P=pts[j], Pm=pts[j-1];
+        acc += Math.hypot(P.x-Pm.x, P.y-Pm.y);
+        if(acc < target) continue;
+        acc=0; target=p.fstep*(0.72+0.56*rng());
+        if(rng()<0.05) continue;
+        var cs=coastShape(P.y,coastPh);
+        if(P.x < cs+3 || P.x > W-3 || P.y<0 || P.y>H) continue;
+        var Q=nextPts[j];
+        var dx=Q.x-P.x, dy=Q.y-P.y, gap=Math.hypot(dx,dy);
+        if(gap<3) continue;
+        dx/=gap; dy/=gap;
+        var lenNoise = 0.6 + 0.34*Math.sin(P.y*0.05 + b*1.3) + (rng()-0.5)*0.4;
+        var L = p.flen*Math.max(0.35, lenNoise);
+        L = Math.min(L, gap*0.84);
+        if(L<3) continue;
+        var sx=P.x+dx*1.0, sy=P.y+dy*1.0;
+        var ex=sx+dx*L, ey=sy+dy*L;
+        var perpx=dy, perpy=-dx;                            // curve wobble perpendicular to stroke
+        var w=(rng()-0.5)*Math.min(4, L*0.28);
+        var cxp=sx+dx*L*0.5+perpx*w, cyp=sy+dy*L*0.5+perpy*w;
+        var seg='M'+f1(sx)+' '+f1(sy)+' Q'+f1(cxp)+' '+f1(cyp)+' '+f1(ex)+' '+f1(ey);
+        if(L > p.flen*0.6) featherD+=seg+' '; else featherFaint+=seg+' ';
+      }
+    }
+    return {coastPh:coastPh, crestD:crestD, featherD:featherD, featherFaint:featherFaint};
+  }
+
+  function render(opt){
+    var p=opt.state, g=g=document.getElementById('sea-'+opt.key);
+    var out=generate(p, opt.seed);
+    g.innerHTML=
+      '<path d="'+coastPath(out.coastPh)+'" fill="none" stroke="'+COAST+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>'+
+      '<path d="'+out.featherFaint+'" fill="none" stroke="'+INK+'" stroke-width="'+(p.weight*0.42).toFixed(2)+'" stroke-linecap="round" opacity="'+(p.dark*0.55).toFixed(2)+'"/>'+
+      '<path d="'+out.featherD+'" fill="none" stroke="'+INK+'" stroke-width="'+(p.weight*0.5).toFixed(2)+'" stroke-linecap="round" opacity="'+p.dark.toFixed(2)+'"/>'+
+      '<path d="'+out.crestD+'" fill="none" stroke="'+INK+'" stroke-width="'+(p.weight*1.05).toFixed(2)+'" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>';
+  }
+
+  // ---- slider factory ------------------------------------------------------
+  function ctl(opt,key,label,min,max,step){
+    var row=document.createElement('label');
+    row.style.cssText='display:grid;grid-template-columns:1fr 40px;align-items:center;column-gap:9px;font:400 12px Spectral,Georgia,serif;color:#6A5B3C;';
+    var name=document.createElement('span'); name.textContent=label;
+    var val=document.createElement('span'); val.style.cssText='text-align:right;font-variant-numeric:tabular-nums;color:#2C2213;';
+    var input=document.createElement('input'); input.type='range'; input.min=min; input.max=max; input.step=step; input.value=opt.state[key];
+    input.style.cssText='grid-column:1 / span 2;margin-top:2px;';
+    function show(){ val.textContent=(step<1?(+opt.state[key]).toFixed(1):opt.state[key]); }
+    show();
+    input.addEventListener('input',function(){ opt.state[key]=+input.value; show(); render(opt); });
+    row.appendChild(name); row.appendChild(val); row.appendChild(input);
+    return row;
+  }
+
+  // ---- options -------------------------------------------------------------
+  var OPTIONS=[
+    {key:'A', name:'Calm swell',   blurb:'Long, low, well-spaced rollers with a light comb — open water on a still day.',
+     d:{wl:180, amp:8,  band:30, fstep:2.7, flen:16, weight:1.0, dark:0.7, wildness:0.35}},
+    {key:'B', name:'Reference comb', blurb:'The plate itself: medium swells, a dense feathered shadow filling the back of each wave.',
+     d:{wl:110, amp:12, band:24, fstep:2.2, flen:24, weight:1.05, dark:0.82, wildness:0.4}},
+    {key:'C', name:'Chop',         blurb:'Short wavelength, quick succession — a busy, wind-fretted surface near shore.',
+     d:{wl:62,  amp:6,  band:16, fstep:2.0, flen:12, weight:0.95, dark:0.75, wildness:0.45}},
+    {key:'D', name:'Heavy sea',    blurb:'Tall rolling swells with a deep, dark comb — weight and shadow, a big ocean.',
+     d:{wl:135, amp:17, band:32, fstep:2.0, flen:32, weight:1.2, dark:0.9, wildness:0.5}},
+    {key:'E', name:'Fine ripple',  blurb:'Barely-there undulation, close-packed hair lines — distant, glassy calm.',
+     d:{wl:78,  amp:3.5,band:12, fstep:1.8, flen:8,  weight:0.8, dark:0.62, wildness:0.3}},
+    {key:'F', name:'Wild',         blurb:'High per-band randomness in length, phase and spacing — an irregular, stormy sea.',
+     d:{wl:120, amp:14, band:26, fstep:2.3, flen:26, weight:1.1, dark:0.85, wildness:1.0}}
+  ];
+
+  var grid=document.getElementById('grid');
+  OPTIONS.forEach(function(opt){
+    opt.state={wl:opt.d.wl, amp:opt.d.amp, band:opt.d.band, fstep:opt.d.fstep, flen:opt.d.flen, weight:opt.d.weight, dark:opt.d.dark, wildness:opt.d.wildness};
+    opt.seed=(opt.key.charCodeAt(0)*2654435761)>>>0;
+
+    var card=document.createElement('figure');
+    card.style.cssText='margin:0;display:flex;flex-direction:column;gap:0;';
+
+    var frame=document.createElement('div');
+    frame.style.cssText='position:relative;background:'+PAPER+';border:1px solid #D8CBAB;box-shadow:0 1px 0 rgba(0,0,0,0.03);overflow:hidden;';
+    frame.innerHTML=
+      '<span style="position:absolute;top:12px;left:15px;font:600 21px Spectral,Georgia,serif;color:'+INK+';letter-spacing:0.04em;z-index:1;">'+opt.key+'</span>'+
+      '<span style="position:absolute;top:17px;right:15px;font:500 11px Spectral,Georgia,serif;letter-spacing:0.16em;text-transform:uppercase;color:#9A8A66;z-index:1;">'+opt.name+'</span>'+
+      '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"><g id="sea-'+opt.key+'"></g></svg>';
+
+    var cap=document.createElement('figcaption');
+    cap.style.cssText='font:400 13px/1.5 Spectral,Georgia,serif;color:#5C4E33;padding:11px 2px 0;min-height:42px;';
+    cap.textContent=opt.blurb;
+
+    var tuner=document.createElement('div');
+    tuner.className='tuner';
+    tuner.style.cssText='margin-top:11px;display:grid;grid-template-columns:1fr 1fr;gap:9px 26px;background:#F5EFE0;border:1px solid #D8CBAB;border-radius:2px;padding:14px 16px 16px;';
+    var head=document.createElement('div');
+    head.style.cssText='grid-column:1 / span 2;display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;';
+    head.innerHTML='<span style="font:500 10px Spectral,Georgia,serif;letter-spacing:0.22em;text-transform:uppercase;color:#A5946E;">Tuner</span>';
+    var btn=document.createElement('button'); btn.className='reseed'; btn.textContent='↻ Reseed';
+    btn.addEventListener('click',function(){ opt.seed=(Math.random()*4294967295)>>>0; render(opt); });
+    head.appendChild(btn);
+    tuner.appendChild(head);
+    tuner.appendChild(ctl(opt,'wl',    'Wavelength', 40, 220, 2));
+    tuner.appendChild(ctl(opt,'amp',   'Amplitude',  2, 24, 0.5));
+    tuner.appendChild(ctl(opt,'band',  'Band gap',   10, 40, 1));
+    tuner.appendChild(ctl(opt,'fstep', 'Comb spacing',1.4, 4, 0.1));
+    tuner.appendChild(ctl(opt,'flen',  'Comb length', 5, 40, 1));
+    tuner.appendChild(ctl(opt,'weight','Line weight',0.6, 1.6, 0.05));
+    tuner.appendChild(ctl(opt,'dark',  'Ink depth',  0.4, 1, 0.02));
+    tuner.appendChild(ctl(opt,'wildness','Randomness',0, 1.2, 0.05));
+
+    card.appendChild(frame); card.appendChild(cap); card.appendChild(tuner);
+    grid.appendChild(card);
+
+    render(opt);
+  });
+})();
+</script>
+</body>
+</html>

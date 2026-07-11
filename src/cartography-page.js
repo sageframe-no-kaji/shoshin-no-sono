@@ -74,7 +74,7 @@ const tuners = {
   relevanceFloor: 0.45,
   // register line weights — landed at 0.15 / 0.4 by feel (ho-07.6), locked
   weightRegular: 0.15,
-  weightIndex: 0.4,
+  weightIndex: 0.35,
   peakLabelScale: 0.5, // peak label BASE type size (ho-07.6)
   importanceScale: 0.6, // how much a peak's importance scales its label, like a real map (ho-07.6)
   townLabelScale: 0.85, // town label type — its own dial (ho-07.6)
@@ -131,14 +131,23 @@ const tuners = {
   hachureImportance: 0.6, // density gates at log-scaled local elevation
 
   // ho-08 features (session-5 register)
-  margin: 110, // field keep-out border — padded up from ho-05's 70 so a sea exists (ho-08 datum)
+  margin: 120, // field keep-out border — padded so a sea exists (ho-08 datum; locked 2026-07-11)
   waveThreshold: 0.18,
-  coastRuggedness: 0.3, // coast-band noise: islets and inlets; 0 = the smooth Gaussian shore
-  isoShoreGap: 0.05, // coastal plain: first iso ring starts this fraction of max above the datum
+  coastRuggedness: 0.52, // coast-band noise: islets and inlets (locked 2026-07-11)
+  isoShoreGap: 0.04, // coastal plain: first iso ring starts this fraction of max above the datum (locked)
   coastWeight: 0.7, // coastline stroke weight
-  waterlineCount: 0, // survey-register waterlines — 0 = engraved default (waves carry the sea)
+  waterlineCount: 10, // survey-register waterlines (locked 2026-07-11)
   waveOpacity: 0.5, // waterline ink strength
-  waveIntensity: 0.35, // wave texture: horizontal water strokes in the open sea
+  // Session-7 engraved sea (design/claude-design/exports/session-7-ocean-waves/) —
+  // the practitioner's locked landing, E-family "Fine ripple".
+  waveWl: 78, // wavelength of the crest undulation
+  waveAmp: 3.5, // undulation amplitude
+  waveBand: 18, // band gap between crests
+  waveComb: 1.4, // comb spacing along the crest
+  waveCombLen: 13, // comb stroke length
+  waveWeight: 0.8, // line weight (crest ×1.05, feathers ×0.5/×0.42)
+  waveInk: 0.4, // ink depth — feather opacity
+  waveWild: 0.3, // randomness — per-band wavelength/amplitude variance
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
   roadClear: 1.25, // road cream casing beyond the rails, per side
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
@@ -212,7 +221,7 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
   { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05, locked: true },
-  { key: 'hachureShoreFade', label: 'shore fade (cliffs keep)', min: 0, max: 0.2, step: 0.005 },
+  { key: 'hachureShoreFade', label: 'shore fade (cliffs keep)', min: 0, max: 0.2, step: 0.005, locked: true },
 ];
 
 /** Town placement and building rendering. @type {TunerSpec[]} */
@@ -477,7 +486,15 @@ const render = () => {
     coastWeight: tuners.coastWeight,
     waterlines: tuners.waterlineCount,
     opacity: tuners.waveOpacity,
-    waves: tuners.waveIntensity,
+    seed: carto.activeSeed(),
+    waveWl: tuners.waveWl,
+    waveAmp: tuners.waveAmp,
+    waveBand: tuners.waveBand,
+    waveComb: tuners.waveComb,
+    waveCombLen: tuners.waveCombLen,
+    waveWeight: tuners.waveWeight,
+    waveInk: tuners.waveInk,
+    waveWild: tuners.waveWild,
   });
   svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   // Iso elevation labels are placed on iso lines — they only read when the
@@ -595,7 +612,15 @@ const playWriting = (writeSteps, token, layers) => {
     coastWeight: tuners.coastWeight,
     waterlines: tuners.waterlineCount,
     opacity: tuners.waveOpacity,
-    waves: tuners.waveIntensity,
+    seed: carto.activeSeed(),
+    waveWl: tuners.waveWl,
+    waveAmp: tuners.waveAmp,
+    waveBand: tuners.waveBand,
+    waveComb: tuners.waveComb,
+    waveCombLen: tuners.waveCombLen,
+    waveWeight: tuners.waveWeight,
+    waveInk: tuners.waveInk,
+    waveWild: tuners.waveWild,
   }) +
     corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     (gate.currentLayers().iso
@@ -738,20 +763,27 @@ const TUNER_SECTIONS = [
   { title: 'beacons', specs: BEACON_TUNER_SPECS },
   { title: 'emergence', specs: EMERGENCE_TUNER_SPECS },
   { title: 'features', specs: [
-    { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5 },
-    { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
-    { key: 'coastRuggedness', label: 'coast ruggedness (islands, inlets)', min: 0, max: 1, step: 0.02 },
-    { key: 'isoShoreGap', label: 'iso shore gap (coastal plain)', min: 0, max: 0.15, step: 0.005 },
-    { key: 'coastWeight', label: 'coastline weight', min: 0.2, max: 2.5, step: 0.05 },
-    { key: 'waterlineCount', label: 'waterlines (count)', min: 0, max: 10, step: 1 },
-    { key: 'waveOpacity', label: 'waterline ink', min: 0, max: 1, step: 0.02 },
-    { key: 'waveIntensity', label: 'wave intensity', min: 0, max: 1, step: 0.02 },
-    { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },
-    { key: 'roadClear', label: 'road clearing', min: 0, max: 6, step: 0.05 },
-    { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05 },
-    { key: 'trailWeight', label: 'trail weight', min: 0.2, max: 2, step: 0.05 },
-    { key: 'trailTick', label: 'trail tick length', min: 0, max: 6, step: 0.1 },
-    { key: 'trailClear', label: 'trail clearing (0 = uncased lock)', min: 0, max: 6, step: 0.1 },
+    { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5, locked: true },
+    { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01, locked: true },
+    { key: 'coastRuggedness', label: 'coast ruggedness (islands, inlets)', min: 0, max: 1, step: 0.02, locked: true },
+    { key: 'isoShoreGap', label: 'iso shore gap (coastal plain)', min: 0, max: 0.15, step: 0.005, locked: true },
+    { key: 'coastWeight', label: 'coastline weight', min: 0.2, max: 2.5, step: 0.05, locked: true },
+    { key: 'waterlineCount', label: 'waterlines (count)', min: 0, max: 10, step: 1, locked: true },
+    { key: 'waveOpacity', label: 'waterline ink', min: 0, max: 1, step: 0.02, locked: true },
+    { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05, locked: true },
+    { key: 'roadClear', label: 'road clearing', min: 0, max: 6, step: 0.05, locked: true },
+    { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05, locked: true },
+    { key: 'trailWeight', label: 'trail weight', min: 0.2, max: 2, step: 0.05, locked: true },
+    { key: 'trailTick', label: 'trail tick length', min: 0, max: 6, step: 0.1, locked: true },
+    { key: 'trailClear', label: 'trail clearing (0 = uncased lock)', min: 0, max: 6, step: 0.1, locked: true },
+    { key: 'waveWl', label: 'wave: wavelength', min: 40, max: 220, step: 2 },
+    { key: 'waveAmp', label: 'wave: amplitude', min: 2, max: 24, step: 0.5 },
+    { key: 'waveBand', label: 'wave: band gap', min: 10, max: 40, step: 1 },
+    { key: 'waveComb', label: 'wave: comb spacing', min: 1.4, max: 4, step: 0.1 },
+    { key: 'waveCombLen', label: 'wave: comb length', min: 5, max: 40, step: 1 },
+    { key: 'waveWeight', label: 'wave: line weight', min: 0.6, max: 1.6, step: 0.05 },
+    { key: 'waveInk', label: 'wave: ink depth', min: 0, max: 1, step: 0.02 },
+    { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05 },
   ]},
 ];
 

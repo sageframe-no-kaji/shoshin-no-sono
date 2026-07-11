@@ -1,0 +1,22 @@
+{
+  "session": 7,
+  "question": "What does the sea look like?",
+  "source": "claude.ai design project b5ef80fc — Ocean Waves - Session 7.html",
+  "chosen": "E-family (Fine ripple), practitioner-landed",
+  "locked": {
+    "wavelength": 78,
+    "amplitude": 3.5,
+    "bandGap": 18,
+    "combSpacing": 1.4,
+    "combLength": 13,
+    "lineWeight": 0.8,
+    "inkDepth": 0.4,
+    "randomness": 0.3
+  },
+  "principles": [
+    "Crest lines are offset copies of the coast, relaxing toward an open swell as they march seaward — in the map, iso-lines of the distance-from-shore field.",
+    "The feather comb rides the coast normal from each crest toward the next band, auto-capped by the band gap.",
+    "Two ink classes by stroke length: strong feathers and a faint under-comb.",
+    "Parked in-session: closed bays/lakes, wave interaction with islands, concave-inlet trimming."
+  ]
+}

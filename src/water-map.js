@@ -28,11 +28,92 @@ import { mulberry32 } from './field.js';
 /**
  * @typedef {Object} WaterOpts
  * @property {number} [coastWeight] Coastline stroke weight (default 0.7).
- * @property {number} [waterlines]  Number of waterline offsets hugging the coast (default 4).
+ * @property {number} [waterlines]  Number of waterline offsets hugging the coast (default 0).
  * @property {number} [opacity]     Waterline ink strength at the coast (default 0.5; 0 hides the waterlines).
- * @property {number} [waves]       Wave-texture intensity — rows of fine horizontal water strokes
- *                                  filling the open sea (default 0.35; 0 hides them).
+ * @property {number} [seed]        Layout seed — the engraved sea reproduces exactly at `?seed=`.
+ * @property {number} [waveWl]      Session-7 wavelength of the crest undulation (default 78).
+ * @property {number} [waveAmp]     Session-7 undulation amplitude (default 3.5).
+ * @property {number} [waveBand]    Session-7 band gap — spacing between crest bands (default 18).
+ * @property {number} [waveComb]    Session-7 comb spacing along the crest (default 1.4).
+ * @property {number} [waveCombLen] Session-7 comb stroke length (default 13).
+ * @property {number} [waveWeight]  Session-7 line weight (crest ×1.05, feathers ×0.5/×0.42; default 0.8).
+ * @property {number} [waveInk]     Session-7 ink depth — feather opacity (faint ×0.55; default 0.4; 0 hides the sea).
+ * @property {number} [waveWild]    Session-7 randomness — per-band wavelength/amplitude variance (default 0.3).
  */
+
+/**
+ * Stitch marching-squares segment soup into ordered point chains (open runs
+ * and closed rings), matching endpoints snapped to 1/8 px. The Session-7 sea
+ * needs ordered crests: undulation is parameterized by arc length and the
+ * comb walks the crest by spacing.
+ * @param {import('./contours.js').Segment[]} segs
+ * @returns {{ x: number, y: number }[][]}
+ */
+function stitchSegs(segs) {
+  const key = (/** @type {{x:number,y:number}} */ p) =>
+    `${Math.round(p.x * 8)}:${Math.round(p.y * 8)}`;
+  /** @type {Map<string, Array<[number, number]>>} */
+  const adj = new Map();
+  segs.forEach((s, i) => {
+    for (const e of [0, 1]) {
+      const k = key(s[e]);
+      const list = adj.get(k) ?? [];
+      list.push([i, e]);
+      adj.set(k, list);
+    }
+  });
+  const used = new Uint8Array(segs.length);
+  /** @type {{ x: number, y: number }[][]} */
+  const chains = [];
+  for (let i = 0; i < segs.length; i++) {
+    if (used[i]) continue;
+    used[i] = 1;
+    const chain = [segs[i][0], segs[i][1]];
+    for (const forward of [true, false]) {
+      for (;;) {
+        const endPt = forward ? chain[chain.length - 1] : chain[0];
+        const cands = adj.get(key(endPt)) ?? [];
+        let found = -1;
+        let fend = 0;
+        for (const [si, se] of cands) {
+          if (!used[si]) {
+            found = si;
+            fend = se;
+            break;
+          }
+        }
+        if (found < 0) break;
+        used[found] = 1;
+        const nxt = segs[found][1 - fend];
+        if (forward) chain.push(nxt);
+        else chain.unshift(nxt);
+      }
+    }
+    chains.push(chain);
+  }
+  return chains;
+}
+
+/**
+ * Bilinear sample of a cols×rows grid at a field point (clamped).
+ * @param {Float64Array} arr @param {Heightfield} hf
+ * @param {number} x @param {number} y @returns {number}
+ */
+function sampleGrid(arr, hf, x, y) {
+  const { cols, rows, cell } = hf;
+  const gx = Math.max(0, Math.min(cols - 1, x / cell));
+  const gy = Math.max(0, Math.min(rows - 1, y / cell));
+  const i0 = Math.floor(gx);
+  const j0 = Math.floor(gy);
+  const i1 = Math.min(cols - 1, i0 + 1);
+  const j1 = Math.min(rows - 1, j0 + 1);
+  const fx = gx - i0;
+  const fy = gy - j0;
+  return (
+    (arr[j0 * cols + i0] * (1 - fx) + arr[j0 * cols + i1] * fx) * (1 - fy) +
+    (arr[j1 * cols + i0] * (1 - fx) + arr[j1 * cols + i1] * fx) * fy
+  );
+}
 
 /**
  * The sea mask: flat-zero cells connected to the map boundary (4-neighbor
@@ -137,13 +218,17 @@ export function waterSvg(hf, opts = {}) {
   if (hf.max <= 0) return '';
   const coastWeight = opts.coastWeight ?? 0.7;
   const inkOpacity = opts.opacity ?? 0.5;
-  // Two water languages, one dial each: waterlining is the survey-chart
-  // register (the Upolu plate), the rolling wave bands are the engraved
-  // register (the practitioner's Gastaldi reference). They read as rivals
-  // when stacked, so the default is waves-only; raise `waterlines` for the
-  // survey register, zero `waves` to swap back entirely.
   const lineCount = opts.waterlines ?? 0;
-  const waveIntensity = opts.waves ?? 0.35;
+  // Session-7 engraved sea parameters (the practitioner's locked landing).
+  const seed = (opts.seed ?? 1) >>> 0;
+  const waveWl = opts.waveWl ?? 78;
+  const waveAmp = opts.waveAmp ?? 3.5;
+  const waveBand = opts.waveBand ?? 18;
+  const waveComb = opts.waveComb ?? 1.4;
+  const waveCombLen = opts.waveCombLen ?? 13;
+  const waveWeight = opts.waveWeight ?? 0.8;
+  const waveInk = opts.waveInk ?? 0.4;
+  const waveWild = opts.waveWild ?? 0.3;
 
   const mask = seaMask(hf);
   let hasSea = false;
@@ -233,66 +318,115 @@ export function waterSvg(hf, opts = {}) {
     }
   }
 
-  // Wave texture — the engraved sea of the practitioner's reference, built
-  // the way the engraver built it: each "wave" is a TRAIN of fine parallel
-  // hairlines riding a long slow swell, feathered at the train's edges, with
-  // blank paper between trains. Darkness comes from line density, never
-  // stroke weight. Everything derives from the band index through a seeded
-  // stream, so the sea reproduces exactly.
-  if (waveIntensity > 0) {
-    const standoff = 4 + 5.5 * Math.min(lineCount, 2); // clear any waterlines
-    const GOLD = 2.399963;
-    const TRAIN_GAP = 34; // vertical rhythm of the swell trains
-    const SUB = 7; // hairlines per train
-    const SUB_SPREAD = 1.7; // px between hairlines
-    let band = 0;
-    for (let yc = TRAIN_GAP * 0.6; yc < height; yc += TRAIN_GAP, band++) {
-      const rnd = mulberry32((band + 1) * 0x9e37);
-      const phase = band * GOLD + rnd() * 1.5;
-      const amp = 8 + rnd() * 6; // the swell's real roll
-      const k1 = (Math.PI * 2) / (230 + rnd() * 90); // long wavelength
-      const k2 = k1 * (2.3 + rnd());
-      const y0 = yc + (rnd() - 0.5) * 8;
-      for (let s = 0; s < SUB; s++) {
-        const off = (s - (SUB - 1) / 2) * SUB_SPREAD;
-        const edge = Math.abs(off) / (((SUB - 1) / 2) * SUB_SPREAD + 0.01); // 0 centre → 1 edge
-        // Feather: edge hairlines cover less of each run, asymmetrically.
-        const skipHead = rnd() * 0.3 * edge;
-        const skipTail = rnd() * 0.3 * edge;
-        let d = '';
-        /** @type {string[]} */
-        let run = [];
-        const flush = () => {
-          if (run.length >= 4) {
-            const a = Math.floor(run.length * skipHead);
-            const b = run.length - Math.floor(run.length * skipTail);
-            const seg = run.slice(a, b);
-            if (seg.length >= 4) d += `M${seg[0]} L${seg.slice(1).join(' L')} `;
-          }
-          run = [];
-        };
-        for (let x = 0; x <= width; x += cell) {
-          const yy =
-            y0 + off + Math.sin(x * k1 + phase) * amp + Math.sin(x * k2 + phase * 1.7) * (amp * 0.18);
-          const i = Math.round(x / cell);
-          const j = Math.round(yy / cell);
-          const inWater =
-            i >= 0 &&
-            i < cols &&
-            j >= 0 &&
-            j < rows &&
-            mask[j * cols + i] === 1 &&
-            dist[j * cols + i] > standoff;
-          if (inWater) run.push(`${x.toFixed(1)},${yy.toFixed(1)}`);
-          else flush();
+  // The engraved sea — Session 7 (design/claude-design/exports/
+  // session-7-ocean-waves/): bold sinuous CREST lines run parallel to the
+  // shore — each band an offset copy of the coast, which on a real map is an
+  // iso-line of the distance-from-shore field, naturally relaxing toward an
+  // open swell as it marches out — and off each crest a comb of fine
+  // quadratic hair-strokes rides the coast normal toward the next band,
+  // auto-capped by the band gap. Two ink classes by stroke length (strong
+  // feathers and a faint under-comb), crest on top. Ink on paper, per the
+  // artifact. Everything derives from the seed, so `?seed=` reproduces the
+  // sea exactly. Parked in-session, inherited here: wave interaction with
+  // islands (loop crests carry a phase seam) and concave-inlet trimming.
+  if (waveInk > 0 && waveWeight > 0) {
+    /** @type {Heightfield} */
+    const distHf = { field: dist, cols, rows, cell, width, height, max: Infinity };
+    const rng = mulberry32((seed ^ 0x5ea0007) >>> 0 || 1);
+    let maxDist = 0;
+    for (let k = 0; k < dist.length; k++) {
+      if (mask[k] && dist[k] > maxDist) maxDist = dist[k];
+    }
+    const COAST_GAP = 13; // first crest stands off the shore (artifact constant)
+    let crestD = '';
+    let featherD = '';
+    let faintD = '';
+    for (let k = 0; COAST_GAP + k * waveBand <= maxDist && k < 80; k++) {
+      const level = COAST_GAP + k * waveBand;
+      const chains = stitchSegs(extractContour(distHf, level));
+      // Per-band wave parameters — the artifact's formulas, verbatim.
+      const br = mulberry32(((seed * 2654435761) ^ (k * 40503)) >>> 0);
+      const wl = waveWl * (1 + (br() - 0.5) * 0.5 * waveWild);
+      const amp = waveAmp * (1 + (br() - 0.5) * 0.9 * waveWild);
+      const wl2 = wl * (0.5 + 0.12 * br());
+      const amp2 = amp * (0.4 + 0.2 * br());
+      const ph1 = br() * 6.28;
+      const ph2 = br() * 6.28;
+      for (const chain of chains) {
+        if (chain.length < 6) continue;
+        // The displaced crest: undulation rides the coast normal (the
+        // distance-field gradient), parameterized by arc length along the band.
+        /** @type {{ x: number, y: number, nx: number, ny: number, on: boolean, s: number }[]} */
+        const crest = [];
+        let s = 0;
+        let prev = null;
+        for (const pt of chain) {
+          if (prev) s += Math.hypot(pt.x - prev.x, pt.y - prev.y);
+          prev = pt;
+          const gx = (sampleGrid(dist, hf, pt.x + cell, pt.y) - sampleGrid(dist, hf, pt.x - cell, pt.y)) / (2 * cell);
+          const gy = (sampleGrid(dist, hf, pt.x, pt.y + cell) - sampleGrid(dist, hf, pt.x, pt.y - cell)) / (2 * cell);
+          const gm = Math.hypot(gx, gy) || 1;
+          const nx = gx / gm; // seaward — distance grows away from land
+          const ny = gy / gm;
+          const u = amp * Math.sin((s * 2 * Math.PI) / wl + ph1) + amp2 * Math.sin((s * 2 * Math.PI) / wl2 + ph2);
+          const x = pt.x + nx * u;
+          const y = pt.y + ny * u;
+          const on =
+            x >= 2 && x <= width - 2 && y >= 2 && y <= height - 2 && sampleGrid(dist, hf, x, y) > 2;
+          crest.push({ x, y, nx, ny, on, s });
         }
-        flush();
-        if (d) {
-          svg +=
-            `<path d="${d.trim()}" fill="none" stroke="${REGISTER.waterInk}" ` +
-            `stroke-width="0.22" opacity="${(0.8 * waveIntensity).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        // Crest line — the pen lifts where the band leaves the visible sea.
+        let pen = false;
+        for (const c of crest) {
+          if (c.on) {
+            crestD += (pen ? ' L' : 'M') + c.x.toFixed(1) + ' ' + (c.y + (rng() - 0.5) * 0.9).toFixed(1);
+            pen = true;
+          } else pen = false;
+        }
+        crestD += ' ';
+        // Feather comb — walk the crest, emit strokes toward the next band
+        // along the shared normal, auto-capped by the band gap.
+        let acc = 0;
+        let target = waveComb * (0.72 + 0.56 * rng());
+        for (let i = 1; i < crest.length; i++) {
+          const P = crest[i];
+          acc += Math.hypot(P.x - crest[i - 1].x, P.y - crest[i - 1].y);
+          if (acc < target) continue;
+          acc = 0;
+          target = waveComb * (0.72 + 0.56 * rng());
+          if (rng() < 0.05) continue;
+          if (!P.on) continue;
+          const lenNoise = 0.6 + 0.34 * Math.sin(P.s * 0.05 + k * 1.3) + (rng() - 0.5) * 0.4;
+          let L = waveCombLen * Math.max(0.35, lenNoise);
+          L = Math.min(L, waveBand * 0.84);
+          if (L < 3) continue;
+          const sx = P.x + P.nx;
+          const sy = P.y + P.ny;
+          const ex = sx + P.nx * L;
+          const ey = sy + P.ny * L;
+          const w = (rng() - 0.5) * Math.min(4, L * 0.28);
+          const cxp = sx + P.nx * L * 0.5 + P.ny * w;
+          const cyp = sy + P.ny * L * 0.5 - P.nx * w;
+          const seg = `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${cxp.toFixed(1)} ${cyp.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+          if (L > waveCombLen * 0.6) featherD += seg + ' ';
+          else faintD += seg + ' ';
         }
       }
+    }
+    if (faintD) {
+      svg +=
+        `<path d="${faintD.trim()}" fill="none" stroke="${REGISTER.ink}" stroke-width="${(waveWeight * 0.42).toFixed(2)}" ` +
+        `stroke-linecap="round" opacity="${(waveInk * 0.55).toFixed(2)}"/>`;
+    }
+    if (featherD) {
+      svg +=
+        `<path d="${featherD.trim()}" fill="none" stroke="${REGISTER.ink}" stroke-width="${(waveWeight * 0.5).toFixed(2)}" ` +
+        `stroke-linecap="round" opacity="${waveInk.toFixed(2)}"/>`;
+    }
+    if (crestD.trim()) {
+      svg +=
+        `<path d="${crestD.trim()}" fill="none" stroke="${REGISTER.ink}" stroke-width="${(waveWeight * 1.05).toFixed(2)}" ` +
+        `stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`;
     }
   }
 

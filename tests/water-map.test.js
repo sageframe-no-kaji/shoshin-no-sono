@@ -154,7 +154,7 @@ describe('waterSvg', () => {
     // Regression: a one-sided sea-adjacency window shredded the coast into
     // dots wherever the sea lay left/above. The island shore radius ≈ 57 px
     // around (80, 80) — the ink ring must carry points on all four sides.
-    const svg = waterSvg(island(), { waves: 0, waterlines: 0 });
+    const svg = waterSvg(island(), { waveInk: 0, waterlines: 0 });
     const coast = svg.split('stroke="#2B2B2B"')[0].split('<path d="').pop() ?? '';
     const xs = Array.from(coast.matchAll(/M([\d.]+) /g), (m) => parseFloat(m[1]));
     expect(Math.min(...xs)).toBeLessThan(40); // west shore present
@@ -162,19 +162,29 @@ describe('waterSvg', () => {
     expect(xs.length).toBeGreaterThan(30); // a ring, not a handful of dots
   });
 
-  it('wave trains fill the open sea and follow the intensity dial', () => {
-    const on = waterSvg(island(), { waves: 0.8 });
-    const off = waterSvg(island(), { waves: 0 });
-    expect(on).toContain('opacity="0.64"'); // 0.8 × 0.8
-    expect(on.length).toBeGreaterThan(off.length);
-    expect(off).not.toContain('opacity="0.64"');
-    // Trains are bundles of fine hairlines — density, not stroke weight.
-    const hairlines = (on.match(/stroke-width="0.22"/g) ?? []).length;
-    expect(hairlines).toBeGreaterThan(8);
+  it('the engraved sea (Session 7): crests with strong and faint feather combs', () => {
+    const svg = waterSvg(island(), { seed: 7, waterlines: 0 });
+    // Crest = weight × 1.05 at the locked 0.8 default; feathers at ink depth
+    // 0.4 (strong) and × 0.55 (faint) — the artifact's ink formulas.
+    expect(svg).toContain('stroke-width="0.84"'); // crest
+    expect(svg).toContain('opacity="0.40"'); // strong feathers
+    expect(svg).toContain('opacity="0.22"'); // faint under-comb
+    expect(svg).toContain(' Q'); // comb strokes are quadratic hair-strokes
+  });
+
+  it('wave ink 0 silences the engraved sea', () => {
+    const svg = waterSvg(island(), { seed: 7, waveInk: 0, waterlines: 0 });
+    expect(svg).not.toContain('stroke-width="0.84"');
+    expect(svg).not.toContain(' Q');
+  });
+
+  it('the sea reproduces exactly at a seed, and differs across seeds', () => {
+    expect(waterSvg(island(), { seed: 42 })).toBe(waterSvg(island(), { seed: 42 }));
+    expect(waterSvg(island(), { seed: 42 })).not.toBe(waterSvg(island(), { seed: 43 }));
   });
 
   it('waterlines march seaward in water ink, thinning and fading', () => {
-    const svg = waterSvg(island(), { waterlines: 4, waves: 0 });
+    const svg = waterSvg(island(), { waterlines: 4, waveInk: 0 });
     const lines = Array.from(
       svg.matchAll(/stroke="#8A7B6A" stroke-width="([\d.]+)" opacity="([\d.]+)"/g),
       (m) => ({ w: parseFloat(m[1]), op: parseFloat(m[2]) }),
@@ -187,7 +197,7 @@ describe('waterSvg', () => {
   });
 
   it('waterline ink 0 leaves only the coastline', () => {
-    const svg = waterSvg(island(), { opacity: 0, waves: 0 });
+    const svg = waterSvg(island(), { opacity: 0, waveInk: 0 });
     expect(svg).toContain('stroke="#2B2B2B"'); // coast still there
     expect(svg).not.toContain('#8A7B6A'); // no waterlines
   });
