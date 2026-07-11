@@ -26,8 +26,11 @@ import { extractContour, segsToPath } from './contours.js';
 
 /**
  * @typedef {Object} WaterOpts
- * @property {number} [opacity]    Waterline ink strength at the coast (default 0.5; 0 hides all waterlines).
- * @property {number} [waterlines] Number of waterline offsets (default 6).
+ * @property {number} [coastWeight] Coastline stroke weight (default 0.7).
+ * @property {number} [waterlines]  Number of waterline offsets hugging the coast (default 4).
+ * @property {number} [opacity]     Waterline ink strength at the coast (default 0.5; 0 hides the waterlines).
+ * @property {number} [waves]       Wave-texture intensity — rows of fine horizontal water strokes
+ *                                  filling the open sea (default 0.35; 0 hides them).
  */
 
 /**
@@ -131,8 +134,10 @@ export function seaDistance(hf, mask) {
  */
 export function waterSvg(hf, opts = {}) {
   if (hf.max <= 0) return '';
+  const coastWeight = opts.coastWeight ?? 0.7;
   const inkOpacity = opts.opacity ?? 0.5;
-  const lineCount = opts.waterlines ?? 6;
+  const lineCount = opts.waterlines ?? 4;
+  const waveIntensity = opts.waves ?? 0.35;
 
   const mask = seaMask(hf);
   let hasSea = false;
@@ -146,6 +151,23 @@ export function waterSvg(hf, opts = {}) {
 
   const { cols, rows, cell, width, height } = hf;
   let svg = '';
+
+  // The sea settles to paper first: cream paint-over of the masked region
+  // (run-length rects per row). The terrain is silent below the datum, but
+  // land-side hachure strokes overhang the shore — the paint-over clips them.
+  for (let j = 0; j < rows; j++) {
+    let run = -1;
+    for (let i = 0; i <= cols; i++) {
+      const sea = i < cols && mask[j * cols + i] === 1;
+      if (sea && run < 0) run = i;
+      if (!sea && run >= 0) {
+        svg +=
+          `<rect x="${((run - 0.5) * cell).toFixed(1)}" y="${((j - 0.5) * cell).toFixed(1)}" ` +
+          `width="${((i - run) * cell).toFixed(1)}" height="${cell.toFixed(1)}" fill="${REGISTER.paper}"/>`;
+        run = -1;
+      }
+    }
+  }
 
   // The coastline — the shore is ZERO; the ring hugs it just above, cream-
   // cased so it stays crisp against the last hachures on the land side. Only
@@ -168,31 +190,70 @@ export function waterSvg(hf, opts = {}) {
   if (coastSegs.length > 0) {
     const d = segsToPath(coastSegs);
     svg +=
-      `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="2.6" stroke-linecap="round"/>` +
-      `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="0.5" stroke-linecap="round"/>`;
+      `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${(coastWeight + 2).toFixed(2)}" stroke-linecap="round"/>` +
+      `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="${coastWeight.toFixed(2)}" stroke-linecap="round"/>`;
   }
 
-  // Waterlining: iso-lines of the distance-from-shore field, spacing growing
-  // and ink thinning seaward — every line parallels every shore, islands
-  // included, and no line can exist over land.
+  const dist = seaDistance(hf, mask);
+
+  // Waterlining: a FEW offsets hugging the coast, tight spacing, thinning fast
+  // — the old-chart accent on the shore, not bathymetry rings marching to the
+  // frame. Iso-lines of the distance field, so they parallel every shore,
+  // islands included, and can never touch land.
   if (inkOpacity > 0 && lineCount > 0) {
-    const dist = seaDistance(hf, mask);
     /** @type {Heightfield} */
     const distHf = { field: dist, cols, rows, cell, width, height, max: Infinity };
-    let offset = 6;
-    let gap = 7;
+    let offset = 5;
+    let gap = 5.5;
     for (let k = 0; k < lineCount; k++) {
       const segs = extractContour(distHf, offset);
       if (segs.length > 0) {
         const t = k / lineCount;
-        const w = (0.4 * (1 - t) + 0.12).toFixed(2);
+        const w = (0.35 * (1 - t) + 0.12).toFixed(2);
         const op = (inkOpacity * (1 - 0.7 * t)).toFixed(2);
         svg +=
           `<path d="${segsToPath(segs)}" fill="none" stroke="${REGISTER.waterInk}" ` +
           `stroke-width="${w}" opacity="${op}" stroke-linecap="round"/>`;
       }
       offset += gap;
-      gap *= 1.28;
+      gap *= 1.22;
+    }
+  }
+
+  // Wave texture: rows of fine horizontal water strokes filling the open sea
+  // beyond the waterlined shore band — the old-map horizontal ruling the
+  // practitioner pointed at. A slow sine wobble keeps the rows hand-ruled
+  // rather than mechanical; strokes exist only where the sea is (never on
+  // land, never inside the waterline band).
+  if (waveIntensity > 0) {
+    const rowStep = Math.max(1, Math.round(9 / cell));
+    const standoff = 5 + 5.5 * Math.min(lineCount, 2); // clear the tightest waterlines
+    let wavePath = '';
+    for (let j = rowStep; j < rows - 1; j += rowStep) {
+      const y = j * cell;
+      /** @type {number} */
+      let runStart = -1;
+      for (let i = 0; i <= cols; i++) {
+        const inWater = i < cols && mask[j * cols + i] === 1 && dist[j * cols + i] > standoff;
+        if (inWater && runStart < 0) runStart = i;
+        if (!inWater && runStart >= 0) {
+          // One wobbled polyline per run, sampled every other cell.
+          if (i - runStart >= 3) {
+            const pts = [];
+            for (let s = runStart; s <= i - 1; s += 2) {
+              const x = s * cell;
+              pts.push(`${x.toFixed(1)},${(y + Math.sin(x * 0.045 + j * 1.7) * 1.2).toFixed(1)}`);
+            }
+            if (pts.length >= 2) wavePath += `M${pts[0]} L${pts.slice(1).join(' L')} `;
+          }
+          runStart = -1;
+        }
+      }
+    }
+    if (wavePath) {
+      svg +=
+        `<path d="${wavePath.trim()}" fill="none" stroke="${REGISTER.waterInk}" ` +
+        `stroke-width="0.3" opacity="${(0.65 * waveIntensity).toFixed(2)}" stroke-linecap="round"/>`;
     }
   }
 

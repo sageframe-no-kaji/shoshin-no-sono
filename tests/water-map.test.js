@@ -111,14 +111,30 @@ describe('waterSvg', () => {
     expect(waterSvg(hfFrom(() => 5, 8))).toBe('');
   });
 
-  it('draws a cream-cased ink coastline at the shore', () => {
+  it('paints the sea to paper: cream rects clip terrain overhang', () => {
     const svg = waterSvg(island());
-    expect(svg).toContain('stroke="#FDFCF9" stroke-width="2.6"');
-    expect(svg).toContain('stroke="#2B2B2B" stroke-width="0.5"');
+    expect(svg).toContain('<rect');
+    expect(svg).toContain('fill="#FDFCF9"');
+  });
+
+  it('draws a cream-cased ink coastline at the shore, weight dialable', () => {
+    const svg = waterSvg(island());
+    expect(svg).toContain('stroke="#2B2B2B" stroke-width="0.70"');
+    const heavy = waterSvg(island(), { coastWeight: 1.6 });
+    expect(heavy).toContain('stroke="#2B2B2B" stroke-width="1.60"');
+    expect(heavy).toContain(`stroke="#FDFCF9" stroke-width="3.60"`); // casing = weight + 2
+  });
+
+  it('wave texture fills the open sea and follows the intensity dial', () => {
+    const on = waterSvg(island(), { waves: 0.8 });
+    const off = waterSvg(island(), { waves: 0 });
+    expect(on).toContain('opacity="0.52"'); // 0.65 × 0.8
+    expect(on.length).toBeGreaterThan(off.length);
+    expect(off).not.toContain('opacity="0.52"');
   });
 
   it('waterlines march seaward in water ink, thinning and fading', () => {
-    const svg = waterSvg(island(), { waterlines: 4 });
+    const svg = waterSvg(island(), { waterlines: 4, waves: 0 });
     const lines = Array.from(
       svg.matchAll(/stroke="#8A7B6A" stroke-width="([\d.]+)" opacity="([\d.]+)"/g),
       (m) => ({ w: parseFloat(m[1]), op: parseFloat(m[2]) }),
@@ -131,7 +147,7 @@ describe('waterSvg', () => {
   });
 
   it('waterline ink 0 leaves only the coastline', () => {
-    const svg = waterSvg(island(), { opacity: 0 });
+    const svg = waterSvg(island(), { opacity: 0, waves: 0 });
     expect(svg).toContain('stroke="#2B2B2B"'); // coast still there
     expect(svg).not.toContain('#8A7B6A'); // no waterlines
   });

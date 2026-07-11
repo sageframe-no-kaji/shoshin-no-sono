@@ -132,7 +132,10 @@ const tuners = {
   // ho-08 features (session-5 register)
   margin: 110, // field keep-out border — padded up from ho-05's 70 so a sea exists (ho-08 datum)
   waveThreshold: 0.18,
-  waveOpacity: 0.5,
+  coastWeight: 0.7, // coastline stroke weight
+  waterlineCount: 4, // waterline offsets hugging the coast
+  waveOpacity: 0.5, // waterline ink strength
+  waveIntensity: 0.35, // wave texture: horizontal water strokes in the open sea
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
   roadClear: 1.25, // road cream casing beyond the rails, per side
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
@@ -462,7 +465,12 @@ const render = () => {
   svg += terrainSvg(field.heightfield);
   // The sea paints over the terrain below the waterline, so it draws right
   // after the terrain; the corpus-floor marker and labels ride above it.
-  svg += waterSvg(field.heightfield, { opacity: tuners.waveOpacity });
+  svg += waterSvg(field.heightfield, {
+    coastWeight: tuners.coastWeight,
+    waterlines: tuners.waterlineCount,
+    opacity: tuners.waveOpacity,
+    waves: tuners.waveIntensity,
+  });
   svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   // Iso elevation labels are placed on iso lines — they only read when the
   // iso layer is on, regardless of hachures.
@@ -575,7 +583,12 @@ const playWriting = (writeSteps, token, layers) => {
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
   layers.terr.innerHTML =
     terrainSvg(field.heightfield) +
-    waterSvg(field.heightfield, { opacity: tuners.waveOpacity }) +
+    waterSvg(field.heightfield, {
+    coastWeight: tuners.coastWeight,
+    waterlines: tuners.waterlineCount,
+    opacity: tuners.waveOpacity,
+    waves: tuners.waveIntensity,
+  }) +
     corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     (gate.currentLayers().iso
       ? elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale })
@@ -719,7 +732,10 @@ const TUNER_SECTIONS = [
   { title: 'features', specs: [
     { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5 },
     { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
+    { key: 'coastWeight', label: 'coastline weight', min: 0.2, max: 2.5, step: 0.05 },
+    { key: 'waterlineCount', label: 'waterlines (count)', min: 0, max: 10, step: 1 },
     { key: 'waveOpacity', label: 'waterline ink', min: 0, max: 1, step: 0.02 },
+    { key: 'waveIntensity', label: 'wave intensity', min: 0, max: 1, step: 0.02 },
     { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },
     { key: 'roadClear', label: 'road clearing', min: 0, max: 6, step: 0.05 },
     { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05 },
