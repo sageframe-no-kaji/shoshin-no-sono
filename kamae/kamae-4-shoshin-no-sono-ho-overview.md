@@ -1,6 +1,6 @@
 # 初心の園 — Shoshin no Sono — Ho Overview
 
-Five phases. Twenty hos including ho-00, ho-01.5, ho-06.5, and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
+Five phases. Twenty-one planned hos including ho-00, ho-01.5, ho-06.5, ho-08.5, and ho-12.5. Three replan checkpoints, one ship moment. Decisions render inline with the ho that resolves them. Release tags at every phase boundary.
 
 ## What this is, and what it is not
 
@@ -16,7 +16,7 @@ It is also not a per-ho document. Each ho gets its own scope at session time via
 |---|---|---|
 | 0. Foundation | ho-00 | The repo exists; the framing documents are committed; schema is finalized; a preview URL serves an empty page |
 | 1. Data and visible catalog | ho-01, ho-01.5, ho-02, ho-03 | A shareable MVP catalog: grid view, filter URLs, the MVP sample (~20 entries) of the body of work in `works.json` |
-| 2. Cartography | ho-04, ho-05, ho-06, ho-06.5, ho-07, ho-08, ho-09 | The procedural interference cartography rendering on desktop with full interaction |
+| 2. Cartography | ho-04, ho-05, ho-06, ho-06.5, ho-07, ho-08, ho-08.5, ho-09 | The procedural interference cartography rendering on desktop with full interaction, plus the verso — the all-text back of the map that subsumes the grid |
 | 3. Authoring | ho-10, ho-11, ho-12, ho-12.5 | A live, fully-populated catalog: the Steward edits existing works; the Founder adds new ones with AI-assist via the Scribe; ho-12.5 completes the hydration as the Founder's first real stress test |
 | 4. Polish and ship | ho-13, ho-14, ho-15, ho-16 | Mobile experience, accessibility, the companion essay, retirement of the prototype, v1.0 |
 
@@ -155,7 +155,7 @@ This ho produces the first thing the practitioner can share. A card grid renders
 
 ## Phase 2 — Cartography
 
-This phase produces the interference cartography on desktop. The work splits into two registers: visual design (what the cartography looks like, settled in ho-04 via Claude Design with bounded prompts) and procedural generation (the math and rendering pipeline, built in hos 05 through 09). By the end of this phase, a visitor on desktop arrives at the preview URL, sees a topographic map render fresh from current data, watches writing-piece towns populate chronologically, clicks through to canonical homes or to the essays that articulate the relationships shown.
+This phase produces the interference cartography on desktop. The work splits into two registers: visual design (what the cartography looks like, settled in ho-04 via Claude Design with bounded prompts) and procedural generation (the math and rendering pipeline, built in hos 05 through 09). By the end of this phase, a visitor on desktop arrives at the preview URL, sees a topographic map render fresh from current data, watches writing-piece towns populate chronologically, clicks through to canonical homes or to the essays that articulate the relationships shown. The map also has a back now — the verso (ho-08.5), the all-text reverse side that carries the gazetteer, the legend, and the survey notes, and subsumes the grid view.
 
 *Release on phase complete: v0.2*
 
@@ -305,6 +305,36 @@ The relationship grammar from the System Design becomes visible on the map. Ridg
 
 **Possible split:** If feature rendering reveals six distinct rendering challenges, split into ho-08.1 (structural edges — ridges and twin peaks) and ho-08.2 (linear edges — trails, roads, paths). The visual register from ho-04 should clarify which split, if any, is natural.
 
+### ho-08.5 — The verso: the back of the map (inserted)
+
+Inserted 2026-07-11, during the ho-08 era. Every serious map has a back — the gazetteer, the legend, the survey notes — and this ho builds it: the full-text reverse side of the cartography, reached by turning the map over. The verso carries three things. The gazetteer indexes every work — name, native script, one-liner, links to canonical homes — and is the routing surface the map face deliberately isn't; it is also what crawlers, screen readers, skimmers, and reduced-motion visitors actually read. The legend explains the map's semantics in a couple hundred words — what elevation means, why writing is a town, what a trail is versus a road, what the beacon is — resolving the map face's reticence without cluttering it. The survey notes and colophon compose largely from data the catalog already carries: the group intros and theme vocabulary in `works.json`, the seed readout, one sentence on the emergence. The verso subsumes the ho-03 grid view — the cards retire; two text surfaces would be one too many, and the gazetteer does the grid's job with more character and less UI. ho-03 stays closed (forward-only); this ho supersedes its surface and says so.
+
+**Depends on:** ho-08 (the map face's full feature vocabulary must exist before the legend can explain it).
+
+**What's in scope:**
+- The verso as a Gate door: the anticipated `view` URL key, filter state carrying across the flip in both directions
+- The gazetteer: all works, dense and typographic, with canonical-home links
+- The legend: every mark on the map face explained
+- The survey notes / colophon, composed from existing `works.json` data plus a short authored note
+- Grid view retirement — the verso replaces it as the text surface
+- Semantic HTML throughout — this is the accessibility and crawler surface
+
+**What "done" means:**
+- A `?view=` URL lands on the verso; flipping preserves filter state; flipping back preserves it again
+- Every work appears in the gazetteer with working links to its canonical home
+- The legend accounts for every mark type the ho-08 map face renders
+- The grid view is gone; no second text surface remains
+- A screen reader traverses the verso as a sensible document: headings, lists, links
+
+**What's out of scope:** The flip gesture's interaction polish and animation (ho-09 owns interaction). Mobile layout of the verso (ho-13). SEO metadata beyond semantic markup (ho-14).
+
+**Decisions required:**
+- **The verso's name and door**: what the surface is called in the UI ("the back of the map," "verso," "index," "gazetteer") and what the URL value reads (`?view=back` or similar). Doors should read clean; the word chosen here is the word visitors share.
+- **Grid retirement mechanics**: whether `src/grid.js` is deleted outright or partially reused as the gazetteer renderer's skeleton (the card data-shape and the escape/filter plumbing overlap). Forward-only governs documents, not code; retiring the module is a normal refactor, decided at authoring.
+- **Verso composition at v1**: gazetteer + legend + colophon is the committed core. Whether the back also carries a relationship listing in prose (the distance-table analog) is decided by feel once the core three read right.
+
+**Possible split:** Unlikely — the content composes from existing Indexer queries. If the flip mechanics (Gate `view` key, two-surface page orchestration) turn out to fight the content work, split into ho-08.5-a (the verso surface and content) and ho-08.5-b (the flip and grid retirement).
+
 ### ho-09 — Interaction layer
 
 Hover-highlight with dimming of unrelated features. Click on a peak opens an in-place card with the work's name, native script, one-line description, and a primary CTA to the canonical home. Click on a town opens a card with a link to the essay. Click on a relationship feature (ridge, trail, road) — if the edge has `articulated_in` set, the card links directly to the articulating essay; otherwise it shows related-writing options. Changing a filter triggers a fresh render — the map regenerates with new positions, contours, and feature placements.
@@ -325,6 +355,8 @@ Hover-highlight with dimming of unrelated features. Click on a peak opens an in-
 - Card overlays close on click-outside
 
 **What's out of scope:** Mobile interaction (Phase 4). Performance polish (Phase 4).
+
+**Update (2026-07-11, ho-08.5 insertion):** the interaction layer now includes the flip — the gesture that turns the map over to the verso and back. The verso surface itself is built in ho-08.5; this ho owns the gesture's affordance and polish, and should design the card overlays knowing the verso exists as the text landing (a card's "read more" path can resolve to a gazetteer anchor rather than growing card scope).
 
 **Possible split:** If the multiple interaction types each turn out non-trivial, split into ho-09.1 (hover behaviors and card overlays) and ho-09.2 (filter change, fresh render, transitions).
 
@@ -462,6 +494,8 @@ This phase carries the project from "working on desktop, alive in authoring" to 
 
 Adapt the cartography to a simplified decorative version at narrow viewport — major peaks only, simplified contours, no relationship features rendered, no towns at low zoom, no interaction with the terrain itself. Tap drops into the grid view, which is the actual navigation on mobile. URL state preserved across modes — a shared `?theme=craft` link lands on a filtered grid view on mobile and a filtered cartography view on desktop. Claude Design pull-off for the mobile aesthetic.
 
+**Update (2026-07-11, ho-08.5 insertion):** the grid view is subsumed by the verso in ho-08.5, so mobile's tap-through navigation surface is the verso, not the grid. The mechanic is unchanged — decorative map, tap drops into the text surface, URL state preserved — but the text surface is the back of the map. Read "grid view" above accordingly; this ho decides the verso's narrow-viewport layout.
+
 **Depends on:** ho-12 (authoring works) — though could be done after ho-09 if mobile is prioritized over authoring. The current order assumes authoring is the priority.
 
 **What's in scope:**
@@ -597,6 +631,7 @@ The overview is updated when splits or insertions happen. New hos are added to t
 
 - **ho-01.5 — Environment scaffold.** Inserted (2026-06-12, at ho-02 authoring). The technical scaffold ho-00 didn't produce — test harness, lint/type stack, validator, placeholder page, project CLAUDE.md — landed as its own ho before the first code ho rather than folded into ho-02. See the Phase 1 entry.
 - **ho-06.5 — Tuner landing.** Inserted (2026-06-13, after ho-06). The by-feel tuner pass on the field `opts` — deferred through ho-05 and ho-06 — landed in the practitioner's hand and moved every field default; ho-06.5 locks them across `contours.js`, `field.js`, and `cartographer.js`. The forward-only response to ho-06 having closed its tuner verdict on the model's eye. See the Phase 2 entry.
+- **ho-08.5 — The verso: the back of the map.** Inserted (2026-07-11, during the ho-08 era). The design conversation that named the map's two tensions — the map is an argument that resists indexing, and its positions are deliberately non-semantic — resolved to a cartographic answer rather than a UI one: the map gets a back, in the genre real maps have (gazetteer, legend, colophon). The verso subsumes the ho-03 grid view; ho-09's flip gesture and ho-13's mobile fallback both re-point to it. See the Phase 2 entry.
 - **ho-12.5 — Complete the hydration via the Founder.** Now a planned ho, not a contingency. ho-01 produces an MVP sample of ~20 entries; the remaining works in the body of work (estimated 20-30 more) hydrate through the Founder UI in ho-12.5. This makes the Founder's first real-world test a bulk operation against the production workflow, which is a much stronger validation than adding a single hypothetical new work. Surfacings from ho-12.5 may also drive prompt-template iteration for the Scribe.
 
 **Conditional insertions:**
@@ -654,7 +689,10 @@ ho-07 (towns + populate)
 ho-08 (relationship features)
   │
   ▼
-ho-09 (interactions) ───────► v0.2 ★ replan checkpoint
+ho-08.5 (the verso — subsumes ho-03's grid)
+  │
+  ▼
+ho-09 (interactions, incl. the flip) ───────► v0.2 ★ replan checkpoint
   │
   ├──► ho-10 (Steward)
   │
@@ -684,7 +722,7 @@ Hos 10, 11, and 12 have some independence in execution order. The Founder (12) d
 
 ## What to do with this document
 
-The overview lives in the repo at `kamae/shoshin-no-sono-kamae-4-ho-overview.md`. The practitioner returns to it between hos: to confirm what's next, to update what changed, to mark splits and insertions as they happen. After each phase boundary, the practitioner cuts a release tag and notes the actual state of the build against the planned phase content.
+The overview lives in the repo at `kamae/kamae-4-shoshin-no-sono-ho-overview.md`. The practitioner returns to it between hos: to confirm what's next, to update what changed, to mark splits and insertions as they happen. After each phase boundary, the practitioner cuts a release tag and notes the actual state of the build against the planned phase content.
 
 When a per-ho document is needed for an upcoming session, the practitioner invokes `ho-kamae-5-authoring-collaborator` against the relevant ho's entry in this overview. The per-ho document gets the depth this overview does not carry — full scope, full acceptance criteria, full implementation notes — bounded for one focused session.
 
