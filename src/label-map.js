@@ -299,14 +299,20 @@ export const ELEVATION_STEP_FT = 1000;
  * elevation in feet, set inline with a cream halo and rotated along the line. A
  * couple per level. Rendered only in the resting / frozen-terrain views (computed
  * once), not per world beat.
+ * With a datum (`base`, ho-08's sea level), the numbers read feet ABOVE the
+ * waterline and no labeled ring exists below it.
  * @param {Heightfield} hf
- * @param {{ elevationScale: number }} opts size dial for the numerals
+ * @param {{ elevationScale: number, base?: number }} opts size dial + datum elevation
  */
 export const elevationLabelsSvg = (hf, opts) => {
-  const maxFeet = hf.max * FEET_PER_UNIT;
+  const base = opts.base ?? 0;
   let svg = '';
-  for (let feet = ELEVATION_STEP_FT; feet < maxFeet; feet += ELEVATION_STEP_FT) {
-    const segs = extractContour(hf, feet / FEET_PER_UNIT);
+  for (
+    let feet = ELEVATION_STEP_FT;
+    base + feet / FEET_PER_UNIT < hf.max;
+    feet += ELEVATION_STEP_FT
+  ) {
+    const segs = extractContour(hf, base + feet / FEET_PER_UNIT);
     if (segs.length < 8) continue;
     const stride = Math.max(8, Math.floor(segs.length / 2)); // ~a couple labels per level
     for (let i = Math.floor(stride / 2); i < segs.length; i += stride) {

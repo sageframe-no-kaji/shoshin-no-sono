@@ -516,10 +516,13 @@ export function gradient(hf, x, y) {
  * `DESCENT_STEPS` substeps, re-sampling the gradient each step — it curves down
  * the terrain into low ground rather than stepping blindly. `footOffset` is the
  * total descent budget; raise it to push a town further into the valley. A flat
- * field leaves the seat put. Clamped to the field bounds.
- * @param {Point} seat @param {Heightfield} hf @param {number} footOffset @returns {Point}
+ * field leaves the seat put. Clamped to the field bounds. `floor` (ho-08's sea
+ * level) stops the descent at the waterline — negative ground prohibits towns.
+ * @param {Point} seat @param {Heightfield} hf @param {number} footOffset
+ * @param {number} [floor] elevation the seat never descends below
+ * @returns {Point}
  */
-export function seatDownhill(seat, hf, footOffset) {
+export function seatDownhill(seat, hf, footOffset, floor = -Infinity) {
   let x = seat.x;
   let y = seat.y;
   const step = footOffset / DESCENT_STEPS;
@@ -527,8 +530,11 @@ export function seatDownhill(seat, hf, footOffset) {
     const g = gradient(hf, x, y);
     const m = Math.hypot(g.x, g.y);
     if (m < 1e-6) break; // reached a basin — nothing left to descend
-    x = Math.max(0, Math.min(hf.width, x - (g.x / m) * step));
-    y = Math.max(0, Math.min(hf.height, y - (g.y / m) * step));
+    const nx = Math.max(0, Math.min(hf.width, x - (g.x / m) * step));
+    const ny = Math.max(0, Math.min(hf.height, y - (g.y / m) * step));
+    if (sampleField(hf, nx, ny) < floor) break; // the coast — settle here, not in the sea
+    x = nx;
+    y = ny;
   }
   return { x, y };
 }

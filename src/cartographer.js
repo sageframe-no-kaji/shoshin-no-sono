@@ -145,8 +145,11 @@ export function computeField(indexer, state, seed, opts = {}) {
  * @typedef {CartographyOpts & {
  *   anchorBias?: number, strengthFull?: number, secondaryStrength?: number,
  *   footOffset?: number, elongK?: number, elongCap?: number, contourFollow?: number,
- *   density?: number, extentScale?: number, thresholds?: number[]
+ *   density?: number, extentScale?: number, thresholds?: number[],
+ *   seaFraction?: number
  * }} TownOpts
+ * `seaFraction` (ho-08's datum): sea level as a fraction of the field max —
+ * town seats never descend below it (negative ground prohibits settlement).
  */
 
 /**
@@ -208,7 +211,9 @@ export function computeTowns(indexer, state, field, opts = {}) {
         .map((e) => ({ pos: /** @type {{x:number,y:number}} */ (peakPos.get(e.target)), strength: secondaryStrength }));
     }
 
-    const seat = seatDownhill(townSeat(anchors, centroid, opts), hf, footOffset);
+    // The datum floor: seats stop at the coast, never in the sea (ho-08).
+    const floor = opts.seaFraction != null ? opts.seaFraction * hf.max : -Infinity;
+    const seat = seatDownhill(townSeat(anchors, centroid, opts), hf, footOffset, floor);
     const weight = indexer.settlementWeight(town.id);
     const level = sizeBand(weight, thresholds);
     const density = baseDensity + weight * extentScale;

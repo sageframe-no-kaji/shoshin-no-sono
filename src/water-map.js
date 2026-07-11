@@ -159,10 +159,10 @@ export function waterSvg(hf, opts = {}) {
     }
   }
 
-  // 3. Sparse wave marks in the deep zone (well below the coast), staggered.
+  // 3. Sparse wave marks in the deep zone (below the coast), staggered.
   if (waveOpacity > 0) {
-    const deep = seaLevel * 0.55;
-    const stride = Math.max(1, Math.round(26 / cell));
+    const deep = seaLevel * 0.7;
+    const stride = Math.max(1, Math.round(22 / cell));
     const W = 9;
     const H = 1.5;
     let rowIndex = 0;

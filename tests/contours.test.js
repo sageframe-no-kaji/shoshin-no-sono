@@ -35,6 +35,14 @@ describe('contourLevels', () => {
   it('carries more rings as the field rises (count tracks elevation)', () => {
     expect(contourLevels(10, 0.62).length).toBeGreaterThan(contourLevels(3, 0.62).length);
   });
+
+  it('a datum lifts the level set — no rings at or below sea level (ho-08)', () => {
+    const levels = contourLevels(2.0, 0.62, 0.5);
+    expect(levels[0]).toBeCloseTo(1.12);
+    for (const l of levels) expect(l).toBeGreaterThan(0.5);
+    // and the datum ring itself is not in the set — the coastline draws it
+    expect(levels.some((l) => Math.abs(l - 0.5) < 1e-9)).toBe(false);
+  });
 });
 
 describe('extractContour — marching squares', () => {

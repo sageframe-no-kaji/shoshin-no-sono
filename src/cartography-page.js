@@ -130,6 +130,7 @@ const tuners = {
   hachureImportance: 0.6, // density gates at log-scaled local elevation
 
   // ho-08 features (session-5 register)
+  margin: 110, // field keep-out border — padded up from ho-05's 70 so a sea exists (ho-08 datum)
   waveThreshold: 0.18,
   waveOpacity: 0.18,
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
@@ -366,6 +367,8 @@ const terrainSvg = (heightfield) => {
       interval: tuners.interval,
       weightRegular: tuners.weightRegular,
       weightIndex: tuners.weightIndex,
+      // The datum (ho-08): isos climb from sea level; nothing rings the sea.
+      base: tuners.waveThreshold * heightfield.max,
       // When hachures are also on, suppress the iso paper rect so the hachure
       // ground shows through.
       paper: layers.hachure ? 'transparent' : undefined,
@@ -446,6 +449,7 @@ const render = () => {
   const towns = computeTowns(indexer, state, field, {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
+    seaFraction: tuners.waveThreshold,
   });
   const layers = gate.currentLayers();
   let svg = layers.hachure ? labelGlowFilter(tuners.labelGlow) : '';
@@ -456,7 +460,10 @@ const render = () => {
   svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   // Iso elevation labels are placed on iso lines — they only read when the
   // iso layer is on, regardless of hachures.
-  if (layers.iso) svg += elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale });
+  if (layers.iso) svg += elevationLabelsSvg(field.heightfield, {
+      elevationScale: tuners.elevationScale,
+      base: tuners.waveThreshold * field.heightfield.max,
+    });
   svg += featuresSvg(field, towns);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   // signal-fire beacons, breathing at rest
@@ -559,6 +566,7 @@ const playWriting = (writeSteps, token, layers) => {
   const allTowns = computeTowns(indexer, state, field, {
     ...tuners,
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
+    seaFraction: tuners.waveThreshold,
   });
   const byId = new Map(allTowns.map((t) => [t.id, t]));
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
@@ -567,7 +575,10 @@ const playWriting = (writeSteps, token, layers) => {
     waterSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity }) +
     corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     (gate.currentLayers().iso
-      ? elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale })
+      ? elevationLabelsSvg(field.heightfield, {
+      elevationScale: tuners.elevationScale,
+      base: tuners.waveThreshold * field.heightfield.max,
+    })
       : '') +
     featuresSvg(field, allTowns) +
     beaconSvg(field.peaks, {
@@ -706,6 +717,7 @@ const TUNER_SECTIONS = [
   { title: 'beacons', specs: BEACON_TUNER_SPECS },
   { title: 'emergence', specs: EMERGENCE_TUNER_SPECS },
   { title: 'features', specs: [
+    { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5 },
     { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
     { key: 'waveOpacity', label: 'wave marks', min: 0, max: 0.5, step: 0.01 },
     { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },

@@ -26,6 +26,9 @@
  * @typedef {Object} ContourOpts
  * @property {number} [interval] Elevation step between contour levels (ring spacing).
  * @property {number} [indexEvery] Every Nth level (from the outermost) is an index contour.
+ * @property {number} [base] The datum — levels climb from here (sea level; ho-08).
+ *   Isos exist only above the datum: the coastline IS the datum ring, drawn by
+ *   the water layer, so no contour rings render in the sea.
  */
 
 /** `interval` (ring spacing) landed by the practitioner's by-feel pass in ho-06.5; `indexEvery` is register. */
@@ -35,18 +38,19 @@ const CONTOUR_DEFAULTS = { interval: 0.32, indexEvery: 5 };
 const round2 = (n) => Math.round(n * 100) / 100;
 
 /**
- * The level set: elevations from one interval up to (but not reaching) the
- * field max. Count tracks elevation — a taller field carries more rings, and a
- * filter-sunk field carries fewer (Decision 2). Levels run low → high, so
- * index 0 is the lowest, outermost ring.
+ * The level set: elevations from one interval above the datum up to (but not
+ * reaching) the field max. Count tracks elevation — a taller field carries
+ * more rings, and a filter-sunk field carries fewer (Decision 2). Levels run
+ * low → high, so index 0 is the lowest, outermost ring.
  * @param {number} max largest elevation in the field
  * @param {number} interval elevation step
+ * @param {number} [base] the datum (sea level) — levels start one interval above it
  * @returns {number[]}
  */
-export function contourLevels(max, interval) {
+export function contourLevels(max, interval, base = 0) {
   /** @type {number[]} */
   const levels = [];
-  for (let level = interval; level < max; level += interval) levels.push(level);
+  for (let level = base + interval; level < max; level += interval) levels.push(level);
   return levels;
 }
 
@@ -152,7 +156,8 @@ export function segsToPath(segs) {
 export function contourGeometry(hf, opts) {
   const interval = opts?.interval ?? CONTOUR_DEFAULTS.interval;
   const indexEvery = opts?.indexEvery ?? CONTOUR_DEFAULTS.indexEvery;
-  return contourLevels(hf.max, interval).map((level, k) => ({
+  const base = opts?.base ?? 0;
+  return contourLevels(hf.max, interval, base).map((level, k) => ({
     level,
     isIndex: k % indexEvery === 0,
     d: segsToPath(extractContour(hf, level)),

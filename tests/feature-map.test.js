@@ -263,6 +263,16 @@ describe('terrainRoutedPath', () => {
     expect(drift(1)).toBeGreaterThan(drift(0.2));
   });
 
+  it('a floor pushes the route out of the sea — negative ground prohibits routes (ho-08)', () => {
+    // tiltedHf rises 0.08/px along +x; a floor of 8 puts the coastline at x = 100,
+    // so a route chorded through the sea at x = 50 must climb east onto land.
+    const hf = tiltedHf();
+    const pts = terrainRoutedPath(hf, 50, 40, 50, 360, { follow: 1, floor: 8 });
+    const interior = pts.slice(3, -3);
+    const meanX = interior.reduce((s, p) => s + p.x, 0) / interior.length;
+    expect(meanX).toBeGreaterThan(70);
+  });
+
   it('keeps a minimal separation from avoid polylines (a trail never sits on a road)', () => {
     // Flat field (no slope pull), trail chord lying exactly ON a road corridor.
     const flat = tiltedHf();

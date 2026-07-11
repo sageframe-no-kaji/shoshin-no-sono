@@ -77,6 +77,8 @@ function gradAt(hf, x, y) {
  * @property {number} [slopeRef] Slope magnitude at which the sideways push saturates.
  * @property {{ x: number, y: number }[][]} [avoid] Polylines to keep clear of (road corridors).
  * @property {number} [minSep]   Minimal separation from `avoid` polylines in px.
+ * @property {number} [floor]    The datum (sea level, absolute elevation) — routes climb out of
+ *   ground below it; negative elevations prohibit roads and trails (ho-08).
  */
 
 /**
@@ -161,6 +163,7 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
   const slopeRef = opts.slopeRef ?? 0.02; // any real slope pushes at full strength
   const avoid = opts.avoid ?? [];
   const minSep = opts.minSep ?? 7;
+  const floor = opts.floor ?? -Infinity;
   const smooth = 0.2;
   for (let k = 0; k < iters; k++) {
     for (let i = 1; i < n; i++) {
@@ -175,14 +178,22 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
       const g = gradAt(hf, px, py);
       const gm = Math.hypot(g.x, g.y);
       if (gm >= 1e-9) {
-        // Slide toward lower ground along the local normal. The push responds
-        // to the DIRECTION of the slope at full strength once the slope is
-        // real (gm/slopeRef saturates) — raw-magnitude pushes were so weak the
-        // smoothing pass erased them and every route relaxed to its chord.
-        const toward = (g.x * nx + g.y * ny) / gm;
-        const slide = -toward * Math.min(1, gm / slopeRef) * step;
-        px += nx * slide;
-        py += ny * slide;
+        if (sampleHf(hf, px, py) < floor) {
+          // Below the datum — a route can't run in the sea; climb straight
+          // out along the gradient instead of hunting lower ground.
+          px += (g.x / gm) * step;
+          py += (g.y / gm) * step;
+        } else {
+          // Slide toward lower ground along the local normal. The push
+          // responds to the DIRECTION of the slope at full strength once the
+          // slope is real (gm/slopeRef saturates) — raw-magnitude pushes were
+          // so weak the smoothing pass erased them and every route relaxed to
+          // its chord.
+          const toward = (g.x * nx + g.y * ny) / gm;
+          const slide = -toward * Math.min(1, gm / slopeRef) * step;
+          px += nx * slide;
+          py += ny * slide;
+        }
       }
       const drift = (px - x1) * cnx + (py - y1) * cny;
       if (drift > maxDrift) {
@@ -463,6 +474,7 @@ export function computeRoadRoutes(edges, hf, opts = {}) {
       ? terrainRoutedPath(hf, e.from.x, e.from.y, foot.x, foot.y, {
           follow: opts.follow ?? 0.7,
           maxDrift: opts.maxDrift ?? 70,
+          floor: opts.floor,
         })
       : bowedPoints(e.from.x, e.from.y, foot.x, foot.y, strHash(e.id), 0.12);
     return { pts, strength: e.strength ?? 1, id: e.id };
@@ -531,6 +543,7 @@ export function trailsSvg(edges, hf, opts = {}) {
         maxDrift: opts.maxDrift ?? 45,
         avoid: opts.avoid,
         minSep: opts.minSep,
+        floor: opts.floor,
       });
       out += railAndRungsSvg(chaikin(pts, 2), opts);
     } else {

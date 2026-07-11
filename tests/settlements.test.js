@@ -140,6 +140,14 @@ describe('seatDownhill', () => {
   it('leaves a seat on flat ground unchanged', () => {
     expect(seatDownhill({ x: 50, y: 50 }, flat, 20)).toEqual({ x: 50, y: 50 });
   });
+
+  it('a floor stops the descent at the waterline (ho-08 datum)', () => {
+    // rampX rises 0.1/px along +x; downhill runs toward -x.
+    const unfloored = seatDownhill({ x: 50, y: 50 }, rampX, 30);
+    const floored = seatDownhill({ x: 50, y: 50 }, rampX, 30, 4);
+    expect(unfloored.x).toBeLessThan(30); // free descent runs the full budget
+    expect(floored.x).toBeGreaterThan(40); // stops where the next step would sink below elev 4
+  });
 });
 
 describe('sizeBand', () => {
