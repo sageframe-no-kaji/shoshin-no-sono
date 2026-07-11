@@ -4,6 +4,7 @@ import {
   curvedPath,
   roadPathSvg,
   trailTickLadderSvg,
+  terrainRoutedPath,
   roadsSvg,
   trailsSvg,
 } from '../src/feature-map.js';
@@ -174,18 +175,67 @@ describe('trailTickLadderSvg', () => {
   });
 });
 
-// ── roadsSvg ──────────────────────────────────────────────────────────────────
+// ── terrainRoutedPath ─────────────────────────────────────────────────────────
 
-/** Build a tilted heightfield — low on the left, high on the right. */
+/** Build a tilted heightfield — low on the left, high on the right, at a
+ * realistic slope (~0.08 elevation units per px, the scale a real peak's
+ * flank carries). */
 const tiltedHf = (width = 400, height = 400, cell = 4) => {
   const cols = Math.ceil(width / cell) + 1;
   const rows = Math.ceil(height / cell) + 1;
   const field = new Float64Array(cols * rows);
   for (let j = 0; j < rows; j++)
     for (let i = 0; i < cols; i++)
-      field[j * cols + i] = i / cols; // low left, high right
-  return { field, cols, rows, cell, width, height, max: 1 };
+      field[j * cols + i] = i * cell * 0.08; // low left, high right
+  return { field, cols, rows, cell, width, height, max: width * 0.08 };
 };
+
+describe('terrainRoutedPath', () => {
+  it('endpoints never move', () => {
+    const hf = tiltedHf();
+    const pts = terrainRoutedPath(hf, 200, 40, 200, 360, { follow: 1 });
+    expect(pts[0].x).toBeCloseTo(200, 6);
+    expect(pts[0].y).toBeCloseTo(40, 6);
+    expect(pts[pts.length - 1].x).toBeCloseTo(200, 6);
+    expect(pts[pts.length - 1].y).toBeCloseTo(360, 6);
+  });
+
+  it('follow 0 returns the straight chord', () => {
+    const hf = tiltedHf();
+    const pts = terrainRoutedPath(hf, 100, 100, 300, 100, { follow: 0 });
+    for (const p of pts) expect(p.y).toBeCloseTo(100, 6);
+  });
+
+  it('routes toward lower ground (tilted field: a N–S route drifts west)', () => {
+    // Field rises to the east; a north–south route at x=200 should relax west
+    // (downhill is -x for every interior waypoint).
+    const hf = tiltedHf();
+    const pts = terrainRoutedPath(hf, 200, 40, 200, 360, { follow: 1 });
+    const interior = pts.slice(1, -1);
+    const meanX = interior.reduce((s, p) => s + p.x, 0) / interior.length;
+    expect(meanX).toBeLessThan(199);
+  });
+
+  it('lateral drift is clamped to maxDrift', () => {
+    const hf = tiltedHf();
+    const maxDrift = 30;
+    const pts = terrainRoutedPath(hf, 200, 40, 200, 360, { follow: 1.5, iters: 60, maxDrift });
+    // Chord is vertical at x=200 — drift is |x - 200|.
+    for (const p of pts) expect(Math.abs(p.x - 200)).toBeLessThanOrEqual(maxDrift + 1e-6);
+  });
+
+  it('stronger follow drifts further than weaker follow', () => {
+    const hf = tiltedHf();
+    const drift = (/** @type {number} */ f) => {
+      const pts = terrainRoutedPath(hf, 200, 40, 200, 360, { follow: f });
+      const interior = pts.slice(1, -1);
+      return Math.abs(interior.reduce((s, p) => s + p.x, 0) / interior.length - 200);
+    };
+    expect(drift(1)).toBeGreaterThan(drift(0.2));
+  });
+});
+
+// ── roadsSvg ──────────────────────────────────────────────────────────────────
 
 describe('roadsSvg', () => {
   it('returns empty string for an empty edge array', () => {

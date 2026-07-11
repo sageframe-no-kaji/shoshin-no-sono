@@ -10,9 +10,12 @@
  * above it. The casing omission is the load-bearing rule (session-5 lock):
  * roads are cased, trails are uncased.
  *
- * Road paths are cubic Béziers whose bow sign is terrain-aware (or id-derived
- * without a heightfield); trail rails bow gently by the edge id — so each mark
- * is unique but stable across redraws.
+ * With a heightfield, both marks route by least resistance: chord waypoints
+ * relax sideways toward lower ground and smooth, so roads swing through
+ * valleys and around hills and trails drift with the terrain instead of
+ * cutting straight — character from process, not decoration. Without a
+ * heightfield both fall back to a gentle id-signed bow, unique but stable
+ * across redraws.
  *
  * Pure: SVG strings in, SVG strings out. No DOM, no Indexer, no Gate, no URL.
  */
@@ -53,27 +56,94 @@ function sampleHf(hf, x, y) {
 }
 
 /**
- * Terrain-aware bow sign: sample perpendicular to the path midpoint and curve
- * toward the lower side (the valley). Falls back to strHash sign when no
- * heightfield is provided.
- * @param {Heightfield} hf @param {number} x1 @param {number} y1
- * @param {number} x2 @param {number} y2 @returns {1|-1}
+ * Central-difference gradient of the heightfield at a field point (uphill).
+ * @param {Heightfield} hf @param {number} x @param {number} y
+ * @returns {{ x: number, y: number }}
  */
-function terrainBowSign(hf, x1, y1, x2, y2) {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len = Math.hypot(dx, dy);
-  if (len < 10) return 1;
-  const mx = (x1 + x2) / 2;
-  const my = (y1 + y2) / 2;
-  // Perpendicular unit vector
-  const nx = -dy / len;
-  const ny = dx / len;
-  const probe = Math.min(70, len * 0.3);
-  const leftElev = sampleHf(hf, mx + nx * probe, my + ny * probe);
-  const rightElev = sampleHf(hf, mx - nx * probe, my - ny * probe);
-  // Curve toward the lower side (into the valley)
-  return leftElev <= rightElev ? 1 : -1;
+function gradAt(hf, x, y) {
+  const e = hf.cell;
+  return {
+    x: (sampleHf(hf, x + e, y) - sampleHf(hf, x - e, y)) / (2 * e),
+    y: (sampleHf(hf, x, y + e) - sampleHf(hf, x, y - e)) / (2 * e),
+  };
+}
+
+/**
+ * @typedef {Object} RouteOpts
+ * @property {number} [follow]   Terrain-following strength (0 = straight chord).
+ * @property {number} [spacing]  Waypoint spacing along the chord in px.
+ * @property {number} [iters]    Relaxation iterations.
+ * @property {number} [maxDrift] Lateral clamp from the chord in px (keeps a route a route).
+ */
+
+/**
+ * Least-resistance route between two points over the heightfield: waypoints
+ * start on the straight chord, then each relaxation pass slides every interior
+ * point sideways toward lower ground (the downhill component perpendicular to
+ * the local direction) and smooths the line so it stays route-like. The result
+ * swings through valleys and around hills the way a surveyed road does.
+ * Endpoints never move; lateral drift is clamped to a corridor.
+ * @param {Heightfield} hf
+ * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
+ * @param {RouteOpts} [opts]
+ * @returns {{ x: number, y: number }[]}
+ */
+export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
+  const follow = opts.follow ?? 0.7;
+  const spacing = opts.spacing ?? 12;
+  const iters = opts.iters ?? 30;
+  const maxDrift = opts.maxDrift ?? 70;
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const n = Math.max(3, Math.round(len / spacing));
+  /** @type {{ x: number, y: number }[]} */
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    pts.push({ x: x1 + ((x2 - x1) * i) / n, y: y1 + ((y2 - y1) * i) / n });
+  }
+  if (follow <= 0 || len < 1) return pts;
+  // Chord normal, for clamping lateral drift.
+  const cnx = -(y2 - y1) / len;
+  const cny = (x2 - x1) / len;
+  const step = follow * spacing * 0.5;
+  const smooth = 0.3;
+  for (let k = 0; k < iters; k++) {
+    for (let i = 1; i < n; i++) {
+      const p = pts[i];
+      const g = gradAt(hf, p.x, p.y);
+      const tx = pts[i + 1].x - pts[i - 1].x;
+      const ty = pts[i + 1].y - pts[i - 1].y;
+      const tm = Math.hypot(tx, ty) || 1;
+      const nx = -ty / tm;
+      const ny = tx / tm;
+      // Slide toward lower ground along the local normal.
+      const slide = -(g.x * nx + g.y * ny) * step;
+      let px = p.x + nx * slide;
+      let py = p.y + ny * slide;
+      const drift = (px - x1) * cnx + (py - y1) * cny;
+      if (drift > maxDrift) {
+        px -= cnx * (drift - maxDrift);
+        py -= cny * (drift - maxDrift);
+      } else if (drift < -maxDrift) {
+        px -= cnx * (drift + maxDrift);
+        py -= cny * (drift + maxDrift);
+      }
+      p.x = px;
+      p.y = py;
+    }
+    // Smoothing pass keeps the route road-like (no kinks from noisy gradients).
+    for (let i = 1; i < n; i++) {
+      pts[i].x = pts[i].x * (1 - smooth) + ((pts[i - 1].x + pts[i + 1].x) / 2) * smooth;
+      pts[i].y = pts[i].y * (1 - smooth) + ((pts[i - 1].y + pts[i + 1].y) / 2) * smooth;
+    }
+  }
+  return pts;
+}
+
+/** Polyline waypoints → SVG path `d`. @param {{x:number,y:number}[]} pts @returns {string} */
+function pointsToPath(pts) {
+  let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+  for (let i = 1; i < pts.length; i++) d += ` L${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+  return d;
 }
 
 /**
@@ -150,9 +220,9 @@ export function roadPathSvg(d, strength = 1) {
   const outer = (4.5 * s).toFixed(2);
   const infill = (2.8 * s).toFixed(2);
   return (
-    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${casing}" stroke-linecap="round"/>` +
-    `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="${outer}" opacity="0.75" stroke-linecap="round"/>` +
-    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${infill}" stroke-linecap="round"/>`
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${casing}" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="${outer}" opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${infill}" stroke-linecap="round" stroke-linejoin="round"/>`
   );
 }
 
@@ -178,12 +248,22 @@ const TRAIL_WEIGHT = 0.6;
  * @returns {string} SVG path elements (rail + rungs)
  */
 export function trailTickLadderSvg(x1, y1, x2, y2, sign) {
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  if (len < 20) return '';
+  return railAndRungsSvg(bowedPoints(x1, y1, x2, y2, sign));
+}
+
+/**
+ * Sample the gently-bowed cubic into waypoints — the no-heightfield fallback
+ * rail (same curve family as roads, shallower bow).
+ * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
+ * @param {number} sign 1 or -1
+ * @returns {{ x: number, y: number }[]}
+ */
+function bowedPoints(x1, y1, x2, y2, sign) {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy);
-  if (len < 20) return '';
-
-  // The rail: same cubic form as roads, shallower bow.
   const bow = len * 0.06 * sign;
   const px = -dy / len;
   const py = dx / len;
@@ -191,32 +271,55 @@ export function trailTickLadderSvg(x1, y1, x2, y2, sign) {
   const c1y = y1 + dy / 3 + py * bow;
   const c2x = x1 + (dx * 2) / 3 + px * bow;
   const c2y = y1 + (dy * 2) / 3 + py * bow;
-  const d =
-    `M${x1.toFixed(1)},${y1.toFixed(1)} ` +
-    `C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ` +
-    `${x2.toFixed(1)},${y2.toFixed(1)}`;
-
-  // The rungs: sample the cubic at even parameter steps (point + tangent →
-  // normal), one perpendicular tick per step. Endpoints carry no rung.
-  let rungs = '';
-  const n = Math.max(2, Math.round(len / TICK_SPACING));
-  for (let i = 1; i < n; i++) {
+  const n = Math.max(3, Math.round(len / 8));
+  /** @type {{ x: number, y: number }[]} */
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
     const t = i / n;
     const u = 1 - t;
-    const bx = u * u * u * x1 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x2;
-    const by = u * u * u * y1 + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * y2;
-    const tx = 3 * u * u * (c1x - x1) + 6 * u * t * (c2x - c1x) + 3 * t * t * (x2 - c2x);
-    const ty = 3 * u * u * (c1y - y1) + 6 * u * t * (c2y - c1y) + 3 * t * t * (y2 - c2y);
-    const tm = Math.hypot(tx, ty) || 1;
-    const nx = -ty / tm;
-    const ny = tx / tm;
-    rungs +=
-      `M${(bx - nx * TICK_HALF).toFixed(1)},${(by - ny * TICK_HALF).toFixed(1)} ` +
-      `L${(bx + nx * TICK_HALF).toFixed(1)},${(by + ny * TICK_HALF).toFixed(1)} `;
+    pts.push({
+      x: u * u * u * x1 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x2,
+      y: u * u * u * y1 + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * y2,
+    });
   }
+  return pts;
+}
 
+/**
+ * Rail + perpendicular rungs over a waypoint polyline — the locked trail mark
+ * drawn along ANY route (bowed fallback or terrain-routed). Rungs are placed
+ * by arc length every TICK_SPACING px, perpendicular to the local segment.
+ * @param {{ x: number, y: number }[]} pts
+ * @returns {string} SVG path elements (rail + rungs)
+ */
+function railAndRungsSvg(pts) {
+  const d = pointsToPath(pts);
+  let rungs = '';
+  let carry = TICK_SPACING; // no rung at the very start point
+  for (let i = 1; i < pts.length; i++) {
+    const ax = pts[i - 1].x;
+    const ay = pts[i - 1].y;
+    const dx = pts[i].x - ax;
+    const dy = pts[i].y - ay;
+    const seg = Math.hypot(dx, dy);
+    if (seg < 1e-6) continue;
+    const ux = dx / seg;
+    const uy = dy / seg;
+    const nx = -uy;
+    const ny = ux;
+    let along = carry;
+    while (along < seg) {
+      const bx = ax + ux * along;
+      const by = ay + uy * along;
+      rungs +=
+        `M${(bx - nx * TICK_HALF).toFixed(1)},${(by - ny * TICK_HALF).toFixed(1)} ` +
+        `L${(bx + nx * TICK_HALF).toFixed(1)},${(by + ny * TICK_HALF).toFixed(1)} `;
+      along += TICK_SPACING;
+    }
+    carry = along - seg;
+  }
   return (
-    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/>` +
     `<path d="${rungs.trim()}" fill="none" stroke="${TRAIL_INK}" stroke-width="${TRAIL_WEIGHT}" opacity="0.8" stroke-linecap="round"/>`
   );
 }
@@ -226,42 +329,56 @@ export function trailTickLadderSvg(x1, y1, x2, y2, sign) {
  */
 
 /**
- * @typedef {{ from: {x:number,y:number}, to: {x:number,y:number}, id: string, footRadius?: number }} TrailEdge
+ * @typedef {{ from: {x:number,y:number}, to: {x:number,y:number}, id: string, footRadius?: number, startRadius?: number }} TrailEdge
  */
 
 /**
  * SVG fragment for all roads (`companion_to` edges, town ↔ town).
- * When `hf` is supplied: bow direction is terrain-aware (curves toward the
- * lower side of the midpoint), and `footRadius` pulls the endpoint back from
- * the destination centre. Falls back to the id-derived sign when no
- * heightfield is provided.
+ * With `hf`, the road routes by least resistance over the terrain
+ * (terrainRoutedPath — swings through valleys, around hills); `opts.follow`
+ * sets how strongly it hunts low ground. Without a heightfield it falls back
+ * to the gentle id-signed bow. `footRadius` pulls the endpoint back from the
+ * destination centre.
  * @param {RoadEdge[]} edges
- * @param {Heightfield} [hf] optional heightfield for terrain-aware routing
+ * @param {Heightfield} [hf] heightfield for least-resistance routing
+ * @param {RouteOpts} [opts]
  * @returns {string}
  */
-export function roadsSvg(edges, hf) {
+export function roadsSvg(edges, hf, opts = {}) {
   if (edges.length === 0) return '';
   return edges
     .map((e) => {
       const foot = e.footRadius
         ? peakFootPoint(e.from.x, e.from.y, e.to.x, e.to.y, e.footRadius)
         : e.to;
-      const sign = hf ? terrainBowSign(hf, e.from.x, e.from.y, foot.x, foot.y) : strHash(e.id);
-      const d = curvedPath(e.from.x, e.from.y, foot.x, foot.y, 0.12, sign);
+      let d;
+      if (hf) {
+        const pts = terrainRoutedPath(hf, e.from.x, e.from.y, foot.x, foot.y, {
+          follow: opts.follow ?? 0.7,
+          maxDrift: opts.maxDrift ?? 70,
+        });
+        d = pointsToPath(pts);
+      } else {
+        d = curvedPath(e.from.x, e.from.y, foot.x, foot.y, 0.12, strHash(e.id));
+      }
       return roadPathSvg(d, e.strength ?? 1);
     })
     .join('');
 }
 
 /**
- * SVG fragment for all trails (town → peak via `documents` edges).
- * Deduplicates by id. Applies footRadius to pull the endpoint back from the
- * peak centre. Trails climb direct — bow sign is id-derived, not
- * terrain-aware, to prevent coiling around radially-symmetric peak cones.
+ * SVG fragment for all trails: `documents` town → peak climbs, plus
+ * peak-to-peak hiking trails (`validates`, carrying both foot radii).
+ * Deduplicates by id. With `hf`, the rail routes by least resistance at a
+ * weaker follow than roads — a trail tolerates grade a road avoids; without
+ * one, the gentle id-signed bow. `footRadius` pulls the destination back to
+ * its foot; `startRadius` pulls the origin forward off its summit.
  * @param {TrailEdge[]} edges
+ * @param {Heightfield} [hf] heightfield for least-resistance routing
+ * @param {RouteOpts} [opts]
  * @returns {string}
  */
-export function trailsSvg(edges) {
+export function trailsSvg(edges, hf, opts = {}) {
   if (edges.length === 0) return '';
   /** @type {Map<string, TrailEdge>} */
   const seen = new Map();
@@ -273,8 +390,19 @@ export function trailsSvg(edges) {
     const foot = e.footRadius
       ? peakFootPoint(e.from.x, e.from.y, e.to.x, e.to.y, e.footRadius)
       : e.to;
-    const sign = strHash(e.id);
-    out += trailTickLadderSvg(e.from.x, e.from.y, foot.x, foot.y, sign);
+    const start = e.startRadius
+      ? peakFootPoint(foot.x, foot.y, e.from.x, e.from.y, e.startRadius)
+      : e.from;
+    if (Math.hypot(foot.x - start.x, foot.y - start.y) < 20) continue;
+    if (hf) {
+      const pts = terrainRoutedPath(hf, start.x, start.y, foot.x, foot.y, {
+        follow: opts.follow ?? 0.35,
+        maxDrift: opts.maxDrift ?? 45,
+      });
+      out += railAndRungsSvg(pts);
+    } else {
+      out += trailTickLadderSvg(start.x, start.y, foot.x, foot.y, strHash(e.id));
+    }
   }
   return out;
 }

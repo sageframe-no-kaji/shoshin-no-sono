@@ -337,6 +337,67 @@ describe('edge assembly — computeRoadEdges / computeTrailEdges (ho-08)', () =>
   it('returns no trails for no towns', () => {
     expect(computeTrailEdges(idx, [], field.peaks)).toEqual([]);
   });
+
+  describe('hiking trails — validates edges between peaks', () => {
+    /** Two peaks validating each other (declared both ways), one town bystander. @type {any} */
+    const hikeData = {
+      work_groups: [{ id: 'methodology', number: 1, name: 'Methodology', intro: '' }],
+      theme_vocabulary: {},
+      works: [
+        {
+          id: 'kanyo',
+          group: 'methodology',
+          importance: 8,
+          themes: [],
+          media: ['software'],
+          status: 'shipped',
+          sort_order_within_group: 10,
+          relationships: [{ target: 'ho-system', type: 'validates' }],
+        },
+        {
+          id: 'ho-system',
+          group: 'methodology',
+          importance: 9,
+          themes: [],
+          media: ['methodology'],
+          status: 'shipped',
+          sort_order_within_group: 20,
+          relationships: [{ target: 'kanyo', type: 'validates' }],
+        },
+      ],
+    };
+    const hikeIdx = createIndexer(hikeData);
+    const hikeField = computeField(hikeIdx, empty, 42);
+
+    it('builds one hiking trail per validated peak pair, deduplicated by sorted id pair', () => {
+      const trails = computeTrailEdges(hikeIdx, [], hikeField.peaks);
+      expect(trails).toHaveLength(1); // declared both ways → one trail
+      expect(trails[0].id).toBe('ho-system|kanyo');
+    });
+
+    it('carries both foot radii, scaled from each peak’s importance', () => {
+      const [trail] = computeTrailEdges(hikeIdx, [], hikeField.peaks);
+      // footFrac 0.75 × (radiusBase 12 + importance × radiusScale 8)
+      const kanyoFoot = (12 + 8 * 8) * 0.75;
+      const hoFoot = (12 + 9 * 8) * 0.75;
+      // Edge is declared kanyo → ho-system first: start at kanyo, foot at ho-system.
+      expect(trail.startRadius).toBeCloseTo(kanyoFoot, 6);
+      expect(trail.footRadius).toBeCloseTo(hoFoot, 6);
+    });
+
+    it('endpoints are the two peak positions', () => {
+      const [trail] = computeTrailEdges(hikeIdx, [], hikeField.peaks);
+      const kanyo = hikeField.peaks.find((p) => p.id === 'kanyo');
+      const ho = hikeField.peaks.find((p) => p.id === 'ho-system');
+      expect(trail.from).toEqual({ x: kanyo?.x, y: kanyo?.y });
+      expect(trail.to).toEqual({ x: ho?.x, y: ho?.y });
+    });
+
+    it('skips a hiking trail whose far peak has not risen (mid-emergence)', () => {
+      const risen = hikeField.peaks.filter((p) => p.id === 'kanyo');
+      expect(computeTrailEdges(hikeIdx, [], risen)).toEqual([]);
+    });
+  });
 });
 
 describe('createCartographer', () => {

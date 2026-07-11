@@ -260,18 +260,25 @@ export function computeRoadEdges(indexer, towns) {
 }
 
 /**
- * Trail edges for a set of placed towns (ho-08): `documents` edges from
- * settlements to their documented peaks. Each trail climbs from the town up to
- * the peak. No footRadius — the town seat is already placed at the peak foot by
- * the seating algorithm; pulling it back further collapses the path.
+ * Trail edges (ho-08), two kinds. Climbs: `documents` edges from settlements
+ * to their documented peaks — no footRadius, the town seat is already placed
+ * at the peak foot by the seating algorithm. Hiking trails: `validates` edges
+ * where BOTH endpoints are peaks — a path walked between summits; both
+ * endpoints pull back to their peak's foot (radius from importance, the
+ * field's radius convention) so the trail doesn't cut into summit marks.
+ * Deduplicated by sorted id pair.
  * @param {Indexer} indexer
  * @param {CartographyTown[]} towns
  * @param {import('./field.js').PositionedPeak[]} peaks
+ * @param {{ radiusBase?: number, radiusScale?: number, footFrac?: number }} [opts]
  * @returns {import('./feature-map.js').TrailEdge[]}
  */
-export function computeTrailEdges(indexer, towns, peaks) {
-  /** @type {Map<string, { x: number, y: number }>} */
-  const peakMap = new Map(peaks.map((p) => [p.id, { x: p.x, y: p.y }]));
+export function computeTrailEdges(indexer, towns, peaks, opts = {}) {
+  const radiusBase = opts.radiusBase ?? 12;
+  const radiusScale = opts.radiusScale ?? 8;
+  const footFrac = opts.footFrac ?? 0.75;
+  /** @type {Map<string, import('./field.js').PositionedPeak>} */
+  const peakMap = new Map(peaks.map((p) => [p.id, p]));
   /** @type {import('./feature-map.js').TrailEdge[]} */
   const trailEdges = [];
   for (const t of towns) {
@@ -280,8 +287,27 @@ export function computeTrailEdges(indexer, towns, peaks) {
       if (!peak) continue;
       trailEdges.push({
         from: t.seat,
-        to: peak,
+        to: { x: peak.x, y: peak.y },
         id: `${t.id}→${e.target}`,
+      });
+    }
+  }
+  const footR = (/** @type {import('./field.js').PositionedPeak} */ p) =>
+    (radiusBase + p.importance * radiusScale) * footFrac;
+  const seenHikes = new Set();
+  for (const p of peaks) {
+    for (const e of indexer.getOutgoing(p.id, 'validates')) {
+      const target = peakMap.get(e.target);
+      if (!target) continue;
+      const key = [p.id, e.target].sort().join('|');
+      if (seenHikes.has(key)) continue;
+      seenHikes.add(key);
+      trailEdges.push({
+        from: { x: p.x, y: p.y },
+        to: { x: target.x, y: target.y },
+        id: key,
+        footRadius: footR(target),
+        startRadius: footR(p),
       });
     }
   }

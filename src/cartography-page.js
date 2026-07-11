@@ -132,6 +132,8 @@ const tuners = {
   // ho-08 features (session-5 register)
   waveThreshold: 0.18,
   waveOpacity: 0.18,
+  roadFollow: 0.7, // road terrain-following strength — least-resistance routing
+  trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -414,8 +416,10 @@ const nameEl = (p) => {
  * @returns {string}
  */
 const featuresSvg = (field, towns) =>
-  roadsSvg(computeRoadEdges(indexer, towns), field.heightfield) +
-  trailsSvg(computeTrailEdges(indexer, towns, field.peaks));
+  roadsSvg(computeRoadEdges(indexer, towns), field.heightfield, { follow: tuners.roadFollow }) +
+  trailsSvg(computeTrailEdges(indexer, towns, field.peaks), field.heightfield, {
+    follow: tuners.trailFollow,
+  });
 
 const render = () => {
   // The resting / static path (filter toggles, reseed-less re-render). A fully
@@ -686,6 +690,8 @@ const TUNER_SECTIONS = [
   { title: 'features', specs: [
     { key: 'waveThreshold', label: 'water threshold', min: 0, max: 0.5, step: 0.01 },
     { key: 'waveOpacity', label: 'wave opacity', min: 0, max: 0.5, step: 0.01 },
+    { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },
+    { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05 },
   ]},
 ];
 
