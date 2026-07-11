@@ -781,7 +781,7 @@ const TUNER_SECTIONS = [
     { key: 'waveBand', label: 'wave: band gap', min: 10, max: 40, step: 1 },
     { key: 'waveComb', label: 'wave: comb spacing', min: 1.4, max: 4, step: 0.1 },
     { key: 'waveCombLen', label: 'wave: comb length', min: 5, max: 40, step: 1 },
-    { key: 'waveWeight', label: 'wave: line weight', min: 0.6, max: 1.6, step: 0.05 },
+    { key: 'waveWeight', label: 'wave: line weight', min: 0, max: 1, step: 0.02 },
     { key: 'waveInk', label: 'wave: ink depth', min: 0, max: 1, step: 0.02 },
     { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05 },
   ]},
