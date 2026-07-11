@@ -119,7 +119,7 @@ const tuners = {
   hachureWScale: 0.4,
   hachurePosJitter: 1.05,
   hachureAngleJitter: 0.15,
-  hachureShoreFade: 0.06, // hachures leave the gentle shore blank; cliffs keep theirs (ho-08)
+  hachureShoreFade: 0.08, // hachure density fades to zero at the shore; cliffs keep theirs (ho-08)
 
   // Label + beacon + overlay dials (ho-A-6.0) — landed values from the
   // by-feel pass and locked as the sidequest baseline.
@@ -134,6 +134,7 @@ const tuners = {
   margin: 110, // field keep-out border — padded up from ho-05's 70 so a sea exists (ho-08 datum)
   waveThreshold: 0.18,
   coastRuggedness: 0.3, // coast-band noise: islets and inlets; 0 = the smooth Gaussian shore
+  isoShoreGap: 0.05, // coastal plain: first iso ring starts this fraction of max above the datum
   coastWeight: 0.7, // coastline stroke weight
   waterlineCount: 0, // survey-register waterlines — 0 = engraved default (waves carry the sea)
   waveOpacity: 0.5, // waterline ink strength
@@ -379,6 +380,9 @@ const terrainSvg = (heightfield) => {
       interval: tuners.interval,
       weightRegular: tuners.weightRegular,
       weightIndex: tuners.weightIndex,
+      // Coastal plain (ho-08): the first land contour starts a clearance above
+      // the datum so the lowest ring doesn't double the coastline.
+      base: tuners.isoShoreGap * heightfield.max,
       // When hachures are also on, suppress the iso paper rect so the hachure
       // ground shows through.
       paper: layers.hachure ? 'transparent' : undefined,
@@ -737,6 +741,7 @@ const TUNER_SECTIONS = [
     { key: 'margin', label: 'coast padding', min: 70, max: 220, step: 5 },
     { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
     { key: 'coastRuggedness', label: 'coast ruggedness (islands, inlets)', min: 0, max: 1, step: 0.02 },
+    { key: 'isoShoreGap', label: 'iso shore gap (coastal plain)', min: 0, max: 0.15, step: 0.005 },
     { key: 'coastWeight', label: 'coastline weight', min: 0.2, max: 2.5, step: 0.05 },
     { key: 'waterlineCount', label: 'waterlines (count)', min: 0, max: 10, step: 1 },
     { key: 'waveOpacity', label: 'waterline ink', min: 0, max: 1, step: 0.02 },

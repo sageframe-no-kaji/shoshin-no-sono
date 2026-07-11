@@ -162,12 +162,15 @@ describe('waterSvg', () => {
     expect(xs.length).toBeGreaterThan(30); // a ring, not a handful of dots
   });
 
-  it('wave texture fills the open sea and follows the intensity dial', () => {
+  it('wave trains fill the open sea and follow the intensity dial', () => {
     const on = waterSvg(island(), { waves: 0.8 });
     const off = waterSvg(island(), { waves: 0 });
-    expect(on).toContain('opacity="0.52"'); // 0.65 × 0.8
+    expect(on).toContain('opacity="0.64"'); // 0.8 × 0.8
     expect(on.length).toBeGreaterThan(off.length);
-    expect(off).not.toContain('opacity="0.52"');
+    expect(off).not.toContain('opacity="0.64"');
+    // Trains are bundles of fine hairlines — density, not stroke weight.
+    const hairlines = (on.match(/stroke-width="0.22"/g) ?? []).length;
+    expect(hairlines).toBeGreaterThan(8);
   });
 
   it('waterlines march seaward in water ink, thinning and fading', () => {

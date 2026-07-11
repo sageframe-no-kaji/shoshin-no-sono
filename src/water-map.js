@@ -21,6 +21,7 @@
 
 import { REGISTER } from './register.js';
 import { extractContour, segsToPath } from './contours.js';
+import { mulberry32 } from './field.js';
 
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 
@@ -232,49 +233,65 @@ export function waterSvg(hf, opts = {}) {
     }
   }
 
-  // Wave texture: the engraved rolling bands of the 16th-century charts the
-  // practitioner pointed at — fewer, bolder wavy lines with a layered wobble
-  // and per-band weight variation, flowing across the open sea. Bands exist
-  // only in the water, standing off the waterlined shore; the wobble and the
-  // weights derive from the row index, so the sea reproduces exactly.
+  // Wave texture — the engraved sea of the practitioner's reference, built
+  // the way the engraver built it: each "wave" is a TRAIN of fine parallel
+  // hairlines riding a long slow swell, feathered at the train's edges, with
+  // blank paper between trains. Darkness comes from line density, never
+  // stroke weight. Everything derives from the band index through a seeded
+  // stream, so the sea reproduces exactly.
   if (waveIntensity > 0) {
-    const rowStep = Math.max(1, Math.round(13 / cell));
-    const standoff = 5 + 5.5 * Math.min(lineCount, 2); // clear the tightest waterlines
+    const standoff = 4 + 5.5 * Math.min(lineCount, 2); // clear any waterlines
     const GOLD = 2.399963;
+    const TRAIN_GAP = 34; // vertical rhythm of the swell trains
+    const SUB = 7; // hairlines per train
+    const SUB_SPREAD = 1.7; // px between hairlines
     let band = 0;
-    for (let j = rowStep; j < rows - 1; j += rowStep, band++) {
-      // Per-band character — the engraving's hand: each band rolls at its own
-      // amplitude, wavelength, weight, and vertical drift, all derived from
-      // the band index so the sea reproduces exactly.
-      const phase = band * GOLD;
-      const amp = 2.2 + 1.8 * (0.5 + 0.5 * Math.sin(band * 1.3 + 0.5));
-      const k1 = 0.017 + 0.006 * Math.sin(band * 0.9);
-      const y = j * cell + Math.sin(band * 2.7) * 3;
-      const bandW = (0.22 + 0.16 * (0.5 + 0.5 * Math.sin(band * 1.7 + 1))).toFixed(2);
-      let d = '';
-      /** @type {number} */
-      let runStart = -1;
-      for (let i = 0; i <= cols; i++) {
-        const inWater = i < cols && mask[j * cols + i] === 1 && dist[j * cols + i] > standoff;
-        if (inWater && runStart < 0) runStart = i;
-        if (!inWater && runStart >= 0) {
-          if (i - runStart >= 4) {
-            const pts = [];
-            for (let s = runStart; s <= i - 1; s++) {
-              const x = s * cell;
-              const yy =
-                y + Math.sin(x * k1 + phase) * amp + Math.sin(x * 0.052 + phase * 1.7) * 1.2;
-              pts.push(`${x.toFixed(1)},${yy.toFixed(1)}`);
-            }
-            d += `M${pts[0]} L${pts.slice(1).join(' L')} `;
+    for (let yc = TRAIN_GAP * 0.6; yc < height; yc += TRAIN_GAP, band++) {
+      const rnd = mulberry32((band + 1) * 0x9e37);
+      const phase = band * GOLD + rnd() * 1.5;
+      const amp = 8 + rnd() * 6; // the swell's real roll
+      const k1 = (Math.PI * 2) / (230 + rnd() * 90); // long wavelength
+      const k2 = k1 * (2.3 + rnd());
+      const y0 = yc + (rnd() - 0.5) * 8;
+      for (let s = 0; s < SUB; s++) {
+        const off = (s - (SUB - 1) / 2) * SUB_SPREAD;
+        const edge = Math.abs(off) / (((SUB - 1) / 2) * SUB_SPREAD + 0.01); // 0 centre → 1 edge
+        // Feather: edge hairlines cover less of each run, asymmetrically.
+        const skipHead = rnd() * 0.3 * edge;
+        const skipTail = rnd() * 0.3 * edge;
+        let d = '';
+        /** @type {string[]} */
+        let run = [];
+        const flush = () => {
+          if (run.length >= 4) {
+            const a = Math.floor(run.length * skipHead);
+            const b = run.length - Math.floor(run.length * skipTail);
+            const seg = run.slice(a, b);
+            if (seg.length >= 4) d += `M${seg[0]} L${seg.slice(1).join(' L')} `;
           }
-          runStart = -1;
+          run = [];
+        };
+        for (let x = 0; x <= width; x += cell) {
+          const yy =
+            y0 + off + Math.sin(x * k1 + phase) * amp + Math.sin(x * k2 + phase * 1.7) * (amp * 0.18);
+          const i = Math.round(x / cell);
+          const j = Math.round(yy / cell);
+          const inWater =
+            i >= 0 &&
+            i < cols &&
+            j >= 0 &&
+            j < rows &&
+            mask[j * cols + i] === 1 &&
+            dist[j * cols + i] > standoff;
+          if (inWater) run.push(`${x.toFixed(1)},${yy.toFixed(1)}`);
+          else flush();
         }
-      }
-      if (d) {
-        svg +=
-          `<path d="${d.trim()}" fill="none" stroke="${REGISTER.waterInk}" ` +
-          `stroke-width="${bandW}" opacity="${(0.65 * waveIntensity).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        flush();
+        if (d) {
+          svg +=
+            `<path d="${d.trim()}" fill="none" stroke="${REGISTER.waterInk}" ` +
+            `stroke-width="0.22" opacity="${(0.8 * waveIntensity).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        }
       }
     }
   }

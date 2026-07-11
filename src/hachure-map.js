@@ -33,9 +33,10 @@ import { REGISTER } from './register.js';
  * @property {number} [importance] 0..1 — log-scaled density gate. 0 = every
  *   qualifying sample emits a stroke (uniform density); 1 = emission gated by
  *   `log(1+elev)/log(1+max)` so high peaks stay dense and low skirts thin out.
- * @property {number} [shoreFade] Elevation fraction of max below which strokes are
- *   suppressed unless the slope is cliff-steep (≥ slopeRef) — hachures leave a
- *   gentle shore blank and run to the water only at cliffs (ho-08).
+ * @property {number} [shoreFade] Elevation fraction of max below which stroke
+ *   density fades toward zero at the waterline, unless the slope is cliff-steep
+ *   (≥ CLIFF_SLOPE) — hachures leave a gentle shore blank and run to the water
+ *   only at cliffs (ho-08).
  * @property {string} [ink]        Stroke color.
  * @property {string} [paper]      Background fill.
  */
@@ -53,8 +54,13 @@ const DEFAULTS = {
   angleJitter: 0.18,
   seed: 1,
   importance: 0,
-  shoreFade: 0.06,
+  shoreFade: 0.08,
 };
+
+/** Slope at which low ground keeps its hachures despite the shore fade — a
+ * sea-cliff. Deliberately NOT slopeRef (a stroke-scaling ceiling, landed near
+ * 0.05); a cliff is several times steeper than saturation. */
+const CLIFF_SLOPE = 0.22;
 
 /**
  * Mulberry32 — the same generator field.js uses, inlined so this module has no
@@ -118,17 +124,23 @@ export function hachureMapSvg(hf, opts = {}) {
       const mag = Math.hypot(dx, dy);
       if (mag < o.slopeFloor) continue;
 
-      // Shore fade (ho-08): hachures leave a gentle coast blank — the marks
-      // run down to the water only where the slope is cliff-steep. Suppress
-      // strokes in the low band above the datum unless mag clears slopeRef.
-      if (o.shoreFade > 0 && field[j * cols + i] < o.shoreFade * hf.max && mag < o.slopeRef) {
-        continue;
-      }
-
       // Seeded jitter, deterministic per (seed, i, j). One stream for the
       // importance-gated skip + jitter draws, so byte-identical reproduction
       // survives importance flips at the same seed.
       const rng = mulberry32(hashIJ(o.seed, i, j));
+
+      // Shore fade (ho-08): hachures leave a gentle coast blank, thinning
+      // GRADUALLY as the ground approaches the waterline — density ramps to
+      // zero at the shore rather than cutting at a line. Cliffs are exempt:
+      // where the slope clears CLIFF_SLOPE the marks run to the water, the
+      // way a hachured sea-cliff should. (An earlier version keyed the cliff
+      // test to slopeRef — a stroke-scaling ceiling the practitioner landed
+      // at 0.05, which made every coastal flank a "cliff" and the fade a
+      // no-op. The cliff threshold is its own steep constant.)
+      if (o.shoreFade > 0 && mag < CLIFF_SLOPE) {
+        const t = field[j * cols + i] / (o.shoreFade * hf.max); // 0 shore → 1 band top
+        if (t < 1 && rng() > t * t) continue;
+      }
 
       // Importance gate (log-scaled): high-elevation samples almost always
       // pass; low skirts thin out. importance=0 is the uniform baseline.
