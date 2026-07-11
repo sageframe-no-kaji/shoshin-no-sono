@@ -1,0 +1,50 @@
+{
+  "keisaku": 1,
+  "works": [
+    {
+      "id": "shoshin-no-sono",
+      "name": "初心の園",
+      "tags": [
+        "javascript"
+      ],
+      "media": [
+        "software"
+      ],
+      "status": "in-development",
+      "repo": "https://github.com/sageframe-no-kaji/shoshin-no-sono.git",
+      "license": "MIT",
+      "tech_stack": "JavaScript",
+      "created": "2026-05-18",
+      "last_updated": "2026-07-10",
+      "state": {
+        "stage": "dev",
+        "last": "The hachure arc (ho-A) closed. ho-A-6.0 built `src/hachure-map.js` as a parallel renderer; ho-A-6.1 replaced the XOR `?render=` key with two independent layer flags (`?iso=1&hachure=1`), composed the renderer chain, and landed a comprehensive three-section tuner panel. The arc merged into `labs` at `c5a1e44`. Post-closure surfacings logged to `ho-process/hos/ho-A-surfacings.md` (Churchill hachure survey, colonial-aesthetics caution, caterpillar lineage). A design reference plate (Upolu, US Exploring Expedition, 1839) committed at `400f672`.",
+        "next": "unset — practitioner to point (K6 seeded retroactively). The ho-A merge closeout (`ho-process/hos/ho-A-merge-closeout.md`) names three outstanding items: (1) the `package-lock.json` drift on the `huaraches` worktree, (2) deleting the stale `huaraches` branch and worktree, (3) the Phase 3 Reflect on ho-A-6.1 which was deferred at closeout. After those, the Phase 2 plan continues with ho-07.1 onwards (emergence data, animation, town tuner landing — see K4 overview). The `labs` branch is the active work branch; `main` is the ho-00 baseline.",
+        "holdup": "Three items from ho-A closeout remain open: (a) resolve `package-lock.json` drift on `huaraches` worktree (commit or discard); (b) delete `huaraches` branch and worktree once lockfile resolved; (c) write Phase 3 Reflect for ho-A-6.1 (deferred decisions: iso layer thinning multiplier when both layers active; slider density and section ordering findings). Also open: ho-A-6.1 status was `open` (closed-pending-Reflect) at the time of the merge closeout — should be flipped to `complete` once the Reflect is written.",
+        "as_of": "2026-07-09"
+      },
+      "_keisaku": {
+        "generated_at": "2026-07-10T23:58:14",
+        "generator_version": "1",
+        "sources": {
+          "readme": "README.md",
+          "contract": "ho-process/kamae-6-shoshin-no-sono-state-memory.md",
+          "manifest": "package.json"
+        },
+        "derived_defaults": {
+          "id": "shoshin-no-sono",
+          "name": "初心の園",
+          "media": [
+            "software"
+          ],
+          "status": "in-development",
+          "created": "2026-05-18",
+          "tags": [
+            "javascript"
+          ]
+        },
+        "contract_issues": []
+      }
+    }
+  ]
+}
