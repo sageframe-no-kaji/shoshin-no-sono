@@ -119,6 +119,7 @@ const tuners = {
   hachureWScale: 0.4,
   hachurePosJitter: 1.05,
   hachureAngleJitter: 0.15,
+  hachureShoreFade: 0.06, // hachures leave the gentle shore blank; cliffs keep theirs (ho-08)
 
   // Label + beacon + overlay dials (ho-A-6.0) — landed values from the
   // by-feel pass and locked as the sidequest baseline.
@@ -209,6 +210,7 @@ const HACHURE_TUNER_SPECS = [
   { key: 'hachurePosJitter', label: 'position jitter (px)', min: 0, max: 2, step: 0.05, locked: true },
   { key: 'hachureAngleJitter', label: 'angle jitter (rad)', min: 0, max: 0.6, step: 0.01, locked: true },
   { key: 'hachureImportance', label: 'density by importance', min: 0, max: 1, step: 0.05, locked: true },
+  { key: 'hachureShoreFade', label: 'shore fade (cliffs keep)', min: 0, max: 0.2, step: 0.005 },
 ];
 
 /** Town placement and building rendering. @type {TunerSpec[]} */
@@ -367,6 +369,7 @@ const terrainSvg = (heightfield) => {
       posJitter: tuners.hachurePosJitter,
       angleJitter: tuners.hachureAngleJitter,
       importance: tuners.hachureImportance,
+      shoreFade: tuners.hachureShoreFade,
       seed: carto.activeSeed(),
     });
   }

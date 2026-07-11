@@ -125,6 +125,18 @@ describe('waterSvg', () => {
     expect(heavy).toContain(`stroke="#FDFCF9" stroke-width="3.60"`); // casing = weight + 2
   });
 
+  it('the coastline rings the WHOLE island, not fragments on one side', () => {
+    // Regression: a one-sided sea-adjacency window shredded the coast into
+    // dots wherever the sea lay left/above. The island shore radius ≈ 57 px
+    // around (80, 80) — the ink ring must carry points on all four sides.
+    const svg = waterSvg(island(), { waves: 0, waterlines: 0 });
+    const coast = svg.split('stroke="#2B2B2B"')[0].split('<path d="').pop() ?? '';
+    const xs = Array.from(coast.matchAll(/M([\d.]+) /g), (m) => parseFloat(m[1]));
+    expect(Math.min(...xs)).toBeLessThan(40); // west shore present
+    expect(Math.max(...xs)).toBeGreaterThan(120); // east shore present
+    expect(xs.length).toBeGreaterThan(30); // a ring, not a handful of dots
+  });
+
   it('wave texture fills the open sea and follows the intensity dial', () => {
     const on = waterSvg(island(), { waves: 0.8 });
     const off = waterSvg(island(), { waves: 0 });

@@ -176,13 +176,14 @@ export function waterSvg(hf, opts = {}) {
   const nearSea = (/** @type {import('./contours.js').Segment} */ s) => {
     const i0 = Math.max(0, Math.min(cols - 1, Math.floor((s[0].x + s[1].x) / 2 / cell)));
     const j0 = Math.max(0, Math.min(rows - 1, Math.floor((s[0].y + s[1].y) / 2 / cell)));
-    for (const [di, dj] of [
-      [0, 0],
-      [1, 0],
-      [0, 1],
-      [1, 1],
-    ]) {
-      if (mask[Math.min(rows - 1, j0 + dj) * cols + Math.min(cols - 1, i0 + di)]) return true;
+    // Full 3×3 neighborhood — a one-sided window drops every segment whose sea
+    // lies left or above, shredding the coastline into dots.
+    for (let dj = -1; dj <= 1; dj++) {
+      for (let di = -1; di <= 1; di++) {
+        const i = Math.max(0, Math.min(cols - 1, i0 + di));
+        const j = Math.max(0, Math.min(rows - 1, j0 + dj));
+        if (mask[j * cols + i]) return true;
+      }
     }
     return false;
   };

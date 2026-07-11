@@ -33,6 +33,9 @@ import { REGISTER } from './register.js';
  * @property {number} [importance] 0..1 — log-scaled density gate. 0 = every
  *   qualifying sample emits a stroke (uniform density); 1 = emission gated by
  *   `log(1+elev)/log(1+max)` so high peaks stay dense and low skirts thin out.
+ * @property {number} [shoreFade] Elevation fraction of max below which strokes are
+ *   suppressed unless the slope is cliff-steep (≥ slopeRef) — hachures leave a
+ *   gentle shore blank and run to the water only at cliffs (ho-08).
  * @property {string} [ink]        Stroke color.
  * @property {string} [paper]      Background fill.
  */
@@ -50,6 +53,7 @@ const DEFAULTS = {
   angleJitter: 0.18,
   seed: 1,
   importance: 0,
+  shoreFade: 0.06,
 };
 
 /**
@@ -113,6 +117,13 @@ export function hachureMapSvg(hf, opts = {}) {
       const dy = (field[(j + stride) * cols + i] - field[(j - stride) * cols + i]) / step2;
       const mag = Math.hypot(dx, dy);
       if (mag < o.slopeFloor) continue;
+
+      // Shore fade (ho-08): hachures leave a gentle coast blank — the marks
+      // run down to the water only where the slope is cliff-steep. Suppress
+      // strokes in the low band above the datum unless mag clears slopeRef.
+      if (o.shoreFade > 0 && field[j * cols + i] < o.shoreFade * hf.max && mag < o.slopeRef) {
+        continue;
+      }
 
       // Seeded jitter, deterministic per (seed, i, j). One stream for the
       // importance-gated skip + jitter draws, so byte-identical reproduction
