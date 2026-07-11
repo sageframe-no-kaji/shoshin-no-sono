@@ -5,7 +5,6 @@
     "last_updated": "2026-06-11",
     "purpose": "Public-facing catalog of the Sageframe body of work. Routes visitors to canonical homes; demonstrates coherence through typed relationships rendered as interference cartography."
   },
-
   "web_properties": [
     {
       "property": "sageframe.net",
@@ -24,7 +23,6 @@
       "job": "The Pink Teaming manifesto, the cooperative-counterpart-to-red-teaming argument."
     }
   ],
-
   "additional_outlets": [
     {
       "name": "GitHub",
@@ -42,7 +40,6 @@
       "role": "Secondary outlet for some essays."
     }
   ],
-
   "theme_vocabulary": {
     "craft": "Practice, discipline, how-to-make. Ho System, Dandori, m4Bookmaker, methodology work.",
     "relationship": "How humans encounter AI, each other, or systems. Pink Teaming, Voice DNA, Constructive Interference essays.",
@@ -53,7 +50,6 @@
     "sovereignty": "Self-determination in tools, data, and infrastructure. m4Bookmaker, Hōzō, the homelab work.",
     "infrastructure": "Systems beneath the visible work — what makes the rest possible. SSH Actually, Hōzō, adobe-peace, pptx-builder."
   },
-
   "work_groups": [
     {
       "id": "methodology",
@@ -116,7 +112,6 @@
       "intro": "Timeline markers. Work that preceded the current practice or has been superseded."
     }
   ],
-
   "works": [
     {
       "id": "ho-system",
@@ -127,11 +122,22 @@
       "importance": 9,
       "color": null,
       "featured": true,
-      "media": ["methodology"],
+      "media": [
+        "methodology"
+      ],
       "group": "methodology",
-      "themes": ["craft", "agency"],
+      "themes": [
+        "craft",
+        "agency"
+      ],
       "status": "shipped",
-      "tags": ["methodology", "published", "human-ai-collaboration", "shu-ha-ri", "open-source"],
+      "tags": [
+        "methodology",
+        "published",
+        "human-ai-collaboration",
+        "shu-ha-ri",
+        "open-source"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/ho-system",
       "license": "CC BY-NC-ND 4.0",
       "deployment": [
@@ -175,11 +181,22 @@
       "importance": 7,
       "color": null,
       "featured": true,
-      "media": ["methodology"],
+      "media": [
+        "methodology"
+      ],
       "group": "methodology",
-      "themes": ["craft", "agency"],
+      "themes": [
+        "craft",
+        "agency"
+      ],
       "status": "shipped",
-      "tags": ["methodology", "agent-infrastructure", "published", "claude-skill", "human-ai-collaboration"],
+      "tags": [
+        "methodology",
+        "agent-infrastructure",
+        "published",
+        "claude-skill",
+        "human-ai-collaboration"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -226,11 +243,23 @@
       "importance": 8,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "production-systems",
-      "themes": ["craft", "attention"],
+      "themes": [
+        "craft",
+        "attention"
+      ],
       "status": "shipped",
-      "tags": ["software", "production-system", "computer-vision", "yolov8", "wildlife-monitoring", "harvard"],
+      "tags": [
+        "software",
+        "production-system",
+        "computer-vision",
+        "yolov8",
+        "wildlife-monitoring",
+        "harvard"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/kanyo",
       "license": null,
       "deployment": [
@@ -281,17 +310,34 @@
       "importance": 7,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "production-systems",
-      "themes": ["sovereignty", "continuity", "infrastructure"],
+      "themes": [
+        "sovereignty",
+        "continuity",
+        "infrastructure"
+      ],
       "status": "shipped",
-      "tags": ["software", "production-system", "zfs", "backup-orchestration", "infrastructure", "ho-system-validation"],
+      "tags": [
+        "software",
+        "production-system",
+        "zfs",
+        "backup-orchestration",
+        "infrastructure",
+        "ho-system-validation"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/hozo",
       "license": null,
       "deployment": [
         {
           "label": "GitHub repo",
           "url": "https://github.com/sageframe-no-kaji/hozo"
+        },
+        {
+          "label": "Live site + interactive demo",
+          "url": "https://hozo.sageframe.net"
         }
       ],
       "tech_stack": "Python, syncoid, Wake-on-LAN, WebAuthn, bootstrap web UI",
@@ -302,7 +348,7 @@
       "personal_stake": null,
       "created": "2026-02-25",
       "conceived": "2025-12-13",
-      "last_updated": "2026-05-17",
+      "last_updated": "2026-06-24",
       "short_description": "Wake-on-demand ZFS backup orchestrator. Pushes ZFS snapshots to a low-power remote backup node using syncoid over SSH, waking the node only when a backup run is scheduled or triggered. Runs entirely on the source machine — no agent needed on the remote. Bootstrap web UI with WebAuthn passkey auth provides job dashboard, run history, log viewer, break-glass DR restore. 278 tests, 99% coverage, zero lint or type errors. Built in approximately three hours using the Ho System.",
       "substantive_description": [
         "Hōzō is the second proof, and the more interesting one. Kanyō took six weeks; Hōzō took three hours. The delta is not about the projects' relative complexity — it's about the practitioner's progression through Shu, Ha, and Ri. The same person who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime, with higher test coverage and lower error rate.",
@@ -339,11 +385,21 @@
       "importance": 6,
       "color": null,
       "featured": false,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "methodology",
-      "themes": ["craft", "continuity"],
+      "themes": [
+        "craft",
+        "continuity"
+      ],
       "status": "in-development",
-      "tags": ["software", "instrument", "methodology-pilot", "practitioner-workbench"],
+      "tags": [
+        "software",
+        "instrument",
+        "methodology-pilot",
+        "practitioner-workbench"
+      ],
       "repo": null,
       "license": null,
       "deployment": [],
@@ -392,11 +448,22 @@
       "importance": 7,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "production-systems",
-      "themes": ["knowledge", "agency"],
+      "themes": [
+        "knowledge",
+        "agency"
+      ],
       "status": "in-development",
-      "tags": ["software", "demonstration", "ai-governance", "medical-simulation", "deterministic-engine"],
+      "tags": [
+        "software",
+        "demonstration",
+        "ai-governance",
+        "medical-simulation",
+        "deterministic-engine"
+      ],
       "repo": null,
       "license": null,
       "deployment": [],
@@ -438,11 +505,22 @@
       "importance": 6,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "production-systems",
-      "themes": ["agency", "knowledge"],
+      "themes": [
+        "agency",
+        "knowledge"
+      ],
       "status": "shipped",
-      "tags": ["software", "production-system", "research-instrument", "educational-accountability", "playwright"],
+      "tags": [
+        "software",
+        "production-system",
+        "research-instrument",
+        "educational-accountability",
+        "playwright"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/glassroom",
       "license": null,
       "deployment": [
@@ -486,11 +564,22 @@
       "importance": 5,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "production-systems",
-      "themes": ["sovereignty", "craft"],
+      "themes": [
+        "sovereignty",
+        "craft"
+      ],
       "status": "shipped",
-      "tags": ["software", "production-system", "digital-sovereignty", "audiobooks", "desktop-app"],
+      "tags": [
+        "software",
+        "production-system",
+        "digital-sovereignty",
+        "audiobooks",
+        "desktop-app"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/m4bookmaker",
       "license": null,
       "deployment": [
@@ -545,11 +634,22 @@
       "importance": 7,
       "color": null,
       "featured": true,
-      "media": ["website", "writing"],
+      "media": [
+        "website",
+        "writing"
+      ],
       "group": "methodology",
-      "themes": ["relationship", "attention"],
+      "themes": [
+        "relationship",
+        "attention"
+      ],
       "status": "live",
-      "tags": ["manifesto", "safety-practice", "research", "hermeneutics"],
+      "tags": [
+        "manifesto",
+        "safety-practice",
+        "research",
+        "hermeneutics"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -600,11 +700,21 @@
       "importance": 7,
       "color": null,
       "featured": true,
-      "media": ["methodology"],
+      "media": [
+        "methodology"
+      ],
       "group": "constructive-interference",
-      "themes": ["craft", "relationship"],
+      "themes": [
+        "craft",
+        "relationship"
+      ],
       "status": "near-publication",
-      "tags": ["research", "taxonomy", "writing-craft", "diagnostics"],
+      "tags": [
+        "research",
+        "taxonomy",
+        "writing-craft",
+        "diagnostics"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/constructive-interference",
       "license": null,
       "deployment": [
@@ -647,11 +757,22 @@
       "importance": 4,
       "color": null,
       "featured": false,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "constructive-interference",
-      "themes": ["relationship", "craft"],
+      "themes": [
+        "relationship",
+        "craft"
+      ],
       "status": "shipped",
-      "tags": ["software", "research-instrument", "diagnostics", "nlp", "claude-api"],
+      "tags": [
+        "software",
+        "research-instrument",
+        "diagnostics",
+        "nlp",
+        "claude-api"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/kiku",
       "license": null,
       "deployment": [
@@ -697,11 +818,21 @@
       "importance": 6,
       "color": null,
       "featured": true,
-      "media": ["methodology"],
+      "media": [
+        "methodology"
+      ],
       "group": "knowledge-architecture",
-      "themes": ["knowledge", "attention"],
+      "themes": [
+        "knowledge",
+        "attention"
+      ],
       "status": "published",
-      "tags": ["methodology", "knowledge-architecture", "progressive-disclosure", "published"],
+      "tags": [
+        "methodology",
+        "knowledge-architecture",
+        "progressive-disclosure",
+        "published"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -740,11 +871,23 @@
       "importance": 4,
       "color": null,
       "featured": false,
-      "media": ["website", "writing"],
+      "media": [
+        "website",
+        "writing"
+      ],
       "group": "knowledge-architecture",
-      "themes": ["knowledge", "infrastructure"],
+      "themes": [
+        "knowledge",
+        "infrastructure"
+      ],
       "status": "live",
-      "tags": ["content", "knowledge-architecture", "ssh", "security", "htmx"],
+      "tags": [
+        "content",
+        "knowledge-architecture",
+        "ssh",
+        "security",
+        "htmx"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/ssh-actually",
       "license": "CC BY-ND 4.0",
       "deployment": [
@@ -791,11 +934,23 @@
       "importance": 6,
       "color": null,
       "featured": true,
-      "media": ["website", "software"],
+      "media": [
+        "website",
+        "software"
+      ],
       "group": "interactive-demonstrations",
-      "themes": ["attention"],
+      "themes": [
+        "attention"
+      ],
       "status": "shipped",
-      "tags": ["software", "interactive", "data-visualization", "pedagogy", "wave-physics", "canonical-identity"],
+      "tags": [
+        "software",
+        "interactive",
+        "data-visualization",
+        "pedagogy",
+        "wave-physics",
+        "canonical-identity"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -846,11 +1001,25 @@
       "importance": 6,
       "color": null,
       "featured": true,
-      "media": ["website", "software"],
+      "media": [
+        "website",
+        "software"
+      ],
       "group": "interactive-demonstrations",
-      "themes": ["attention", "relationship"],
+      "themes": [
+        "attention",
+        "relationship"
+      ],
       "status": "shipped",
-      "tags": ["software", "interactive", "embeddings", "umap", "wave-physics", "pedagogy", "embedded-research"],
+      "tags": [
+        "software",
+        "interactive",
+        "embeddings",
+        "umap",
+        "wave-physics",
+        "pedagogy",
+        "embedded-research"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -908,11 +1077,22 @@
       "importance": 3,
       "color": null,
       "featured": false,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "infrastructure",
-      "themes": ["infrastructure", "sovereignty"],
+      "themes": [
+        "infrastructure",
+        "sovereignty"
+      ],
       "status": "in-development",
-      "tags": ["software", "cli", "infrastructure", "configuration-management", "homelab"],
+      "tags": [
+        "software",
+        "cli",
+        "infrastructure",
+        "configuration-management",
+        "homelab"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/forteller",
       "license": null,
       "deployment": [
@@ -959,11 +1139,22 @@
       "importance": 3,
       "color": null,
       "featured": false,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "infrastructure",
-      "themes": ["infrastructure", "sovereignty"],
+      "themes": [
+        "infrastructure",
+        "sovereignty"
+      ],
       "status": "in-development",
-      "tags": ["software", "desktop-app", "operational-workbench", "zfs", "homelab"],
+      "tags": [
+        "software",
+        "desktop-app",
+        "operational-workbench",
+        "zfs",
+        "homelab"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/palana",
       "license": null,
       "deployment": [
@@ -1002,11 +1193,25 @@
       "importance": 5,
       "color": null,
       "featured": false,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "adaptive-tools",
-      "themes": ["agency", "sovereignty"],
+      "themes": [
+        "agency",
+        "sovereignty"
+      ],
       "status": "shipped",
-      "tags": ["software", "adaptive-tool", "udl", "diary", "voice-transcription", "read-aloud", "homelab", "personal"],
+      "tags": [
+        "software",
+        "adaptive-tool",
+        "udl",
+        "diary",
+        "voice-transcription",
+        "read-aloud",
+        "homelab",
+        "personal"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/edelmore-diary",
       "license": "MIT",
       "deployment": [
@@ -1017,6 +1222,10 @@
         {
           "label": "Container image (GHCR)",
           "url": "https://ghcr.io/sageframe-no-kaji/edelmore-diary"
+        },
+        {
+          "label": "Live demo",
+          "url": "https://edelmore.sageframe.net"
         }
       ],
       "tech_stack": "SvelteKit (TypeScript, Svelte 5 runes), SQLite (better-sqlite3), Tailwind v4, StPageFlip, argon2id; optional WhisperX transcription and Kokoro TTS read-aloud; Docker + Caddy",
@@ -1027,7 +1236,7 @@
       "personal_stake": "Built for Iona, who wanted to keep an Anne Frank–style diary on her own terms — and for her sisters Ada and Isla.",
       "created": "2026-05-14",
       "conceived": "2026-05-14",
-      "last_updated": "2026-06-14",
+      "last_updated": "2026-06-24",
       "short_description": "A private web diary shaped like a book. It opens to today's page. Pages turn. Voice transcription handles the writing for hands that struggle with the keyboard, and it can read entries back aloud with the words highlighted as they're spoken. Runs on a parent's homelab, behind Tailscale and the home LAN, and nobody reads it but the person who wrote it. Built as an adaptive tool — for kids who have trouble writing — on Universal Design for Learning principles.",
       "substantive_description": [
         "Adaptive tools are usually designed apologetically — accommodation as patch, accessibility as afterthought. Edelmore is built from the opposite direction. Universal Design for Learning means the design itself accommodates without naming the accommodation. A diary that opens to today's page and turns its pages and accepts voice as easily as typing isn't a diary for kids with writing difficulties. It's a diary.",
@@ -1049,11 +1258,26 @@
       "importance": 4,
       "color": null,
       "featured": false,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "adaptive-tools",
-      "themes": ["agency", "attention"],
+      "themes": [
+        "agency",
+        "attention"
+      ],
       "status": "scaffolded",
-      "tags": ["software", "adaptive-tool", "udl", "ebook-reader", "epub", "read-along", "tts", "accessibility", "personal"],
+      "tags": [
+        "software",
+        "adaptive-tool",
+        "udl",
+        "ebook-reader",
+        "epub",
+        "read-along",
+        "tts",
+        "accessibility",
+        "personal"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/edelmore-reader",
       "license": "MIT",
       "deployment": [
@@ -1100,11 +1324,21 @@
       "importance": 2,
       "color": null,
       "featured": false,
-      "media": ["image"],
+      "media": [
+        "image"
+      ],
       "group": "archived",
-      "themes": ["attention"],
+      "themes": [
+        "attention"
+      ],
       "status": "archived",
-      "tags": ["archived", "creative-practice", "generative-imagery", "machine-vision", "timeline-marker"],
+      "tags": [
+        "archived",
+        "creative-practice",
+        "generative-imagery",
+        "machine-vision",
+        "timeline-marker"
+      ],
       "repo": null,
       "license": null,
       "deployment": [],
@@ -1145,11 +1379,20 @@
       "importance": 5,
       "color": null,
       "featured": false,
-      "media": ["writing"],
+      "media": [
+        "writing"
+      ],
       "group": "writing",
-      "themes": ["craft"],
+      "themes": [
+        "craft"
+      ],
       "status": "published",
-      "tags": ["essay", "methodology-debut", "build-story", "computer-vision"],
+      "tags": [
+        "essay",
+        "methodology-debut",
+        "build-story",
+        "computer-vision"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1202,11 +1445,21 @@
       "importance": 6,
       "color": null,
       "featured": false,
-      "media": ["writing"],
+      "media": [
+        "writing"
+      ],
       "group": "writing",
-      "themes": ["craft", "continuity"],
+      "themes": [
+        "craft",
+        "continuity"
+      ],
       "status": "published",
-      "tags": ["essay", "shu-ha-ri", "methodology", "shipping-story"],
+      "tags": [
+        "essay",
+        "shu-ha-ri",
+        "methodology",
+        "shipping-story"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1259,11 +1512,20 @@
       "importance": 6,
       "color": null,
       "featured": false,
-      "media": ["writing"],
+      "media": [
+        "writing"
+      ],
       "group": "writing",
-      "themes": ["agency", "knowledge"],
+      "themes": [
+        "agency",
+        "knowledge"
+      ],
       "status": "published",
-      "tags": ["manifesto", "education", "capability-amplification"],
+      "tags": [
+        "manifesto",
+        "education",
+        "capability-amplification"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1309,11 +1571,20 @@
       "importance": 5,
       "color": null,
       "featured": false,
-      "media": ["writing"],
+      "media": [
+        "writing"
+      ],
       "group": "writing",
-      "themes": ["knowledge", "agency"],
+      "themes": [
+        "knowledge",
+        "agency"
+      ],
       "status": "published",
-      "tags": ["position-paper", "educational-accountability", "empirical-audit"],
+      "tags": [
+        "position-paper",
+        "educational-accountability",
+        "empirical-audit"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1366,11 +1637,21 @@
       "importance": 5,
       "color": null,
       "featured": false,
-      "media": ["writing"],
+      "media": [
+        "writing"
+      ],
       "group": "writing",
-      "themes": ["relationship", "attention"],
+      "themes": [
+        "relationship",
+        "attention"
+      ],
       "status": "published",
-      "tags": ["essay", "sycophancy", "safety", "sustained-collaboration"],
+      "tags": [
+        "essay",
+        "sycophancy",
+        "safety",
+        "sustained-collaboration"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1423,11 +1704,20 @@
       "importance": 5,
       "color": null,
       "featured": false,
-      "media": ["writing"],
+      "media": [
+        "writing"
+      ],
       "group": "writing",
-      "themes": ["agency", "knowledge"],
+      "themes": [
+        "agency",
+        "knowledge"
+      ],
       "status": "published",
-      "tags": ["position-paper", "ai-governance", "civic-infrastructure"],
+      "tags": [
+        "position-paper",
+        "ai-governance",
+        "civic-infrastructure"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1480,11 +1770,21 @@
       "importance": 10,
       "color": null,
       "featured": true,
-      "media": ["website"],
+      "media": [
+        "website"
+      ],
       "group": "knowledge-architecture",
-      "themes": ["knowledge", "continuity"],
+      "themes": [
+        "knowledge",
+        "continuity"
+      ],
       "status": "live",
-      "tags": ["knowledge-architecture", "body-of-work", "genesis", "sageframe"],
+      "tags": [
+        "knowledge-architecture",
+        "body-of-work",
+        "genesis",
+        "sageframe"
+      ],
       "repo": null,
       "license": null,
       "deployment": [
@@ -1523,17 +1823,37 @@
       "importance": 9,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "constructive-interference",
-      "themes": ["continuity", "knowledge"],
-      "status": "scaffolded",
-      "tags": ["software", "research-instrument", "knowledge-management", "semantic-search", "embeddings", "sqlite-vec", "fts5", "mcp-server", "fastapi", "ai-corpus"],
+      "themes": [
+        "continuity",
+        "knowledge"
+      ],
+      "status": "shipped",
+      "tags": [
+        "software",
+        "research-instrument",
+        "knowledge-management",
+        "semantic-search",
+        "embeddings",
+        "sqlite-vec",
+        "fts5",
+        "mcp-server",
+        "fastapi",
+        "ai-corpus"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/shodo",
       "license": null,
       "deployment": [
         {
           "label": "GitHub repo",
           "url": "https://github.com/sageframe-no-kaji/shodo"
+        },
+        {
+          "label": "Live demo",
+          "url": "https://shodo.sageframe.net"
         }
       ],
       "tech_stack": "Python 3.11+, FastAPI, SQLite (sqlite-vec + FTS5), bge-m3 embeddings, cross-encoder reranker, HTMX + Jinja2 + Tailwind, HTTP-transported MCP server; optional Ollama; Docker Compose",
@@ -1544,7 +1864,7 @@
       "personal_stake": null,
       "created": "2026-05-07",
       "conceived": "2026-03-04",
-      "last_updated": "2026-06-14",
+      "last_updated": "2026-06-24",
       "short_description": "A search-and-visualization engine for your own AI conversation history — the years of thinking-with-AI that current tools treat as exhaust. Shodō ingests exports from Claude, ChatGPT, and Claude Code, embeds and indexes them into a local SQLite corpus (sqlite-vec for vectors, FTS5 for lexical), and lets you search across years in natural language, drop into the matching exchange, walk to neighboring conversations on the shelf, and see the temporal density of your own attention as a heat map. Two named parts: Shūji, the disciplined ingestion/embedding engine that runs as a service; and Shodō, the family of interfaces (a web Library Surface plus HTTP, MCP, Python, and CLI bridges) that consume it. A core instrument of the Constructive Interference program and a module for Sutra. (created = build start; conceived ~March 2026.)",
       "substantive_description": [
         "Borges's Library of Babel held every possible book and no way to find any of them — total information, total uselessness. Your AI conversation history is a smaller version of the same problem: vast, complete, and effectively inaccessible. The record of years of real intellectual labor — architecture decisions argued through, drafts reasoned out, conclusions hard-won — persists in some sidebar and is practically unreachable. It cannot be searched semantically; topics cannot be traced across time; the same problems get solved twice. This is a knowledge-management crisis dressed up as a UI limitation.",
@@ -1566,11 +1886,27 @@
       "importance": 8,
       "color": null,
       "featured": true,
-      "media": ["software"],
+      "media": [
+        "software"
+      ],
       "group": "constructive-interference",
-      "themes": ["agency", "craft"],
+      "themes": [
+        "agency",
+        "craft"
+      ],
       "status": "scaffolded",
-      "tags": ["software", "desktop-app", "writing-tool", "version-control", "git", "tauri", "rust", "codemirror", "authoring", "markdown"],
+      "tags": [
+        "software",
+        "desktop-app",
+        "writing-tool",
+        "version-control",
+        "git",
+        "tauri",
+        "rust",
+        "codemirror",
+        "authoring",
+        "markdown"
+      ],
       "repo": "https://github.com/sageframe-no-kaji/sutra",
       "license": null,
       "deployment": [

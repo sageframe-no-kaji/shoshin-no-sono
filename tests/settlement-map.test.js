@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { settlementSvg } from '../src/settlement-map.js';
+import { settlementSvg, settlementClearingSvg } from '../src/settlement-map.js';
 
 describe('settlementSvg', () => {
   it('renders nothing for an empty block list', () => {
@@ -42,5 +42,37 @@ describe('settlementSvg', () => {
       { x: 20, y: 0, w: 8, h: 8, a: 0 },
     ]);
     expect(svg.match(/<rect/g)).toHaveLength(3);
+  });
+});
+
+describe('settlementClearingSvg', () => {
+  it('returns empty string for an empty block list', () => {
+    expect(settlementClearingSvg([])).toBe('');
+  });
+
+  it('emits one rect per block (cream fill, cream stroke)', () => {
+    const svg = settlementClearingSvg([{ x: 10, y: 20, w: 8, h: 6, a: 0 }]);
+    expect(svg).toContain('<rect');
+    expect(svg).toContain('fill="#FDFCF9"');
+    expect(svg).toContain('stroke="#FDFCF9"');
+    expect(svg).toContain('stroke-linejoin="round"');
+  });
+
+  it('stroke-width is 2× the pad', () => {
+    const svg = settlementClearingSvg([{ x: 0, y: 0, w: 8, h: 8, a: 0 }], 10);
+    expect(svg).toContain('stroke-width="20"');
+  });
+
+  it('uses default pad 16 → stroke-width 32', () => {
+    const svg = settlementClearingSvg([{ x: 0, y: 0, w: 8, h: 8, a: 0 }]);
+    expect(svg).toContain('stroke-width="32"');
+  });
+
+  it('emits one rect per block', () => {
+    const svg = settlementClearingSvg([
+      { x: 0, y: 0, w: 8, h: 8, a: 0 },
+      { x: 20, y: 0, w: 8, h: 8, a: 0 },
+    ]);
+    expect(svg.match(/<rect/g)).toHaveLength(2);
   });
 });

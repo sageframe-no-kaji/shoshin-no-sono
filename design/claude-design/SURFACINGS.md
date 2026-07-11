@@ -98,7 +98,7 @@ Session 4 ruled out *overlay-style ridge marks*. It did **not** decide that the 
 
 1. **Placement pull** — successor laid out near predecessor; existing field/streamlines do the work; no new code in the field generator.
 2. **Field deformation** — this tapered-spur primitive added to f along each `succeeded_by` edge.
-3. **Roads / trails** (session 5, still to run) — human marks on terrain, semantically distinct from the field.
+3. **Roads / trails** (session 5, locked) — cased double-line road, tick-ladder trail; see session 5 entry below.
 4. **Rivers** (parked back in session 2) — succession as directional flow, river-as-lineage.
 
 ho-08 weighs all four against the chosen rendering register and commits. The primitive sits here ready, used or unused depending on that call. The SVG variants from Claude Design are not retained — the math is the spec; the pictures were illustrations.
@@ -107,3 +107,36 @@ ho-08 weighs all four against the chosen rendering register and commits. The pri
 - Register principle ("field-deform or honest overlay; no fake contours") → register page when next opened.
 - Four-carrier candidate list → ho-08 (to be authored).
 - Tapered-spur primitive → here only; not yet in `src/field.js`.
+
+## Session 5 — road and trail (locked, 2026-06-25)
+
+One round on v2 prompt (hachure ground). Three variants tested. **B locked.**
+
+### Result
+
+**Road: cased double-line.** Cream casing painted first (same mechanism as label and settlement clearings), thin gray rails on either side. The cream halo punches through the hachure texture so the double rail stays crisp at any density. Load-bearing historical convention — surveyors used this.
+
+**Trail: perpendicular tick-ladder.** Fine ticks crossing the path at regular intervals, no casing, single-weight ink. Sits in the hachure texture rather than above it.
+
+### Register principles (durable — both locked)
+
+> **Roads are cased; trails are uncased. The cream halo is what encodes the hierarchy — not the mark pattern alone.**
+
+Roads sit above the hachure texture (cased). Trails sit in it (uncased). The interference strategy itself carries the road/trail distinction. The tick-ladder pattern distinguishes the trail mark further, but casing-omission is the load-bearing rule.
+
+> **Clearing = cream paint-over, same mechanism across labels, settlements, and roads.** Not a suppression zone in the hachure generator — a cream shape rendered after hachures and before the ink mark on top.
+
+### Variants rejected
+
+- **A (cleared lane):** hachure suppression fragmented the field at the edges of the lane; suppression zone required coupling to the hachure generator; ten roads on a busy map would read as holes, not paths.
+- **C (single heavy stroke):** outweighed the hachures but stranded against a busy field — too dominant, would strangle a dense map; trail in fine dashes nearly vanished.
+
+### Parked (session-generated, still open)
+
+- Road weight scales with settlement size — heavier casing to larger settlements, lighter to hamlets. Decide at ho-08 when weight→size mapping exists.
+- Switchbacks where road grade exceeds the local gradient are a field-deforming question, not an overlay one. Ho-08.
+- Town-to-town roads (companion_to edges) — same casing convention, different semantic. Ho-08.
+
+### Propagated
+- Two register principles above → register page when next opened.
+- Road/trail spec → ho-08 (implementation).

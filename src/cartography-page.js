@@ -21,10 +21,12 @@ import { createCartographer, computeField, computeTowns } from './cartographer.j
 import { contourMapSvg } from './contour-map.js';
 import { hachureMapSvg } from './hachure-map.js';
 import { extractContour } from './contours.js';
-import { settlementSvg } from './settlement-map.js';
+import { settlementSvg, settlementClearingSvg } from './settlement-map.js';
 import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
 import { buildEmergenceTimeline, emergencePlan, scaleFn, CORPUS_FLOOR } from './emergence.js';
+import { roadsSvg, trailsSvg } from './feature-map.js';
+import { wavesSvg } from './water-map.js';
 
 const indexer = createIndexer(await loadWorks('./works.json'));
 const gate = createGate(window);
@@ -103,6 +105,10 @@ const tuners = {
   // ho-A-6.1: isoOverlayWeight retired. Independent layers means the iso
   // renderer uses weightRegular/weightIndex directly when its layer is on.
   hachureImportance: 0.6, // density gates at log-scaled local elevation
+
+  // ho-08 features (session-5 register)
+  waveThreshold: 0.18,
+  waveOpacity: 0.18,
 };
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
@@ -425,7 +431,8 @@ const oneTownSvg = (t, fraction, drawLabel = true) => {
   const fullCount = Math.floor(pos);
   const fade = pos - fullCount; // the in-progress house's opacity
   const ink = townInkColor();
-  let inner = settlementSvg(ordered.slice(0, fullCount), { ink });
+  const visible = ordered.slice(0, fullCount);
+  let inner = settlementClearingSvg(visible, 4) + settlementSvg(visible, { ink });
   if (fullCount < n && fade > 0.001) {
     inner += `<g opacity="${fade.toFixed(2)}">${settlementSvg([ordered[fullCount]], { ink })}</g>`;
   }
@@ -659,6 +666,55 @@ const nameEl = (p) => {
   return `<g style="opacity:0;animation:emgIn ${tuners.nameFadeMs}ms ease-in-out ${tuners.nameDelayMs}ms forwards;">${label}</g>`;
 };
 
+/**
+ * Roads and trails for the current field + towns.
+ * @param {import('./cartographer.js').CartographyField} field
+ * @param {import('./cartographer.js').CartographyTown[]} towns
+ * @returns {string}
+ */
+const featuresSvg = (field, towns) => {
+  const peakMap = new Map(field.peaks.map(p => [p.id, { x: p.x, y: p.y }]));
+  const townSet = new Set(towns.map(t => t.id));
+  const townSeat = new Map(towns.map(t => [t.id, t.seat]));
+
+  // Roads: companion_to edges where BOTH endpoints are settlements.
+  // Town-to-town connections sit flat in the valleys.
+  /** @type {import('./feature-map.js').RoadEdge[]} */
+  const roadEdges = [];
+  const seenRoads = new Set();
+  for (const t of towns) {
+    for (const e of indexer.getOutgoing(t.id, 'companion_to')) {
+      if (!townSet.has(e.target)) continue;
+      const key = [t.id, e.target].sort().join('|');
+      if (seenRoads.has(key)) continue;
+      seenRoads.add(key);
+      const dest = townSeat.get(e.target);
+      if (!dest) continue;
+      roadEdges.push({ from: t.seat, to: dest, id: key, strength: 2 });
+    }
+  }
+
+  // Trails: documents edges from settlements to their documented peaks.
+  // Each trail climbs from the town up to the peak's foot.
+  /** @type {import('./feature-map.js').TrailEdge[]} */
+  const trailEdges = [];
+  for (const t of towns) {
+    for (const e of indexer.getOutgoing(t.id, 'documents')) {
+      const peak = peakMap.get(e.target);
+      if (!peak) continue;
+      // No footRadius — the town seat is already placed at the peak foot by
+      // the seating algorithm. Pulling it back further collapses the path.
+      trailEdges.push({
+        from: t.seat,
+        to: peak,
+        id: `${t.id}→${e.target}`,
+      });
+    }
+  }
+
+  return roadsSvg(roadEdges, field.heightfield) + trailsSvg(trailEdges);
+};
+
 const render = () => {
   // The resting / static path (filter toggles, reseed-less re-render). A fully
   // revealed map: every peak at scale 1, so this equals the emergence end frame.
@@ -676,6 +732,8 @@ const render = () => {
   // Iso elevation labels are placed on iso lines — they only read when the
   // iso layer is on, regardless of hachures.
   if (layers.iso) svg += elevationLabelsSvg(field.heightfield);
+  svg += wavesSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity });
+  svg += featuresSvg(field, towns);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   svg += beaconSvg(field.peaks, true); // signal-fire beacons, breathing at rest
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
@@ -779,6 +837,8 @@ const playWriting = (writeSteps, token, layers) => {
     corpusFloorSvg() +
     terrainSvg(field.heightfield) +
     (gate.currentLayers().iso ? elevationLabelsSvg(field.heightfield) : '') +
+    wavesSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity }) +
+    featuresSvg(field, allTowns) +
     beaconSvg(field.peaks, true) +
     (showPeaks ? peakDotsSvg(field.peaks) : '');
 
@@ -910,6 +970,10 @@ const TUNER_SECTIONS = [
   { title: 'labels', specs: LABEL_TUNER_SPECS },
   { title: 'beacons', specs: BEACON_TUNER_SPECS },
   { title: 'emergence', specs: EMERGENCE_TUNER_SPECS },
+  { title: 'features', specs: [
+    { key: 'waveThreshold', label: 'water threshold', min: 0, max: 0.5, step: 0.01 },
+    { key: 'waveOpacity', label: 'wave opacity', min: 0, max: 0.5, step: 0.01 },
+  ]},
 ];
 
 const renderTuners = () => {

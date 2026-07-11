@@ -28,6 +28,28 @@ const REGISTER = {
  */
 
 /**
+ * Cream clearing for a settlement: each block rendered as a fat cream stroke
+ * following the actual building outline — same mechanism as the label knockout
+ * (paint-order / thick stroke) but applied to rects. Render BEFORE the ink
+ * blocks so the clearing sits under the buildings.
+ * @param {Block[]} blocks
+ * @param {number} [pad] clearing half-width in px (default 16)
+ * @returns {string} SVG fragment
+ */
+export function settlementClearingSvg(blocks, pad = 16) {
+  if (blocks.length === 0) return '';
+  const sw = round2(pad * 2);
+  let svg = '';
+  for (const b of blocks) {
+    svg +=
+      `<rect x="${round2(-b.w / 2)}" y="${round2(-b.h / 2)}" width="${round2(b.w)}" height="${round2(b.h)}" ` +
+      `transform="translate(${round2(b.x)},${round2(b.y)}) rotate(${round2(b.a || 0)})" ` +
+      `fill="#FDFCF9" stroke="#FDFCF9" stroke-width="${sw}" stroke-linejoin="round"/>`;
+  }
+  return svg;
+}
+
+/**
  * Render one settlement's blocks as SVG `<rect>`s in settlement-local space.
  * The caller wraps this in a `<g transform="translate(seatX,seatY)">`, so the
  * blocks stay origin-relative here. Terracotta marks the city landmark; every
