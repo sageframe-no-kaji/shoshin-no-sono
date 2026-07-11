@@ -10,6 +10,8 @@
  * no URL.
  */
 
+import { REGISTER } from './register.js';
+
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 
 /**
@@ -19,9 +21,6 @@
  * @property {number} [opacity]     Maximum wave opacity (default 0.18).
  * @property {number} [edgeMargin]  Px from map boundary that always carries waves (default 90).
  */
-
-/** Warm water ink — a muted sienna that reads water without screaming blue. */
-const WATER_INK = '#8A7B6A';
 
 /**
  * SVG fragment of wave marks for the given heightfield.
@@ -80,7 +79,7 @@ export function wavesSvg(hf, opts = {}) {
         `${(cx + W * 0.5).toFixed(2)},${(cy + H).toFixed(2)} ` +
         `${(cx + W).toFixed(2)},${cy.toFixed(2)}`;
       out +=
-        `<path d="${path}" fill="none" stroke="${WATER_INK}" ` +
+        `<path d="${path}" fill="none" stroke="${REGISTER.waterInk}" ` +
         `stroke-width="0.35" stroke-linecap="round" opacity="${opStr}"/>`;
     }
     rowIndex++;

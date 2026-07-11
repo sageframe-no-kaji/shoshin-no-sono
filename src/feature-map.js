@@ -2,18 +2,26 @@
  * Feature map (ho-08) — roads and trails as honest overlay marks over the
  * hachure field.
  *
- * Roads represent `documents` edges (town → peak): a cased double-line that
- * clears the hachures in its lane and leaves two thin dark rails. Trails
- * represent `validates` edges (peak → peak): a tick-ladder — no casing, just
- * perpendicular ticks along the path at ~9 px intervals.
+ * Roads represent `companion_to` edges (town ↔ town): a cased double-line that
+ * clears the hachures in its lane and leaves two thin dark rails, sitting flat
+ * in the valleys. Trails represent `documents` edges (town → peak): a dashed
+ * switchback that climbs from the town seat to the peak's foot — no casing
+ * weight of its own, it sits in the hachure texture where roads sit above it.
  *
- * Both road and trail paths are cubic Béziers whose bow fraction and sign are
- * derived from the edge id so each arc is unique but stable across redraws.
+ * Road paths are cubic Béziers whose bow sign is terrain-aware (or id-derived
+ * without a heightfield); trail zigzags take their side from the edge id — so
+ * each mark is unique but stable across redraws.
  *
  * Pure: SVG strings in, SVG strings out. No DOM, no Indexer, no Gate, no URL.
  */
 
+import { REGISTER } from './register.js';
+
 /** @typedef {import('./field.js').Heightfield} Heightfield */
+
+/** Trail ink — deliberately lighter than the register ink so trails read as
+ * secondary marks inside the hachure texture. Not a register color. */
+const TRAIL_INK = '#4B4B4B';
 
 /**
  * Clamp `v` to [lo, hi].
@@ -140,9 +148,9 @@ export function roadPathSvg(d, strength = 1) {
   const outer = (4.5 * s).toFixed(2);
   const infill = (2.8 * s).toFixed(2);
   return (
-    `<path d="${d}" fill="none" stroke="#FDFCF9" stroke-width="${casing}" stroke-linecap="round"/>` +
-    `<path d="${d}" fill="none" stroke="#2B2B2B" stroke-width="${outer}" opacity="0.75" stroke-linecap="round"/>` +
-    `<path d="${d}" fill="none" stroke="#FDFCF9" stroke-width="${infill}" stroke-linecap="round"/>`
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${casing}" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="${outer}" opacity="0.75" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${infill}" stroke-linecap="round"/>`
   );
 }
 
@@ -193,8 +201,8 @@ export function trailSwitchbackSvg(x1, y1, x2, y2, sign) {
     pts.slice(1).map(p => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
   return (
-    `<path d="${d}" fill="none" stroke="#FDFCF9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="${d}" fill="none" stroke="#4B4B4B" stroke-width="0.9" opacity="0.7" ` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${d}" fill="none" stroke="${TRAIL_INK}" stroke-width="0.9" opacity="0.7" ` +
     `stroke-dasharray="5 3" stroke-linecap="round" stroke-linejoin="round"/>`
   );
 }
@@ -208,11 +216,11 @@ export function trailSwitchbackSvg(x1, y1, x2, y2, sign) {
  */
 
 /**
- * SVG fragment for all roads (documents edges, town → peak).
+ * SVG fragment for all roads (`companion_to` edges, town ↔ town).
  * When `hf` is supplied: bow direction is terrain-aware (curves toward the
  * lower side of the midpoint), and `footRadius` pulls the endpoint back from
- * the peak centre to the foot of the hachure field. Falls back to the
- * id-derived sign when no heightfield is provided.
+ * the destination centre. Falls back to the id-derived sign when no
+ * heightfield is provided.
  * @param {RoadEdge[]} edges
  * @param {Heightfield} [hf] optional heightfield for terrain-aware routing
  * @returns {string}

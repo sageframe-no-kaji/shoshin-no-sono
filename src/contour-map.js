@@ -12,6 +12,7 @@
  */
 
 import { contourGeometry } from './contours.js';
+import { REGISTER } from './register.js';
 
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 /** @typedef {import('./contours.js').ContourOpts} ContourOpts */
@@ -22,10 +23,9 @@ import { contourGeometry } from './contours.js';
  * }} ContourMapOpts
  */
 
-/** The frozen register (design/visual-register.html, territory spike). */
-const REGISTER = {
-  ink: '#2B2B2B',
-  paper: '#FDFCF9',
+/** Frozen stroke weights (design/visual-register.html) — weights, not colors,
+ * so they stay local; the colors come from src/register.js. */
+const WEIGHTS = {
   weightRegular: 0.25,
   weightIndex: 0.7,
 };
@@ -41,8 +41,8 @@ const REGISTER = {
 export function contourMapSvg(hf, opts = {}) {
   const ink = opts.ink ?? REGISTER.ink;
   const paper = opts.paper ?? REGISTER.paper;
-  const weightRegular = opts.weightRegular ?? REGISTER.weightRegular;
-  const weightIndex = opts.weightIndex ?? REGISTER.weightIndex;
+  const weightRegular = opts.weightRegular ?? WEIGHTS.weightRegular;
+  const weightIndex = opts.weightIndex ?? WEIGHTS.weightIndex;
 
   let svg = `<rect x="0" y="0" width="${hf.width}" height="${hf.height}" fill="${paper}"/>`;
   for (const ring of contourGeometry(hf, opts)) {

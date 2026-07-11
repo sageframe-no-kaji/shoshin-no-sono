@@ -14,6 +14,8 @@
  * Recorded in ho-process/hos/ho-A-hachure-6.0-renderer.md.
  */
 
+import { REGISTER } from './register.js';
+
 /** @typedef {import('./field.js').Heightfield} Heightfield */
 
 /**
@@ -34,12 +36,6 @@
  * @property {string} [ink]        Stroke color.
  * @property {string} [paper]      Background fill.
  */
-
-/** The frozen register, shared with contour-map.js. */
-const REGISTER = {
-  ink: '#2B2B2B',
-  paper: '#FDFCF9',
-};
 
 /** Initial tuner defaults — landed by feel on `:8788`. */
 const DEFAULTS = {

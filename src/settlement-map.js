@@ -10,18 +10,16 @@
  * ho-process/hos/ho-07-town-placement.md.
  */
 
+import { REGISTER } from './register.js';
+
 /** @typedef {import('./settlements.js').Block} Block */
 
 /** @param {number} n @returns {number} 2-decimal round, matching the spike's precision */
 const round2 = (n) => Math.round(n * 100) / 100;
 
-/** The frozen settlement register (design/visual-register.html §2, territory spike). */
-const REGISTER = {
-  ink: '#2B2B2B',
-  paper: '#FDFCF9',
-  terra: '#9A5B3C',
-  sep: 0.4, // paper-stroke party-wall separator weight
-};
+/** Frozen party-wall separator weight (design/visual-register.html §2) — a
+ * stroke weight, not a color, so it stays local; colors come from src/register.js. */
+const SEP = 0.4;
 
 /**
  * @typedef {{ ink?: string, paper?: string, terra?: string, sep?: number }} SettlementMapOpts
@@ -34,9 +32,10 @@ const REGISTER = {
  * blocks so the clearing sits under the buildings.
  * @param {Block[]} blocks
  * @param {number} [pad] clearing half-width in px (default 16)
+ * @param {string} [paper] clearing color (default register paper)
  * @returns {string} SVG fragment
  */
-export function settlementClearingSvg(blocks, pad = 16) {
+export function settlementClearingSvg(blocks, pad = 16, paper = REGISTER.paper) {
   if (blocks.length === 0) return '';
   const sw = round2(pad * 2);
   let svg = '';
@@ -44,7 +43,7 @@ export function settlementClearingSvg(blocks, pad = 16) {
     svg +=
       `<rect x="${round2(-b.w / 2)}" y="${round2(-b.h / 2)}" width="${round2(b.w)}" height="${round2(b.h)}" ` +
       `transform="translate(${round2(b.x)},${round2(b.y)}) rotate(${round2(b.a || 0)})" ` +
-      `fill="#FDFCF9" stroke="#FDFCF9" stroke-width="${sw}" stroke-linejoin="round"/>`;
+      `fill="${paper}" stroke="${paper}" stroke-width="${sw}" stroke-linejoin="round"/>`;
   }
   return svg;
 }
@@ -62,7 +61,7 @@ export function settlementSvg(blocks, opts = {}) {
   const ink = opts.ink ?? REGISTER.ink;
   const paper = opts.paper ?? REGISTER.paper;
   const terra = opts.terra ?? REGISTER.terra;
-  const sep = opts.sep ?? REGISTER.sep;
+  const sep = opts.sep ?? SEP;
   let svg = '';
   for (const b of blocks) {
     const fill = b.terra ? terra : ink;
