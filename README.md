@@ -16,7 +16,7 @@
 >
 > *Click through. The work lives elsewhere; this is the map.*
 
-**Status.** In active design as of May 2026. The architecture is committed; the v1 build begins with the scaffolding ho. The seed and system design are complete. No code yet — see `docs/architecture.md` for the public architectural extract and the provisional ho sequence at the end of this README for the planned arc.
+**Status.** In active build as of July 2026, on the `labs` branch (`main` holds the pre-build baseline). Shipped so far: the `works.json` data model and schema validator (29 works), the Indexer, the grid catalog with filter chips and shareable filter URLs, and the procedural cartography pipeline — seeded peak positions, heightfield, marching-squares contours, an independent hachure layer, town placement with grown settlement morphology, and the emergence load animation. Current work is relationship features as map marks (roads, trails, water), with the interaction layer next. The authoring subsystem, mobile, and deployment are not yet built; the site is not deployed, and local serving is the development surface. v1.0 ships at the end of the ho sequence — see the Current State table below for the arc, and `kamae/kamae-2-shoshin-no-sono-system-design.md` for the architectural extract.
 
 ---
 
@@ -121,7 +121,7 @@ Six components. Three visitor-facing, two practitioner-facing, one shared substr
 
 The shared substrate is `works.json` — the single source of truth, version-controlled in the repo, edited only through the Steward, the Founder, or direct text editing. The visualization is regenerated from this file on every visit.
 
-Full architectural detail is in [`docs/architecture.md`](docs/architecture.md).
+Full architectural detail is in [`kamae/kamae-2-shoshin-no-sono-system-design.md`](kamae/kamae-2-shoshin-no-sono-system-design.md).
 
 ## Tech Stack
 
@@ -129,9 +129,9 @@ Full architectural detail is in [`docs/architecture.md`](docs/architecture.md).
 |---|---|
 | Static hosting | Cloudflare Pages |
 | Frontend | Vanilla HTML/JS/CSS |
-| Visualization library | `d3-force` (positions) + hand-rolled SVG cartography |
+| Visualization library | Hand-rolled SVG cartography, no runtime dependencies |
 | Data | Single `works.json` file in repo |
-| Schema validation | JSON Schema |
+| Schema validation | Descriptive `schema.json` contract + `scripts/validate-works.mjs` |
 | CMS (general editing) | Sveltia CMS |
 | Custom admin (new-work) | Hand-rolled at `/admin/new/` |
 | Auth | GitHub OAuth |
@@ -143,11 +143,11 @@ Full architectural detail is in [`docs/architecture.md`](docs/architecture.md).
 
 | Now | Next | Later |
 |---|---|---|
-| Seed and System Design complete | Repo scaffold and schema (Ho 0) | Visualization spike — Claude Design pull-off (Ho 4) |
-| Architecture committed | Hydrate `works.json` from existing inventory (Ho 1) | Cartography build (Hos 5-9) |
-| Hanko mark designed | The Indexer (Ho 2) | Authoring infrastructure: Steward, Scribe, Founder (Hos 10-12) |
-| `v0-legacy` tag preserves current `sageframe.net` prototype | Grid view and Garden Gate, MVP catalog (Ho 3) | Mobile, accessibility, polish (Hos 13-14) |
-| `labs` branch holds rebuild | First visible deploy: shareable MVP catalog | Companion essay and ship (Hos 15-16) |
+| Data model, schema validator, and hydrated `works.json` — 29 works (Hos 0-1) | Relationship features as map marks: roads, trails, water (Ho 8, in progress) | Authoring infrastructure: Steward, Scribe, Founder (Hos 10-12) |
+| The Indexer (Ho 2) | Interaction layer (Ho 9) | Mobile, accessibility, polish (Hos 13-14) |
+| Grid view and Garden Gate — filter chips, shareable filter URLs (Ho 3) | | Deployment — the site is not yet deployed; local serving is the dev surface |
+| Cartography pipeline: seeded peaks, heightfield, contours, hachure layer, town placement, emergence animation (Hos 4-7) | | Companion essay and ship (Hos 15-16) |
+| `labs` branch holds the build; `main` holds the ho-00 baseline; `v0-legacy` tag preserves the prior `sageframe.net` prototype | | |
 
 ## What's Ahead
 
@@ -180,7 +180,7 @@ git clone https://github.com/sageframe-no-kaji/shoshin-no-sono.git
 cd shoshin-no-sono
 ```
 
-Build and development instructions will be added as the project scaffolds. Each ho in the build sequence is committed independently with a corresponding devlog under `dandori/`. See `kamae/` for the project's framing documents — seed, system design, README, and (forthcoming) ho overview.
+There is no build step — the served site is no-build vanilla ESM, and the `.js` files in `src/` are both the source and the deployed artifact. `npm install` brings in verification tooling only: `npm run validate` (the `works.json` contract), `npm run lint`, `npm run typecheck` (strict `tsc` over JSDoc types), and `npm test` (vitest, 90% coverage floor) all run at every commit via pre-commit; `npm run serve` serves the site at `:8788`. Each ho in the build sequence is committed independently against its bounded scope document under `ho-process/hos/`. See `kamae/` for the project's framing documents — seed, system design, README, and ho overview.
 
 ## Requirements
 
@@ -197,4 +197,4 @@ The MIT license covers the code, schema, prompt template, and other project arti
 ---
 
 *Andrew T. Marcus — Cambridge, MA*
-*Last meaningful update: 2026-05-18*
+*Last meaningful update: 2026-07-10*
