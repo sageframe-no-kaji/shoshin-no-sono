@@ -136,7 +136,12 @@ export function waterSvg(hf, opts = {}) {
   if (hf.max <= 0) return '';
   const coastWeight = opts.coastWeight ?? 0.7;
   const inkOpacity = opts.opacity ?? 0.5;
-  const lineCount = opts.waterlines ?? 4;
+  // Two water languages, one dial each: waterlining is the survey-chart
+  // register (the Upolu plate), the rolling wave bands are the engraved
+  // register (the practitioner's Gastaldi reference). They read as rivals
+  // when stacked, so the default is waves-only; raise `waterlines` for the
+  // survey register, zero `waves` to swap back entirely.
+  const lineCount = opts.waterlines ?? 0;
   const waveIntensity = opts.waves ?? 0.35;
 
   const mask = seaMask(hf);
@@ -170,24 +175,30 @@ export function waterSvg(hf, opts = {}) {
   }
 
   // The coastline — the shore is ZERO; the ring hugs it just above, cream-
-  // cased so it stays crisp against the last hachures on the land side. Only
-  // sea-adjacent segments draw: an inland flat-zero pocket (clamped noise)
-  // must not grow a lake outline.
-  const nearSea = (/** @type {import('./contours.js').Segment} */ s) => {
+  // cased so it stays crisp against the last hachures on the land side. The
+  // outer-coast test floods the below-coast-level region from the boundary
+  // (the coast-level analog of the sea mask): every outer-shore segment rides
+  // that region's edge, however wide the gentle shore band is — measuring
+  // proximity to flat-zero water in cells broke the ring wherever the shore
+  // sloped gently. Enclosed flat pockets stay excluded (no lake outlines).
+  // Sub-pixel fragments drop too: stroked heavy with round caps they render
+  // as ink blobs, which is what the coastline-weight dial was amplifying.
+  const coastLevel = 0.02 * hf.max;
+  const coastMask = seaMask(hf, coastLevel);
+  const nearCoast = (/** @type {import('./contours.js').Segment} */ s) => {
+    if (Math.hypot(s[1].x - s[0].x, s[1].y - s[0].y) < 0.75) return false; // degenerate sliver
     const i0 = Math.max(0, Math.min(cols - 1, Math.floor((s[0].x + s[1].x) / 2 / cell)));
     const j0 = Math.max(0, Math.min(rows - 1, Math.floor((s[0].y + s[1].y) / 2 / cell)));
-    // Full 3×3 neighborhood — a one-sided window drops every segment whose sea
-    // lies left or above, shredding the coastline into dots.
     for (let dj = -1; dj <= 1; dj++) {
       for (let di = -1; di <= 1; di++) {
         const i = Math.max(0, Math.min(cols - 1, i0 + di));
         const j = Math.max(0, Math.min(rows - 1, j0 + dj));
-        if (mask[j * cols + i]) return true;
+        if (coastMask[j * cols + i]) return true;
       }
     }
     return false;
   };
-  const coastSegs = extractContour(hf, 0.02 * hf.max).filter(nearSea);
+  const coastSegs = extractContour(hf, coastLevel).filter(nearCoast);
   if (coastSegs.length > 0) {
     const d = segsToPath(coastSegs);
     svg +=
@@ -232,8 +243,13 @@ export function waterSvg(hf, opts = {}) {
     const GOLD = 2.399963;
     let band = 0;
     for (let j = rowStep; j < rows - 1; j += rowStep, band++) {
-      const y = j * cell;
+      // Per-band character — the engraving's hand: each band rolls at its own
+      // amplitude, wavelength, weight, and vertical drift, all derived from
+      // the band index so the sea reproduces exactly.
       const phase = band * GOLD;
+      const amp = 2.2 + 1.8 * (0.5 + 0.5 * Math.sin(band * 1.3 + 0.5));
+      const k1 = 0.017 + 0.006 * Math.sin(band * 0.9);
+      const y = j * cell + Math.sin(band * 2.7) * 3;
       const bandW = (0.22 + 0.16 * (0.5 + 0.5 * Math.sin(band * 1.7 + 1))).toFixed(2);
       let d = '';
       /** @type {number} */
@@ -247,9 +263,7 @@ export function waterSvg(hf, opts = {}) {
             for (let s = runStart; s <= i - 1; s++) {
               const x = s * cell;
               const yy =
-                y +
-                Math.sin(x * 0.021 + phase) * 3.1 +
-                Math.sin(x * 0.052 + phase * 1.7) * 1.2;
+                y + Math.sin(x * k1 + phase) * amp + Math.sin(x * 0.052 + phase * 1.7) * 1.2;
               pts.push(`${x.toFixed(1)},${yy.toFixed(1)}`);
             }
             d += `M${pts[0]} L${pts.slice(1).join(' L')} `;

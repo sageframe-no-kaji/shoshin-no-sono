@@ -135,7 +135,7 @@ const tuners = {
   waveThreshold: 0.18,
   coastRuggedness: 0.3, // coast-band noise: islets and inlets; 0 = the smooth Gaussian shore
   coastWeight: 0.7, // coastline stroke weight
-  waterlineCount: 4, // waterline offsets hugging the coast
+  waterlineCount: 0, // survey-register waterlines — 0 = engraved default (waves carry the sea)
   waveOpacity: 0.5, // waterline ink strength
   waveIntensity: 0.35, // wave texture: horizontal water strokes in the open sea
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
