@@ -290,14 +290,16 @@ export function curvedPath(x1, y1, x2, y2, bowFraction, sign) {
 /**
  * Three-stroke road fragment (cased double-line) for a single edge.
  * Stroke order: cream casing (clears hachures), dark rails, cream infill.
- * Width scales with `strength` (1–3).
+ * Width scales with `strength` (1–3); `clear` is the extra cream casing
+ * beyond the rails on each side (the road's clearing dial).
  * @param {string} d SVG path `d` string
  * @param {number} [strength] edge strength 1–3 (default 1)
+ * @param {number} [clear] casing beyond the rails per side in px (default 1.25)
  * @returns {string} SVG path elements
  */
-export function roadPathSvg(d, strength = 1) {
+export function roadPathSvg(d, strength = 1, clear = 1.25) {
   const s = 0.75 + 0.25 * clamp(strength / 3, 0, 1);
-  const casing = (7 * s).toFixed(2);
+  const casing = ((4.5 + 2 * clear) * s).toFixed(2);
   const outer = (4.5 * s).toFixed(2);
   const infill = (2.8 * s).toFixed(2);
   return (
@@ -469,12 +471,16 @@ export function computeRoadRoutes(edges, hf, opts = {}) {
 
 /**
  * Render routed roads — Chaikin-smoothed into drawn curves, then the cased
- * double-line per route.
+ * double-line per route. `opts.clear` is the road-clearing dial (cream casing
+ * beyond the rails).
  * @param {RoadRoute[]} routes
+ * @param {{ clear?: number }} [opts]
  * @returns {string}
  */
-export function roadsSvgFromRoutes(routes) {
-  return routes.map((r) => roadPathSvg(pointsToPath(chaikin(r.pts, 3)), r.strength)).join('');
+export function roadsSvgFromRoutes(routes, opts = {}) {
+  return routes
+    .map((r) => roadPathSvg(pointsToPath(chaikin(r.pts, 3)), r.strength, opts.clear))
+    .join('');
 }
 
 /**

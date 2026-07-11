@@ -39,7 +39,7 @@ import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
 import { buildEmergenceTimeline, emergencePlan, scaleFn } from './emergence.js';
 import { computeRoadRoutes, roadsSvgFromRoutes, trailsSvg } from './feature-map.js';
-import { wavesSvg } from './water-map.js';
+import { waterSvg } from './water-map.js';
 import { REGISTER } from './register.js';
 import {
   labelGlowFilter,
@@ -133,6 +133,7 @@ const tuners = {
   waveThreshold: 0.18,
   waveOpacity: 0.18,
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
+  roadClear: 1.25, // road cream casing beyond the rails, per side
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
   trailWeight: 0.7, // single stroke weight, rail and rungs alike
   trailTick: 2.2, // rung half-length in px
@@ -432,7 +433,7 @@ const featuresSvg = (field, towns) => {
       tickHalf: tuners.trailTick,
       clear: tuners.trailClear,
       avoid: roadRoutes.map((r) => r.pts),
-    }) + roadsSvgFromRoutes(roadRoutes)
+    }) + roadsSvgFromRoutes(roadRoutes, { clear: tuners.roadClear })
   );
 };
 
@@ -448,12 +449,14 @@ const render = () => {
   });
   const layers = gate.currentLayers();
   let svg = layers.hachure ? labelGlowFilter(tuners.labelGlow) : '';
-  svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   svg += terrainSvg(field.heightfield);
+  // The sea paints over the terrain below the waterline, so it draws right
+  // after the terrain; the corpus-floor marker and labels ride above it.
+  svg += waterSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity });
+  svg += corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity });
   // Iso elevation labels are placed on iso lines — they only read when the
   // iso layer is on, regardless of hachures.
   if (layers.iso) svg += elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale });
-  svg += wavesSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity });
   svg += featuresSvg(field, towns);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
   // signal-fire beacons, breathing at rest
@@ -560,12 +563,12 @@ const playWriting = (writeSteps, token, layers) => {
   const byId = new Map(allTowns.map((t) => [t.id, t]));
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.
   layers.terr.innerHTML =
-    corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     terrainSvg(field.heightfield) +
+    waterSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity }) +
+    corpusFloorSvg({ floorMarkerOpacity: tuners.floorMarkerOpacity }) +
     (gate.currentLayers().iso
       ? elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale })
       : '') +
-    wavesSvg(field.heightfield, { threshold: tuners.waveThreshold, opacity: tuners.waveOpacity }) +
     featuresSvg(field, allTowns) +
     beaconSvg(field.peaks, {
       beaconOpacity: tuners.beaconOpacity,
@@ -703,9 +706,10 @@ const TUNER_SECTIONS = [
   { title: 'beacons', specs: BEACON_TUNER_SPECS },
   { title: 'emergence', specs: EMERGENCE_TUNER_SPECS },
   { title: 'features', specs: [
-    { key: 'waveThreshold', label: 'water threshold', min: 0, max: 0.5, step: 0.01 },
-    { key: 'waveOpacity', label: 'wave opacity', min: 0, max: 0.5, step: 0.01 },
+    { key: 'waveThreshold', label: 'sea level', min: 0, max: 0.5, step: 0.01 },
+    { key: 'waveOpacity', label: 'wave marks', min: 0, max: 0.5, step: 0.01 },
     { key: 'roadFollow', label: 'road: terrain follow', min: 0, max: 1.5, step: 0.05 },
+    { key: 'roadClear', label: 'road clearing', min: 0, max: 6, step: 0.05 },
     { key: 'trailFollow', label: 'trail: terrain follow', min: 0, max: 1.5, step: 0.05 },
     { key: 'trailWeight', label: 'trail weight', min: 0.2, max: 2, step: 0.05 },
     { key: 'trailTick', label: 'trail tick length', min: 0, max: 6, step: 0.1 },

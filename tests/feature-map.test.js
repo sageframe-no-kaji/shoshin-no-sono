@@ -115,6 +115,17 @@ describe('roadPathSvg', () => {
     const d = 'M0,0 L100,0';
     expect(roadPathSvg(d)).toBe(roadPathSvg(d, 1));
   });
+
+  it('the clearing dial widens the cream casing without touching the rails', () => {
+    const d = 'M0,0 L100,0';
+    const widths = (/** @type {string} */ svg) =>
+      Array.from(svg.matchAll(/stroke-width="([\d.]+)"/g), (m) => parseFloat(m[1]));
+    const tight = widths(roadPathSvg(d, 1, 0));
+    const wide = widths(roadPathSvg(d, 1, 4));
+    expect(wide[0]).toBeGreaterThan(tight[0]); // casing grows
+    expect(wide[1]).toBe(tight[1]); // rails unchanged
+    expect(wide[2]).toBe(tight[2]); // infill unchanged
+  });
 });
 
 // ── trailTickLadderSvg ────────────────────────────────────────────────────────
