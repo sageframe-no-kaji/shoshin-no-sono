@@ -303,6 +303,8 @@ The relationship grammar from the System Design becomes visible on the map. Ridg
 
 **Finding from ho-01:** `succeeded_by` grounds only one real instance in the corpus (Aspirational Intelligence → Ho System), so its cartographic feature may not be worth building for v1 — decide at this ho.
 
+**Update (2026-07-11, the banking pass) — most of this ho landed, and it grew a sea.** The per-ho document now exists (`ho-process/hos/ho-08-relationship-features.md`, authored mid-ho; the ho had opened informally from this entry). Landed: roads = `companion_to` town↔town (cased, terrain-routed by least resistance, eating trails); trails = `documents` town→peak plus `validates` peak↔peak hiking trails (routed rail + rungs; the session-5/6 uncased lock amended on corpus ground — clearing landed 1.6); and the sea, which this entry never anticipated — a field-level datum (the shore is zero), coast ruggedness (islands, inlets), hachure shore fade, the coastal-plain iso gap, and the Session-7 engraved water (design session run 2026-07-11, artifact banked in exports). Register amendments and landings recorded in SURFACINGS. **Still open before this ho closes:** the succession carrier (session 4's four candidates) and the `paired_with` twin-peaks call — the "done means" bullets above for ridges and twin peaks remain unmet; everything else is landed and locked.
+
 **Possible split:** If feature rendering reveals six distinct rendering challenges, split into ho-08.1 (structural edges — ridges and twin peaks) and ho-08.2 (linear edges — trails, roads, paths). The visual register from ho-04 should clarify which split, if any, is natural.
 
 ### ho-08.5 — The verso: the back of the map (inserted)

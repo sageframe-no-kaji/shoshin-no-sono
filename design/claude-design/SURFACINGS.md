@@ -140,3 +140,32 @@ Roads sit above the hachure texture (cased). Trails sit in it (uncased). The int
 ### Propagated
 - Two register principles above → register page when next opened.
 - Road/trail spec → ho-08 (implementation).
+
+## Session numbering — reconciled to the design project (2026-07-11)
+
+The claude.ai design project's file numbering drifted from this log: the project ran ridge as sessions 4 AND 5 ("Ridge - Session 4/5.html"), roads & trails as session 6 (two passes), and ocean waves as session 7 — while this log had folded ridge's two rounds into "session 4" and called roads/trails "session 5". The repo's `session-6-cartouche` prompt collides with the project's session 6. **The project's numbering is adopted from here forward**: this log's session-4 entry = project sessions 4–5; the session-5 entry above = project session 6; waves below = session 7; the cartouche prompt becomes **session 8** when it runs. Forward-only: the entries above keep their headings; this note is the mapping.
+
+## Session 7 — ocean waves (locked, 2026-07-11)
+
+Ran as a full Claude Design session after three failed procedural guesses at the sea (scattered S-marks, ruled rows, hairline trains — each rejected on the plate). The session's answer, implemented verbatim in `src/water-map.js` from the artifact:
+
+**The engraved sea.** Bold sinuous crest lines run parallel to the shore — each band an offset copy of the coast, relaxing toward an open swell as it marches seaward (on the real map: iso-lines of the smoothed distance-from-shore field, which relax naturally) — and off each crest a feather comb of fine quadratic hair-strokes rides the coast normal toward the next band, auto-capped by the band gap. Two ink classes by stroke length: strong feathers at ink depth, a faint under-comb at ×0.55; crest on top at ×1.05 weight. Darkness from density, never stroke width. Ink on paper.
+
+**Locked landing** (E-family "Fine ripple", landed on the live map): wavelength 42, amplitude 2, band gap 11, comb spacing 1.8, comb length 7, line weight 0.14, ink depth 0.78, randomness 0.3. Artifact + parameters banked at `exports/session-7-ocean-waves/`.
+
+**Parked in-session (inherited by the implementation):** closed bays/lakes (moot — the sea mask already excludes enclosed basins per the session-2 rule), wave interaction with islands (loop crests carry a phase seam), concave-inlet trimming.
+
+## ho-08 register amendments — from the live plate (2026-07-11)
+
+The feature/sea arc revised two locks and landed several new register rules; recorded here so the log and the code tell one story.
+
+- **Trail mark (session-5/6 lock, amended).** The tick-ladder SHAPE held — rail + perpendicular rungs, single-weight ink — but on the corpus-density hachure ground the dimensions became tuners and the *uncased* rule was amended: trail clearing landed at 1.6 (cream halo), with 0 preserved on the dial as the original lock. The rail is no longer a bowed arc: it terrain-routes.
+- **Routes are least-resistance paths.** Roads and trails relax toward low ground over the heightfield and Chaikin-smooth into drawn curves — character from process applied to paths. Roads hunt harder than trails (follow 0.7 / 0.35).
+- **Roads eat trails.** Trails draw first; the road's cream casing consumes any trail beneath it (clearing-as-paint-over doing the eating), and the trail router keeps a minimal separation from road corridors — alongside is allowed, on top never.
+- **The shore is ZERO (the datum principle).** Sea level is subtracted from the field itself and clamped: the sea is dead flat, so nothing can render below the coastline as a matter of physics, not renderer convention. The strongest structural rule of the arc.
+- **Coast ruggedness.** Island-scale noise enveloped AT the waterline gives inlets and islets (landed 0.52), deterministic from the layout seed. Islands inherit every register rule unchanged.
+- **Hachures leave the gentle shore; cliffs keep theirs.** Density fades quadratically toward the waterline (shore fade 0.08) unless slope clears an absolute cliff threshold (0.22).
+- **The coastal plain.** The first iso ring starts a clearance above the datum (iso shore gap 0.04) so it never doubles the coastline.
+- **Two water languages, one dial each.** The Session-7 engraved sea is the committed register; waterlining (the Upolu survey register) stays available on its own count dial — they are alternatives, not layers.
+
+Edge semantics as implemented: roads = `companion_to` (town ↔ town); trails = `documents` (town → peak) + `validates` (peak ↔ peak). Succession (`descends_from`/`succeeded_by`) and `paired_with` twin peaks remain THE open ho-08 decisions — session 4's four carriers still on the table.

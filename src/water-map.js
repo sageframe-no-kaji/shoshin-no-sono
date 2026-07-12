@@ -1,19 +1,21 @@
 /**
- * Water map (ho-08) — the sea at the map's edges: coastline and waterlining.
+ * Water map (ho-08) — everything the sea carries: the cream paint-over, the
+ * coastline, optional waterlining, and the Session-7 engraved sea.
  *
  * The heightfield arrives datumed (src/field.js applySeaDatum): the shore is
  * exactly elevation 0 and the sea is dead flat, so the terrain renderers have
  * nothing to say below the coastline — no iso crossings, no hachure gradients.
- * This module draws everything the sea carries. The sea is the flat-zero
- * region CONNECTED TO THE MAP BOUNDARY (flood fill — interior flat basins are
- * valley floors, not lakes; session 2 rejected lakes).
+ * The sea is the flat-zero region CONNECTED TO THE MAP BOUNDARY (flood fill —
+ * interior flat basins are valley floors, not lakes; session 2 rejected
+ * lakes).
  *
- * The register is the survey-chart waterline (the Upolu reference plate, and
- * the old-map water treatments the practitioner pointed at): a cream-cased
- * ink coastline at the shore, then waterlining — smooth coast-parallel offset
- * lines whose spacing grows and ink thins seaward, drawn as iso-lines of a
- * smoothed distance-from-shore field, so they parallel every shore including
- * islands. No scattered wave squiggles.
+ * The committed water register is the Session-7 engraved sea
+ * (design/claude-design/exports/session-7-ocean-waves/): crest lines run
+ * parallel to the shore as iso-lines of the distance-from-shore field, each
+ * carrying a feather comb of quadratic hair-strokes toward the next band.
+ * Waterlining — the survey-chart register of the Upolu plate — remains
+ * available on its own dial (`waterlines`) for A/B against the engraved sea.
+ * The coastline is a cream-cased ink stroke at the shore, weight dialable.
  *
  * Pure: a heightfield in, an SVG string out. No DOM, no Indexer, no Gate,
  * no URL.
