@@ -15,7 +15,7 @@
       "license": "MIT",
       "tech_stack": "JavaScript",
       "created": "2026-05-18",
-      "last_updated": "2026-07-10",
+      "last_updated": "2026-07-11",
       "state": {
         "stage": "dev",
         "last": "The hachure arc (ho-A) closed. ho-A-6.0 built `src/hachure-map.js` as a parallel renderer; ho-A-6.1 replaced the XOR `?render=` key with two independent layer flags (`?iso=1&hachure=1`), composed the renderer chain, and landed a comprehensive three-section tuner panel. The arc merged into `labs` at `c5a1e44`. Post-closure surfacings logged to `ho-process/hos/ho-A-surfacings.md` (Churchill hachure survey, colonial-aesthetics caution, caterpillar lineage). A design reference plate (Upolu, US Exploring Expedition, 1839) committed at `400f672`.",
@@ -24,7 +24,7 @@
         "as_of": "2026-07-09"
       },
       "_keisaku": {
-        "generated_at": "2026-07-10T23:58:14",
+        "generated_at": "2026-07-11T13:34:15",
         "generator_version": "1",
         "sources": {
           "readme": "README.md",
