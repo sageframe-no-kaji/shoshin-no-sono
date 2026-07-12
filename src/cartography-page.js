@@ -161,6 +161,7 @@ const tuners = {
   cartoucheChop: 60, // chop edge length in cartouche-local px (0 hides; the seal signs large at right)
   keyScale: 0.72, // session-9 face key, bottom-left corner (0 hides; the cartouche's junior sibling)
   keyBorder: 0.45, // hairline on the key's reserve — matches the cartouche's landing (0 = the session-9 unframed lock)
+  keyMargin: 10, // the cream box's gap from the plate's left/bottom edges — really in the corner, close to tight
 };
 
 /** The session-8 cartouche dropped into the top-right sea corner (the
@@ -179,19 +180,25 @@ const cartoucheG = (/** @type {import('./cartographer.js').CartographyField} */ 
 const keyG = (/** @type {import('./cartographer.js').CartographyField} */ field) => {
   const ks = tuners.keyScale;
   if (ks <= 0) return '';
-  const y = field.heightfield.height - 200 * ks - 16;
-  return `<g transform="translate(16,${y.toFixed(1)}) scale(${ks})">${faceKeySvg({ seed: field.seed, border: tuners.keyBorder })}</g>`;
+  // Derive the plate transform from the box anchor: the group shifts so the
+  // module's local reserve lands exactly on keyRect.
+  const r = keyRect();
+  const x = r.x - KEY_RESERVE.x * ks;
+  const y = r.y - KEY_RESERVE.y * ks;
+  return `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${ks})">${faceKeySvg({ seed: field.seed, border: tuners.keyBorder })}</g>`;
 };
 
-/** The face key's cream-box footprint in field coordinates — the module's
- * local reserve placed and scaled, so content keep-out uses the box the
- * reader sees, not the whole 320×200 local plate. */
+/** The face key's cream-box footprint in field coordinates — the BOX is the
+ * placement anchor (the module's local plate has generous empty margins, so
+ * anchoring the plate left the box floating mid-water): its left and bottom
+ * edges sit `keyMargin` px off the plate's corner. Content keep-out uses this
+ * same box, so what the reader sees is exactly what content clears. */
 const keyRect = () => {
   const ks = tuners.keyScale;
-  const ty = 620 - 200 * ks - 16;
+  const m = tuners.keyMargin;
   return {
-    x: 16 + KEY_RESERVE.x * ks,
-    y: ty + KEY_RESERVE.y * ks,
+    x: m,
+    y: 620 - m - KEY_RESERVE.h * ks,
     w: KEY_RESERVE.w * ks,
     h: KEY_RESERVE.h * ks,
   };
@@ -867,6 +874,7 @@ const TUNER_SECTIONS = [
     { key: 'cartoucheChop', label: 'cartouche chop size (0 hides)', min: 0, max: 60, step: 1, locked: true },
     { key: 'keyScale', label: 'face key scale (0 hides)', min: 0, max: 1, step: 0.02 },
     { key: 'keyBorder', label: 'face key border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05 },
+    { key: 'keyMargin', label: 'face key corner gap', min: 0, max: 60, step: 1 },
   ]},
 ];
 
