@@ -140,14 +140,14 @@ const tuners = {
   waveOpacity: 0.5, // waterline ink strength
   // Session-7 engraved sea (design/claude-design/exports/session-7-ocean-waves/) —
   // the practitioner's locked landing, E-family "Fine ripple".
-  waveWl: 78, // wavelength of the crest undulation
-  waveAmp: 3.5, // undulation amplitude
-  waveBand: 18, // band gap between crests
-  waveComb: 1.4, // comb spacing along the crest
-  waveCombLen: 13, // comb stroke length
-  waveWeight: 0.8, // line weight (crest ×1.05, feathers ×0.5/×0.42)
-  waveInk: 0.4, // ink depth — feather opacity
-  waveWild: 0.3, // randomness — per-band wavelength/amplitude variance
+  waveWl: 42, // wavelength of the crest undulation (locked 2026-07-11)
+  waveAmp: 2, // undulation amplitude (locked)
+  waveBand: 11, // band gap between crests (locked)
+  waveComb: 1.8, // comb spacing along the crest (locked)
+  waveCombLen: 7, // comb stroke length (locked)
+  waveWeight: 0.14, // line weight — crest ×1.05, feathers ×0.5/×0.42 (locked)
+  waveInk: 0.78, // ink depth — feather opacity (locked)
+  waveWild: 0.3, // randomness — per-band wavelength/amplitude variance (locked)
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
   roadClear: 1.25, // road cream casing beyond the rails, per side
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
@@ -776,14 +776,14 @@ const TUNER_SECTIONS = [
     { key: 'trailWeight', label: 'trail weight', min: 0.2, max: 2, step: 0.05, locked: true },
     { key: 'trailTick', label: 'trail tick length', min: 0, max: 6, step: 0.1, locked: true },
     { key: 'trailClear', label: 'trail clearing (0 = uncased lock)', min: 0, max: 6, step: 0.1, locked: true },
-    { key: 'waveWl', label: 'wave: wavelength', min: 40, max: 220, step: 2 },
-    { key: 'waveAmp', label: 'wave: amplitude', min: 2, max: 24, step: 0.5 },
-    { key: 'waveBand', label: 'wave: band gap', min: 10, max: 40, step: 1 },
-    { key: 'waveComb', label: 'wave: comb spacing', min: 1.4, max: 4, step: 0.1 },
-    { key: 'waveCombLen', label: 'wave: comb length', min: 5, max: 40, step: 1 },
-    { key: 'waveWeight', label: 'wave: line weight', min: 0, max: 1, step: 0.02 },
-    { key: 'waveInk', label: 'wave: ink depth', min: 0, max: 1, step: 0.02 },
-    { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05 },
+    { key: 'waveWl', label: 'wave: wavelength', min: 40, max: 220, step: 2, locked: true },
+    { key: 'waveAmp', label: 'wave: amplitude', min: 2, max: 24, step: 0.5, locked: true },
+    { key: 'waveBand', label: 'wave: band gap', min: 10, max: 40, step: 1, locked: true },
+    { key: 'waveComb', label: 'wave: comb spacing', min: 1.4, max: 4, step: 0.1, locked: true },
+    { key: 'waveCombLen', label: 'wave: comb length', min: 5, max: 40, step: 1, locked: true },
+    { key: 'waveWeight', label: 'wave: line weight', min: 0, max: 1, step: 0.02, locked: true },
+    { key: 'waveInk', label: 'wave: ink depth', min: 0, max: 1, step: 0.02, locked: true },
+    { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05, locked: true },
   ]},
 ];
 

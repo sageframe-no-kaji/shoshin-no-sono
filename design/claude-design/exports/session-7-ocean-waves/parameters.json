@@ -2,15 +2,15 @@
   "session": 7,
   "question": "What does the sea look like?",
   "source": "claude.ai design project b5ef80fc — Ocean Waves - Session 7.html",
-  "chosen": "E-family (Fine ripple), practitioner-landed",
+  "chosen": "E-family (Fine ripple), practitioner-landed on the live map 2026-07-11",
   "locked": {
-    "wavelength": 78,
-    "amplitude": 3.5,
-    "bandGap": 18,
-    "combSpacing": 1.4,
-    "combLength": 13,
-    "lineWeight": 0.8,
-    "inkDepth": 0.4,
+    "wavelength": 42,
+    "amplitude": 2,
+    "bandGap": 11,
+    "combSpacing": 1.8,
+    "combLength": 7,
+    "lineWeight": 0.14,
+    "inkDepth": 0.78,
     "randomness": 0.3
   },
   "principles": [

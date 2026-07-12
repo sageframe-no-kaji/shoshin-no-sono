@@ -31,13 +31,13 @@ import { mulberry32 } from './field.js';
  * @property {number} [waterlines]  Number of waterline offsets hugging the coast (default 0).
  * @property {number} [opacity]     Waterline ink strength at the coast (default 0.5; 0 hides the waterlines).
  * @property {number} [seed]        Layout seed — the engraved sea reproduces exactly at `?seed=`.
- * @property {number} [waveWl]      Session-7 wavelength of the crest undulation (default 78).
- * @property {number} [waveAmp]     Session-7 undulation amplitude (default 3.5).
- * @property {number} [waveBand]    Session-7 band gap — spacing between crest bands (default 18).
- * @property {number} [waveComb]    Session-7 comb spacing along the crest (default 1.4).
- * @property {number} [waveCombLen] Session-7 comb stroke length (default 13).
- * @property {number} [waveWeight]  Session-7 line weight (crest ×1.05, feathers ×0.5/×0.42; default 0.8).
- * @property {number} [waveInk]     Session-7 ink depth — feather opacity (faint ×0.55; default 0.4; 0 hides the sea).
+ * @property {number} [waveWl]      Session-7 wavelength of the crest undulation (default 42).
+ * @property {number} [waveAmp]     Session-7 undulation amplitude (default 2).
+ * @property {number} [waveBand]    Session-7 band gap — spacing between crest bands (default 11).
+ * @property {number} [waveComb]    Session-7 comb spacing along the crest (default 1.8).
+ * @property {number} [waveCombLen] Session-7 comb stroke length (default 7).
+ * @property {number} [waveWeight]  Session-7 line weight (crest ×1.05, feathers ×0.5/×0.42; default 0.14).
+ * @property {number} [waveInk]     Session-7 ink depth — feather opacity (faint ×0.55; default 0.78; 0 hides the sea).
  * @property {number} [waveWild]    Session-7 randomness — per-band wavelength/amplitude variance (default 0.3).
  */
 
@@ -221,13 +221,13 @@ export function waterSvg(hf, opts = {}) {
   const lineCount = opts.waterlines ?? 0;
   // Session-7 engraved sea parameters (the practitioner's locked landing).
   const seed = (opts.seed ?? 1) >>> 0;
-  const waveWl = opts.waveWl ?? 78;
-  const waveAmp = opts.waveAmp ?? 3.5;
-  const waveBand = opts.waveBand ?? 18;
-  const waveComb = opts.waveComb ?? 1.4;
-  const waveCombLen = opts.waveCombLen ?? 13;
-  const waveWeight = opts.waveWeight ?? 0.8;
-  const waveInk = opts.waveInk ?? 0.4;
+  const waveWl = opts.waveWl ?? 42;
+  const waveAmp = opts.waveAmp ?? 2;
+  const waveBand = opts.waveBand ?? 11;
+  const waveComb = opts.waveComb ?? 1.8;
+  const waveCombLen = opts.waveCombLen ?? 7;
+  const waveWeight = opts.waveWeight ?? 0.14;
+  const waveInk = opts.waveInk ?? 0.78;
   const waveWild = opts.waveWild ?? 0.3;
 
   const mask = seaMask(hf);

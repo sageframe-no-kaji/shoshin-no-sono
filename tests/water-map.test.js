@@ -164,17 +164,17 @@ describe('waterSvg', () => {
 
   it('the engraved sea (Session 7): crests with strong and faint feather combs', () => {
     const svg = waterSvg(island(), { seed: 7, waterlines: 0 });
-    // Crest = weight × 1.05 at the locked 0.8 default; feathers at ink depth
-    // 0.4 (strong) and × 0.55 (faint) — the artifact's ink formulas.
-    expect(svg).toContain('stroke-width="0.84"'); // crest
-    expect(svg).toContain('opacity="0.40"'); // strong feathers
-    expect(svg).toContain('opacity="0.22"'); // faint under-comb
+    // Crest = weight × 1.05 at the locked 0.14 default; feathers at ink depth
+    // 0.78 (strong) and × 0.55 (faint) — the artifact's ink formulas.
+    expect(svg).toContain('stroke-width="0.15"'); // crest
+    expect(svg).toContain('opacity="0.78"'); // strong feathers
+    expect(svg).toContain('opacity="0.43"'); // faint under-comb
     expect(svg).toContain(' Q'); // comb strokes are quadratic hair-strokes
   });
 
   it('wave ink 0 silences the engraved sea', () => {
     const svg = waterSvg(island(), { seed: 7, waveInk: 0, waterlines: 0 });
-    expect(svg).not.toContain('stroke-width="0.84"');
+    expect(svg).not.toContain('stroke-width="0.15"');
     expect(svg).not.toContain(' Q');
   });
 
