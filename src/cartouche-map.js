@@ -4,7 +4,8 @@
  * licensed. Implemented from the artifact's chosen variant, then rebalanced
  * on the plate (2026-07-12): the hachure-fan register sample retired and the
  * text block shifted left so the TRUE Sageframe chop (sf-chop.png, extracted
- * to terracotta-on-transparent from the practitioner's brush original) can
+ * from the practitioner's brush original in deep vermilion #9E2B20 — the
+ * customary seal red, deliberately NOT the register terracotta) can
  * sign large on the right — letterhead composition, type left, seal right.
  * The cream reserve remains the paint-over; the native title leads at the
  * steepest size jump; the single terracotta rule with end ticks is the one
@@ -110,7 +111,7 @@ export function cartoucheSvg(opts = {}) {
     const cy = 100 - chopSize / 2;
     g +=
       `<image href="${chopHref}" x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" ` +
-      `width="${chopSize}" height="${chopSize}" opacity="0.9" preserveAspectRatio="xMidYMid meet"/>`;
+      `width="${chopSize}" height="${chopSize}" opacity="0.95" preserveAspectRatio="xMidYMid meet"/>`;
   }
 
   return `<g>${g}</g>`;
