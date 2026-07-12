@@ -86,6 +86,10 @@ function hachureFan(cx, cy, seed) {
  *   unframed session-8 lock). The lock's premise was open water; over land the bare cream
  *   rect reads as a hole in the terrain, and the session's own parked item anticipated a
  *   coastline-style hairline for exactly this case.
+ * @property {number} [chopSize] The chop's edge length in local px (default 34; 0 omits it).
+ *   The artifact assumed a dedicated chop asset at 27 px — illegible at map scale with the
+ *   repo's hanko, so the size is a by-feel dial. The chop centres on (270, 159), mirroring
+ *   the hachure fan's optical centre at (50, ~160) so the two lower-corner marks balance.
  */
 
 /**
@@ -101,6 +105,7 @@ export function cartoucheSvg(opts = {}) {
   const seed = (opts.seed ?? 1) >>> 0;
   const chopHref = opts.chopHref ?? './shoshin-hanko.png';
   const border = opts.border ?? 0.45;
+  const chopSize = opts.chopSize ?? 34;
   let g = '';
 
   // The cream reserve — the terrain runs behind the cartouche and the reserve
@@ -129,11 +134,13 @@ export function cartoucheSvg(opts = {}) {
   // The register sample: a peak-hachure fan at the lower left.
   g += hachureFan(50, 158, seed ^ 0x5151);
 
-  // The brush chop signs the lower right.
-  if (chopHref) {
+  // The brush chop signs the lower right, centred to mirror the fan.
+  if (chopHref && chopSize > 0) {
+    const cx = 270 - chopSize / 2;
+    const cy = 159 - chopSize / 2;
     g +=
-      `<image href="${chopHref}" x="256" y="140" width="27" height="27" ` +
-      `opacity="0.9" preserveAspectRatio="xMidYMid meet"/>`;
+      `<image href="${chopHref}" x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" ` +
+      `width="${chopSize}" height="${chopSize}" opacity="0.9" preserveAspectRatio="xMidYMid meet"/>`;
   }
 
   return `<g>${g}</g>`;

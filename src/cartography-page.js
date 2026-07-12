@@ -157,6 +157,7 @@ const tuners = {
   trailClear: 1.6, // cream halo width — 0 is the session-5 uncased lock; >0 is the legibility dial
   cartoucheScale: 0.52, // session-8 cartouche, top-right corner (0 hides; corner selection parked)
   cartoucheBorder: 0.45, // hairline on the reserve edge — 0 is the unframed session-8 lock (open-water premise)
+  cartoucheChop: 34, // chop edge length in cartouche-local px (0 hides; centred to mirror the fan)
 };
 
 /** The session-8 cartouche dropped into the top-right sea corner (the
@@ -165,7 +166,7 @@ const cartoucheG = (/** @type {import('./cartographer.js').CartographyField} */ 
   const cs = tuners.cartoucheScale;
   if (cs <= 0) return '';
   const x = field.heightfield.width - 320 * cs - 16;
-  return `<g transform="translate(${x.toFixed(1)},16) scale(${cs})">${cartoucheSvg({ seed: field.seed, border: tuners.cartoucheBorder })}</g>`;
+  return `<g transform="translate(${x.toFixed(1)},16) scale(${cs})">${cartoucheSvg({ seed: field.seed, border: tuners.cartoucheBorder, chopSize: tuners.cartoucheChop })}</g>`;
 };
 
 /** Every field computation shares this opts slice: the tuners, the ho-08 sea
@@ -818,6 +819,7 @@ const TUNER_SECTIONS = [
     { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05, locked: true },
     { key: 'cartoucheScale', label: 'cartouche scale (0 hides)', min: 0, max: 1, step: 0.02 },
     { key: 'cartoucheBorder', label: 'cartouche border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05 },
+    { key: 'cartoucheChop', label: 'cartouche chop size (0 hides)', min: 0, max: 60, step: 1 },
   ]},
 ];
 

@@ -43,13 +43,16 @@ describe('cartoucheSvg — session 8, variant A', () => {
     expect(a).toContain('stroke="#4A4A4A" stroke-width="0.55"');
   });
 
-  it('the brush chop signs the lower right, and can be omitted', () => {
+  it('the brush chop signs the lower right — centred on the fan line, sized by dial', () => {
     const withChop = cartoucheSvg();
     expect(withChop).toContain('href="./shoshin-hanko.png"');
-    expect(withChop).toContain('x="256" y="140"');
+    // Default 34 px, centred at (270, 159) — mirroring the hachure fan.
+    expect(withChop).toContain('x="253.0" y="142.0" width="34" height="34"');
+    const big = cartoucheSvg({ chopSize: 44 });
+    expect(big).toContain('x="248.0" y="137.0" width="44" height="44"');
     const custom = cartoucheSvg({ chopHref: './assets/chop.png' });
     expect(custom).toContain('href="./assets/chop.png"');
-    const none = cartoucheSvg({ chopHref: '' });
-    expect(none).not.toContain('<image');
+    expect(cartoucheSvg({ chopHref: '' })).not.toContain('<image');
+    expect(cartoucheSvg({ chopSize: 0 })).not.toContain('<image');
   });
 });
