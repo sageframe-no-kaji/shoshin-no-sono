@@ -155,9 +155,9 @@ const tuners = {
   trailWeight: 0.7, // single stroke weight, rail and rungs alike
   trailTick: 2.2, // rung half-length in px
   trailClear: 1.6, // cream halo width — 0 is the session-5 uncased lock; >0 is the legibility dial
-  cartoucheScale: 0.52, // session-8 cartouche, top-right corner (0 hides; corner selection parked)
+  cartoucheScale: 0.75, // session-8 cartouche, top-right corner (0 hides; corner selection parked; landed 2026-07-12)
   cartoucheBorder: 0.45, // hairline on the reserve edge — 0 is the unframed session-8 lock (open-water premise)
-  cartoucheChop: 34, // chop edge length in cartouche-local px (0 hides; centred to mirror the fan)
+  cartoucheChop: 60, // chop edge length in cartouche-local px (0 hides; the seal signs large at right)
 };
 
 /** The session-8 cartouche dropped into the top-right sea corner (the
