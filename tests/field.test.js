@@ -156,3 +156,35 @@ describe('makeNoise', () => {
     expect(Math.abs(a(0.5, 0.5))).toBeLessThanOrEqual(1.3); // 0.9 + 0.4 octave weights
   });
 });
+
+describe('computePositions — furniture reserve keep-out (ho-08)', () => {
+  /** @param {number} n */
+  const peaks = (n) =>
+    Array.from({ length: n }, (_, i) => ({ id: `w${i}`, importance: 5, amplitude: 5 }));
+
+  it('no peak centre seats inside the reserve plus its standoff', () => {
+    const reserve = { x: 700, y: 16, w: 220, h: 140 }; // a top-right cartouche footprint
+    const pts = computePositions(peaks(40), 12345, { reserve });
+    for (const p of pts) {
+      const inside =
+        p.x >= reserve.x - 30 &&
+        p.x <= reserve.x + reserve.w + 30 &&
+        p.y >= reserve.y - 30 &&
+        p.y <= reserve.y + reserve.h + 30;
+      expect(inside).toBe(false);
+    }
+  });
+
+  it('the keep-out stays deterministic from the seed', () => {
+    const reserve = { x: 700, y: 16, w: 220, h: 140 };
+    const a = computePositions(peaks(12), 7, { reserve });
+    const b = computePositions(peaks(12), 7, { reserve });
+    expect(a).toEqual(b);
+  });
+
+  it('without a reserve, placement is unchanged (back-compat)', () => {
+    const free = computePositions(peaks(12), 7, {});
+    const same = computePositions(peaks(12), 7);
+    expect(free).toEqual(same);
+  });
+});

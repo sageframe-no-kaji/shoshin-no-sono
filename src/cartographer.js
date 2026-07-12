@@ -78,8 +78,13 @@ export function relevance(work, state, floor) {
  *   relevanceFloor?: number,
  *   emergenceScale?: (id: string) => number,
  *   seaFraction?: number,
- *   coastRuggedness?: number
+ *   coastRuggedness?: number,
+ *   cartoucheReserve?: { x: number, y: number, w: number, h: number }
  * }} CartographyOpts
+ * `cartoucheReserve` (ho-08): the cartouche's footprint in field coordinates.
+ * Peaks never seat in it (placement keep-out) and the field is denied
+ * elevation under it (feathered to sea level) — the terrain yields a bay for
+ * the map's signature.
  * `seaFraction` (ho-08's datum): sea level as a fraction of the raw field max.
  * The datum is applied to the heightfield itself — subtract and clamp at zero
  * (src/field.js applySeaDatum) — so the shore is exactly 0, the sea is flat,
@@ -121,7 +126,7 @@ export function computeField(indexer, state, seed, opts = {}) {
   const positioned = computePositions(
     works.map((w) => ({ id: w.id, importance: w.importance, amplitude: w.importance })),
     seed,
-    opts,
+    { ...opts, reserve: opts.cartoucheReserve },
   );
   const weighted = positioned.map((p, i) => ({
     ...p,
@@ -135,6 +140,7 @@ export function computeField(indexer, state, seed, opts = {}) {
   const heightfield = applySeaDatum(buildHeightfield(active, seed, opts), opts.seaFraction ?? 0, {
     ruggedness: opts.coastRuggedness ?? 0,
     seed,
+    reserve: opts.cartoucheReserve,
   });
   return { peaks: active, heightfield, seed };
 }

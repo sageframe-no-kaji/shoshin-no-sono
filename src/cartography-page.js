@@ -167,10 +167,21 @@ const cartoucheG = (/** @type {import('./cartographer.js').CartographyField} */ 
   return `<g transform="translate(${x.toFixed(1)},16) scale(${cs})">${cartoucheSvg({ seed: field.seed })}</g>`;
 };
 
-/** Every field computation shares this opts slice: the tuners plus the ho-08
- * sea datum (sea level as a fraction of the raw field max — the heightfield
- * arrives with the sea already flattened to zero). */
-const fieldOpts = () => ({ ...tuners, seaFraction: tuners.waveThreshold });
+/** Every field computation shares this opts slice: the tuners, the ho-08 sea
+ * datum (sea level as a fraction of the raw field max — the heightfield
+ * arrives with the sea already flattened to zero), and the cartouche reserve
+ * — the field DENIES elevation under the title block, so the terrain yields
+ * a bay for the map's own signature (peaks keep out; the sea floods in). */
+const fieldOpts = () => {
+  const cs = tuners.cartoucheScale;
+  return {
+    ...tuners,
+    seaFraction: tuners.waveThreshold,
+    ...(cs > 0
+      ? { cartoucheReserve: { x: 1000 - 320 * cs - 16, y: 16, w: 320 * cs, h: 200 * cs } }
+      : {}),
+  };
+};
 
 /** Gap between consecutive town builds in the writing phase (not a by-feel tuner). */
 const TOWN_GAP_MS = 140;

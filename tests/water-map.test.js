@@ -59,6 +59,29 @@ describe('applySeaDatum', () => {
     expect(Array.from(raw.field)).toEqual(Array.from(before));
   });
 
+  it('a reserve denies elevation under the furniture, feathered to the surround', () => {
+    const cone = () =>
+      hfFrom((x, y) => Math.max(0, 10 * (1 - Math.hypot(x - 80, y - 80) / 70)));
+    const reserve = { x: 60, y: 60, w: 40, h: 40 }; // over the summit, worst case
+    const hf = applySeaDatum(cone(), 0.18, { reserve, feather: 30 });
+    const at = (/** @type {import('../src/field.js').Heightfield} */ f, /** @type {number} */ x, /** @type {number} */ y) =>
+      f.field[Math.round(y / f.cell) * f.cols + Math.round(x / f.cell)];
+    const free = applySeaDatum(cone(), 0.18);
+    // Dead flat inside the rect…
+    expect(at(hf, 80, 80)).toBe(0); // the summit itself is denied
+    expect(at(hf, 64, 64)).toBe(0);
+    // …suppressed within the feather band, recovering with distance
+    // (compare suppression RATIOS — the cone's own falloff would confound
+    // absolute heights).
+    expect(at(hf, 80, 110)).toBeGreaterThan(0);
+    expect(at(hf, 80, 110)).toBeLessThan(at(free, 80, 110));
+    const ratioNear = at(hf, 80, 110) / at(free, 80, 110);
+    const ratioFar = at(hf, 80, 125) / at(free, 80, 125);
+    expect(ratioNear).toBeLessThan(ratioFar);
+    // Beyond the feather the field is untouched.
+    expect(at(hf, 80, 140)).toBeCloseTo(at(free, 80, 140), 9);
+  });
+
   it('coast ruggedness roughens the shore, reproducibly, without moving the summit', () => {
     const cone = () =>
       hfFrom((x, y) => Math.max(0, 10 * (1 - Math.hypot(x - 80, y - 80) / 70)));

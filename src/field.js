@@ -36,6 +36,9 @@
  * @property {number} [noiseWeight] Amplitude of low-elevation crenellation noise.
  * @property {number} [radiusBase] Massif radius at importance 0.
  * @property {number} [radiusScale] Added radius per importance point.
+ * @property {{ x: number, y: number, w: number, h: number }} [reserve] A furniture
+ *   footprint (ho-08: the cartouche) no peak may seat in — best-candidate darts
+ *   inside it (grown by a small standoff) are discarded.
  */
 
 /**
@@ -87,7 +90,7 @@ export function hashSeed(id, seed) {
   return h >>> 0;
 }
 
-/** @param {FieldOpts} [opts] @returns {Required<FieldOpts>} */
+/** @param {FieldOpts} [opts] @returns {typeof DEFAULTS & FieldOpts} */
 function withDefaults(opts) {
   return { ...DEFAULTS, ...opts };
 }
@@ -121,6 +124,18 @@ export function computePositions(peaks, seed, opts) {
   /** @type {number[]} */
   const ys = [];
 
+  // The furniture keep-out (ho-08): a peak's CENTER never seats inside the
+  // reserve footprint plus a standoff — the field suppression handles the
+  // flanks, but a summit under the cartouche would drown a work.
+  const rsv = o.reserve;
+  const STANDOFF = 30;
+  const inReserve = (/** @type {number} */ px, /** @type {number} */ py) =>
+    rsv != null &&
+    px >= rsv.x - STANDOFF &&
+    px <= rsv.x + rsv.w + STANDOFF &&
+    py >= rsv.y - STANDOFF &&
+    py <= rsv.y + rsv.h + STANDOFF;
+
   for (let i = 0; i < n; i++) {
     let bx = minX;
     let by = minY;
@@ -128,6 +143,7 @@ export function computePositions(peaks, seed, opts) {
     for (let c = 0; c < tries; c++) {
       const px = minX + rnd() * spanX;
       const py = minY + rnd() * spanY;
+      if (inReserve(px, py)) continue; // the dart landed under the furniture
       // Distance to the nearest already-placed peak (Infinity for the first).
       let nearest = Infinity;
       for (let j = 0; j < xs.length; j++) {
@@ -318,11 +334,17 @@ export function buildHeightfield(peaks, seed, opts) {
  * Near the coast it wobbles the shoreline (inlets) and pushes bumps over the
  * datum (islets); at the summits the envelope is ~0 so the peaks never move;
  * in the deep sea the clamp eats it. Deterministic from the seed — `?seed=`
- * reproduces the exact archipelago. Mutates the freshly-built heightfield and
- * returns it.
+ * reproduces the exact archipelago.
+ *
+ * `reserve` denies elevation under a furniture footprint (ho-08: the
+ * cartouche): the field rolls smoothly to sea level inside the rect, feathered
+ * over `feather` px outside it — the terrain yields a bay for the map's own
+ * signature, and the sea floods it by physics (coastline, waterlines, and
+ * waves wrap the bay with no renderer knowing why). Mutates the freshly-built
+ * heightfield and returns it.
  * @param {Heightfield} hf
  * @param {number} fraction sea level as a fraction of the field max (0 = no sea)
- * @param {{ ruggedness?: number, seed?: number }} [opts]
+ * @param {{ ruggedness?: number, seed?: number, reserve?: { x: number, y: number, w: number, h: number }, feather?: number }} [opts]
  * @returns {Heightfield}
  */
 export function applySeaDatum(hf, fraction, opts = {}) {
@@ -332,7 +354,9 @@ export function applySeaDatum(hf, fraction, opts = {}) {
   const noise = ruggedness > 0 ? makeCoastNoise((opts.seed ?? 0) >>> 0) : null;
   const amp = ruggedness * sl * 1.2;
   const w = 0.5 * sl; // envelope half-width in elevation units — the coast band
-  const { cols, rows } = hf;
+  const rsv = opts.reserve;
+  const feather = opts.feather ?? 45;
+  const { cols, rows, cell } = hf;
   let max = 0;
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
@@ -343,6 +367,18 @@ export function applySeaDatum(hf, fraction, opts = {}) {
         v += amp * noise(i / (cols - 1), j / (rows - 1)) * env;
       }
       v = Math.max(0, v);
+      if (rsv && v > 0) {
+        // Distance outside the reserve rect (0 inside) → smoothstep rolloff.
+        const px = i * cell;
+        const py = j * cell;
+        const dx = Math.max(rsv.x - px, 0, px - (rsv.x + rsv.w));
+        const dy = Math.max(rsv.y - py, 0, py - (rsv.y + rsv.h));
+        const d = Math.hypot(dx, dy);
+        if (d < feather) {
+          const t = d / feather;
+          v *= t * t * (3 - 2 * t);
+        }
+      }
       hf.field[k] = v;
       if (v > max) max = v;
     }
