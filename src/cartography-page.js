@@ -363,7 +363,13 @@ const placeNamesSvg = (field, towns) => {
     match: t.match,
     importance: indexer.getWork(t.id)?.importance ?? 0,
   }));
-  return placeNameLayer(peakInputs, townInputs, nameLayerOpts());
+  // The cartouche's box is a label obstacle: place names never enter it.
+  const cs = tuners.cartoucheScale;
+  const obstacles =
+    cs > 0
+      ? [{ x1: 1000 - 320 * cs - 16, y1: 16, x2: 1000 - 16, y2: 16 + 200 * cs }]
+      : [];
+  return placeNameLayer(peakInputs, townInputs, { ...nameLayerOpts(), obstacles });
 };
 
 /** Update the seed / pinned readouts and the theme chips. */
@@ -469,9 +475,11 @@ const nameEl = (p) => {
  */
 const featuresSvg = (field, towns) => {
   const floor = tuners.waveThreshold > 0 ? 0.02 * field.heightfield.max : undefined;
+  const keepOut = fieldOpts().cartoucheReserve;
   const roadRoutes = computeRoadRoutes(computeRoadEdges(indexer, towns), field.heightfield, {
     follow: tuners.roadFollow,
     floor,
+    keepOut,
   });
   // Trails draw FIRST and roads paint over them — roads eat trails; the trail
   // router also keeps a minimal separation from the road corridors, so a trail
@@ -484,6 +492,7 @@ const featuresSvg = (field, towns) => {
       clear: tuners.trailClear,
       avoid: roadRoutes.map((r) => r.pts),
       floor,
+      keepOut,
     }) + roadsSvgFromRoutes(roadRoutes, { clear: tuners.roadClear })
   );
 };
@@ -495,9 +504,8 @@ const render = () => {
   const state = gate.currentState();
   const field = computeField(indexer, state, seed, fieldOpts());
   const towns = computeTowns(indexer, state, field, {
-    ...tuners,
+    ...fieldOpts(),
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
-    seaFraction: tuners.waveThreshold,
   });
   const layers = gate.currentLayers();
   let svg = layers.hachure ? labelGlowFilter(tuners.labelGlow) : '';
@@ -623,9 +631,8 @@ const playWriting = (writeSteps, token, layers) => {
   const state = gate.currentState();
   const field = computeField(indexer, state, seed, fieldOpts()); // full terrain, once
   const allTowns = computeTowns(indexer, state, field, {
-    ...tuners,
+    ...fieldOpts(),
     thresholds: [tuners.t1, tuners.t2, tuners.t3],
-    seaFraction: tuners.waveThreshold,
   });
   const byId = new Map(allTowns.map((t) => [t.id, t]));
   // Freeze the terrain once (breathing beacons keep their phase); only `towns` redraws.

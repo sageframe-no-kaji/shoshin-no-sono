@@ -394,3 +394,26 @@ describe('elevationLabelsSvg', () => {
     expect(svg).toContain('stroke-width="4.8"'); // 2.4 × 2
   });
 });
+
+describe('placeLabels — furniture obstacles (ho-08: the cartouche)', () => {
+  const item = (/** @type {number} */ cx, /** @type {number} */ top, /** @type {number} */ priority) => ({
+    cx,
+    top,
+    w: 40,
+    h: 10,
+    priority,
+    svg: `<text data-cx="${cx}"/>`,
+  });
+
+  it('a label overlapping an obstacle is dropped, others place normally', () => {
+    const obstacle = { x1: 100, y1: 0, x2: 200, y2: 50 };
+    const out = placeLabels([item(150, 20, 9), item(300, 20, 5)], [obstacle]);
+    expect(out).not.toContain('data-cx="150"'); // inside the cartouche box — dropped
+    expect(out).toContain('data-cx="300"'); // clear of it — placed
+  });
+
+  it('no obstacles behaves exactly as before', () => {
+    const out = placeLabels([item(150, 20, 9)]);
+    expect(out).toContain('data-cx="150"');
+  });
+});

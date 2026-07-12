@@ -82,9 +82,12 @@ export function relevance(work, state, floor) {
  *   cartoucheReserve?: { x: number, y: number, w: number, h: number }
  * }} CartographyOpts
  * `cartoucheReserve` (ho-08): the cartouche's footprint in field coordinates.
- * Peaks never seat in it (placement keep-out) and the field is denied
- * elevation under it (feathered to sea level) — the terrain yields a bay for
- * the map's signature.
+ * The terrain generates FREELY beneath it — the cartouche's cream reserve
+ * paints over whatever is there — but the map's CONTENT keeps out: peaks
+ * never seat in it, town seats nudge clear, routes route around, labels
+ * treat it as a collision obstacle. (An earlier same-day approach denied the
+ * field elevation under the footprint; the practitioner superseded it —
+ * furniture claims no terrain, only content.)
  * `seaFraction` (ho-08's datum): sea level as a fraction of the raw field max.
  * The datum is applied to the heightfield itself — subtract and clamp at zero
  * (src/field.js applySeaDatum) — so the shore is exactly 0, the sea is flat,
@@ -140,7 +143,6 @@ export function computeField(indexer, state, seed, opts = {}) {
   const heightfield = applySeaDatum(buildHeightfield(active, seed, opts), opts.seaFraction ?? 0, {
     ruggedness: opts.coastRuggedness ?? 0,
     seed,
-    reserve: opts.cartoucheReserve,
   });
   return { peaks: active, heightfield, seed };
 }
@@ -229,7 +231,11 @@ export function computeTowns(indexer, state, field, opts = {}) {
     // The datum floor (ho-08): the heightfield is already datumed (sea = flat
     // 0), so seats stop a small standoff above the shore, never in the sea.
     const floor = (opts.seaFraction ?? 0) > 0 ? 0.02 * hf.max : -Infinity;
-    const seat = seatDownhill(townSeat(anchors, centroid, opts), hf, footOffset, floor);
+    const seat = nudgeOutOfReserve(
+      seatDownhill(townSeat(anchors, centroid, opts), hf, footOffset, floor),
+      opts.cartoucheReserve,
+      24,
+    );
     const weight = indexer.settlementWeight(town.id);
     const level = sizeBand(weight, thresholds);
     const density = baseDensity + weight * extentScale;
@@ -247,6 +253,36 @@ export function computeTowns(indexer, state, field, opts = {}) {
       match: matchesFilter(town, state),
     };
   });
+}
+
+/**
+ * Push a point out of a furniture reserve (ho-08: the cartouche footprint),
+ * exiting through the nearest expanded edge; points already clear are
+ * untouched. Content never sits under the map's furniture.
+ * @param {{ x: number, y: number }} pt
+ * @param {{ x: number, y: number, w: number, h: number } | undefined} r
+ * @param {number} pad
+ * @returns {{ x: number, y: number }}
+ */
+function nudgeOutOfReserve(pt, r, pad) {
+  if (!r) return pt;
+  if (
+    pt.x < r.x - pad ||
+    pt.x > r.x + r.w + pad ||
+    pt.y < r.y - pad ||
+    pt.y > r.y + r.h + pad
+  ) {
+    return pt;
+  }
+  const left = pt.x - (r.x - pad);
+  const right = r.x + r.w + pad - pt.x;
+  const top = pt.y - (r.y - pad);
+  const bottom = r.y + r.h + pad - pt.y;
+  const m = Math.min(left, right, top, bottom);
+  if (m === left) return { x: r.x - pad, y: pt.y };
+  if (m === right) return { x: r.x + r.w + pad, y: pt.y };
+  if (m === top) return { x: pt.x, y: r.y - pad };
+  return { x: pt.x, y: r.y + r.h + pad };
 }
 
 /**

@@ -79,6 +79,9 @@ function gradAt(hf, x, y) {
  * @property {number} [minSep]   Minimal separation from `avoid` polylines in px.
  * @property {number} [floor]    The datum (sea level, absolute elevation) — routes climb out of
  *   ground below it; negative elevations prohibit roads and trails (ho-08).
+ * @property {{ x: number, y: number, w: number, h: number }} [keepOut] Furniture footprint
+ *   (the cartouche) routes may never enter — waypoints inside project out through the
+ *   nearest edge (ho-08).
  */
 
 /**
@@ -164,6 +167,8 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
   const avoid = opts.avoid ?? [];
   const minSep = opts.minSep ?? 7;
   const floor = opts.floor ?? -Infinity;
+  const keepOut = opts.keepOut;
+  const KO_PAD = 8;
   const smooth = 0.2;
   for (let k = 0; k < iters; k++) {
     for (let i = 1; i < n; i++) {
@@ -202,6 +207,27 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
       } else if (drift < -maxDrift) {
         px -= cnx * (drift + maxDrift);
         py -= cny * (drift + maxDrift);
+      }
+      // Furniture keep-out (the cartouche): a waypoint inside the footprint
+      // exits through the nearest edge — routes go around the title block.
+      if (keepOut) {
+        const r = keepOut;
+        if (
+          px >= r.x - KO_PAD &&
+          px <= r.x + r.w + KO_PAD &&
+          py >= r.y - KO_PAD &&
+          py <= r.y + r.h + KO_PAD
+        ) {
+          const left = px - (r.x - KO_PAD);
+          const right = r.x + r.w + KO_PAD - px;
+          const top = py - (r.y - KO_PAD);
+          const bottom = r.y + r.h + KO_PAD - py;
+          const m = Math.min(left, right, top, bottom);
+          if (m === left) px = r.x - KO_PAD;
+          else if (m === right) px = r.x + r.w + KO_PAD;
+          else if (m === top) py = r.y - KO_PAD;
+          else py = r.y + r.h + KO_PAD;
+        }
       }
       // Minimal separation from road corridors — a trail may run alongside a
       // road, never on it (roads eat trails; the paint order does the eating,
@@ -475,6 +501,7 @@ export function computeRoadRoutes(edges, hf, opts = {}) {
           follow: opts.follow ?? 0.7,
           maxDrift: opts.maxDrift ?? 70,
           floor: opts.floor,
+          keepOut: opts.keepOut,
         })
       : bowedPoints(e.from.x, e.from.y, foot.x, foot.y, strHash(e.id), 0.12);
     return { pts, strength: e.strength ?? 1, id: e.id };
@@ -544,6 +571,7 @@ export function trailsSvg(edges, hf, opts = {}) {
         avoid: opts.avoid,
         minSep: opts.minSep,
         floor: opts.floor,
+        keepOut: opts.keepOut,
       });
       out += railAndRungsSvg(chaikin(pts, 2), opts);
     } else {

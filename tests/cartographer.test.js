@@ -428,3 +428,50 @@ describe('createCartographer', () => {
     expect(Number.isInteger(carto.activeSeed())).toBe(true);
   });
 });
+
+describe('cartoucheReserve — content keeps out of the furniture (ho-08)', () => {
+  it('no peak seats inside the reserve; the terrain beneath is NOT flattened', () => {
+    const reserve = { x: 700, y: 16, w: 220, h: 140 };
+    const withR = computeField(indexer, empty, 12345, { cartoucheReserve: reserve });
+    for (const p of withR.peaks) {
+      const inside =
+        p.x >= reserve.x - 30 &&
+        p.x <= reserve.x + reserve.w + 30 &&
+        p.y >= reserve.y - 30 &&
+        p.y <= reserve.y + reserve.h + 30;
+      expect(inside).toBe(false);
+    }
+    // The field under the footprint generates freely (noise, skirts) — the
+    // reserve must not have zeroed it (this superseded the earlier
+    // deny-elevation approach: furniture claims no terrain, only content).
+    const hf = withR.heightfield;
+    let maxUnder = -Infinity;
+    for (let y = reserve.y; y < reserve.y + reserve.h; y += hf.cell) {
+      for (let x = reserve.x; x < reserve.x + reserve.w; x += hf.cell) {
+        const v = hf.field[Math.round(y / hf.cell) * hf.cols + Math.round(x / hf.cell)];
+        if (v > maxUnder) maxUnder = v;
+      }
+    }
+    expect(maxUnder).toBeGreaterThan(0); // terrain lives under the furniture
+  });
+
+  it('a town seat inside the reserve nudges out through the nearest edge', () => {
+    // Same field both times (positions fixed): find where a town seats with
+    // no reserve, drop the reserve exactly on that seat, and re-place.
+    const field = computeField(indexer, empty, 42);
+    const t0 = computeTowns(indexer, empty, field)[0];
+    const reserve = { x: t0.seat.x - 40, y: t0.seat.y - 30, w: 80, h: 60 };
+    const t1 = computeTowns(indexer, empty, field, { cartoucheReserve: reserve }).find(
+      (t) => t.id === t0.id,
+    );
+    const pad = 24;
+    const inside =
+      t1 != null &&
+      t1.seat.x > reserve.x - pad + 0.001 &&
+      t1.seat.x < reserve.x + reserve.w + pad - 0.001 &&
+      t1.seat.y > reserve.y - pad + 0.001 &&
+      t1.seat.y < reserve.y + reserve.h + pad - 0.001;
+    expect(inside).toBe(false);
+    expect(t1?.seat).not.toEqual(t0.seat); // the nudge actually moved it
+  });
+});

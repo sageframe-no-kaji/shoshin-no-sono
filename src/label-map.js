@@ -37,7 +37,7 @@ export const LABEL_LINE_HEIGHT = 14;
  */
 
 /** @typedef {LabelOpts & { townLabelScale: number, townLabelGap: number }} TownLabelOpts */
-/** @typedef {TownLabelOpts & { peakLabelScale: number, importanceScale: number }} PlaceNameOpts */
+/** @typedef {TownLabelOpts & { peakLabelScale: number, importanceScale: number, obstacles?: {x1:number,y1:number,x2:number,y2:number}[] }} PlaceNameOpts */
 
 /**
  * Textured cream glow filter (ho-A-6.0). Dilates the text alpha (feMorphology)
@@ -217,13 +217,16 @@ export const townLabelSvg = (t, opts) =>
  * Greedy label placement (ho-07.6): place labels by priority, dropping any whose box
  * overlaps one already placed — so text never lands on text. A pragmatic stand-in
  * for ho-09's full collision/leadering layer; here a colliding label is simply
- * omitted rather than nudged or leadered.
- * @param {LabelItem[]} items @returns {string}
+ * omitted rather than nudged or leadered. `obstacles` are pre-placed boxes no
+ * label may enter — map furniture like the cartouche's reserve (ho-08).
+ * @param {LabelItem[]} items
+ * @param {{x1:number,y1:number,x2:number,y2:number}[]} [obstacles]
+ * @returns {string}
  */
-export const placeLabels = (items) => {
+export const placeLabels = (items, obstacles = []) => {
   const ranked = [...items].sort((a, b) => b.priority - a.priority);
   /** @type {{x1:number,y1:number,x2:number,y2:number}[]} */
-  const placed = [];
+  const placed = [...obstacles];
   let out = '';
   for (const it of ranked) {
     const box = { x1: it.cx - it.w / 2, y1: it.top, x2: it.cx + it.w / 2, y2: it.top + it.h };
@@ -284,7 +287,7 @@ export const placeNameLayer = (peaks, towns, opts) => {
       svg: townLabelSvg(t, opts),
     });
   }
-  return placeLabels(items);
+  return placeLabels(items, opts.obstacles);
 };
 
 /** Heightfield units → feet: an importance-9 summit (height ≈ 9) reads ≈ 9000 ft. */
