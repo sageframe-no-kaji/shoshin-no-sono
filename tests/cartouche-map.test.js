@@ -5,7 +5,16 @@ describe('cartoucheSvg — session 8, variant A', () => {
   it('carries its own cream reserve at the artifact geometry (the reserve IS the frame)', () => {
     const svg = cartoucheSvg();
     expect(svg).toContain('<rect x="22" y="18" width="276" height="164" fill="#FDFCF9"/>');
-    expect(svg).not.toContain('stroke-dasharray'); // unframed — no box, no rules but the terracotta one
+    expect(svg).not.toContain('stroke-dasharray'); // no box rules but the terracotta one
+  });
+
+  it('over land, a coastline-style hairline defines the reserve edge — dialable to the unframed lock', () => {
+    const framed = cartoucheSvg(); // default 0.45 hairline
+    expect(framed).toContain('fill="none" stroke="#2B2B2B" stroke-width="0.45"');
+    const unframed = cartoucheSvg({ border: 0 }); // the session-8 open-water lock
+    expect(unframed).not.toContain('fill="none" stroke="#2B2B2B"');
+    const heavy = cartoucheSvg({ border: 0.8 });
+    expect(heavy).toContain('stroke-width="0.80"');
   });
 
   it('the four-line hierarchy: native leads, roman tracks wide, tagline whispers italic', () => {

@@ -82,6 +82,10 @@ function hachureFan(cx, cy, seed) {
  * @typedef {Object} CartoucheOpts
  * @property {number} [seed]     Seeds the hachure fan — same seed, same fan.
  * @property {string} [chopHref] Image href for the brush chop (the hanko). '' omits it.
+ * @property {number} [border]   Hairline stroke on the reserve edge (default 0.45; 0 = the
+ *   unframed session-8 lock). The lock's premise was open water; over land the bare cream
+ *   rect reads as a hole in the terrain, and the session's own parked item anticipated a
+ *   coastline-style hairline for exactly this case.
  */
 
 /**
@@ -96,11 +100,18 @@ function hachureFan(cx, cy, seed) {
 export function cartoucheSvg(opts = {}) {
   const seed = (opts.seed ?? 1) >>> 0;
   const chopHref = opts.chopHref ?? './shoshin-hanko.png';
+  const border = opts.border ?? 0.45;
   let g = '';
 
-  // The cream reserve — the waves part around the cartouche (clearing-as-
-  // paint-over); the reserve is the only frame variant A has.
+  // The cream reserve — the terrain runs behind the cartouche and the reserve
+  // paints over it (clearing-as-paint-over). Unframed over open water (the
+  // session-8 lock); over land a coastline-style hairline defines the edge.
   g += `<rect x="22" y="18" width="276" height="164" fill="${REGISTER.paper}"/>`;
+  if (border > 0) {
+    g +=
+      `<rect x="22" y="18" width="276" height="164" fill="none" ` +
+      `stroke="${REGISTER.ink}" stroke-width="${border.toFixed(2)}" opacity="0.85"/>`;
+  }
 
   // The four-line hierarchy: native leads at the steepest jump.
   g += line(72, 44, 500, REGISTER.ink, 0.12, NATIVE, { cjk: true });
