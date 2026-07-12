@@ -289,6 +289,29 @@ describe('terrainRoutedPath', () => {
     const interior = pts.slice(2, -2); // near-endpoint points can't fully separate
     for (const p of interior) expect(Math.abs(p.y - 100)).toBeGreaterThan(4);
   });
+
+  it('waypoints exit every furniture keep-out — routes go around the cartouche AND the key', () => {
+    // Flat field, chord running straight through two footprints (the two-corner
+    // furniture case: routes must clear each of them, not just the first).
+    const flat = tiltedHf();
+    flat.field.fill(0);
+    const boxes = [
+      { x: 80, y: 80, w: 60, h: 40 },
+      { x: 240, y: 80, w: 60, h: 40 },
+    ];
+    const pts = terrainRoutedPath(flat, 0, 100, 380, 100, { follow: 1, keepOuts: boxes });
+    const PAD = 8;
+    for (const r of boxes) {
+      for (const p of pts.slice(1, -1)) {
+        const inside =
+          p.x > r.x - PAD + 1e-6 &&
+          p.x < r.x + r.w + PAD - 1e-6 &&
+          p.y > r.y - PAD + 1e-6 &&
+          p.y < r.y + r.h + PAD - 1e-6;
+        expect(inside).toBe(false);
+      }
+    }
+  });
 });
 
 // ── roadsSvg ──────────────────────────────────────────────────────────────────

@@ -1,0 +1,25 @@
+{
+  "session": 9,
+  "question": "What does the face key look like?",
+  "source": "claude.ai design project b5ef80fc — Face Key - Session 9.html",
+  "chosen": "A — unframed reserve, three primitives, mark-samples in the gutter (also the session's own recommendation)",
+  "amendment": "the session's premise was open water and its A-lock unframed; the practitioner amended at implementation (2026-07-12) — the map face is land and water, so the reserve takes the cartouche's hairline border (0.45) so its edge holds over terrain, matching the cartouche's own same-day landing",
+  "locked": {
+    "aspect": "8:5 (320x200 local coordinates)",
+    "reserve": { "x": 53, "y": 52, "width": 214, "height": 96, "note": "cream paint-over; hairline border per the amendment — the key's only frame" },
+    "entries": [
+      { "swatch": "peak — seeded hachure fan at map weight", "noun": "PEAK", "gloss": "a work; height is weight." },
+      { "swatch": "town — 5-6 seeded ink blocks with party-wall gaps", "noun": "TOWN", "gloss": "the writing, at its foot." },
+      { "swatch": "trail — fine rail with four perpendicular rungs", "noun": "TRAIL", "gloss": "to what a writing documents." }
+    ],
+    "type": { "noun": "size 8.4, weight 500, tracking 0.13em, ink", "gloss": "size 9.4, weight 400, em-dash lead, roman grey #4A4A4A" },
+    "layout": { "gutterX": 77, "labelX": 99, "firstBaseline": 82, "leading": 25 },
+    "voice": "three good lines beat five — road and beacon go to the verso's full legend",
+    "placement": "bottom-left corner at ~0.72 scale, opposite margin from the cartouche (the session's placement check); visibly the junior of the two reserves"
+  },
+  "parked": [
+    "which margin the pipeline prefers for the key relative to the chosen cartouche corner, and whether the two ever want to stack in one margin",
+    "a scale threshold below which the gloss drops and only swatch + noun survive",
+    "whether the verso's full legend should quote these same generated swatches so face and back never disagree"
+  ]
+}

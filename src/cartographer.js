@@ -79,15 +79,16 @@ export function relevance(work, state, floor) {
  *   emergenceScale?: (id: string) => number,
  *   seaFraction?: number,
  *   coastRuggedness?: number,
- *   cartoucheReserve?: { x: number, y: number, w: number, h: number }
+ *   reserves?: { x: number, y: number, w: number, h: number }[]
  * }} CartographyOpts
- * `cartoucheReserve` (ho-08): the cartouche's footprint in field coordinates.
- * The terrain generates FREELY beneath it — the cartouche's cream reserve
- * paints over whatever is there — but the map's CONTENT keeps out: peaks
- * never seat in it, town seats nudge clear, routes route around, labels
- * treat it as a collision obstacle. (An earlier same-day approach denied the
- * field elevation under the footprint; the practitioner superseded it —
- * furniture claims no terrain, only content.)
+ * `reserves` (ho-08): the furniture footprints in field coordinates — the
+ * cartouche, then the face key (furniture is plural now, so the singular
+ * `cartoucheReserve` became a list). The terrain generates FREELY beneath
+ * them — each piece's cream reserve paints over whatever is there — but the
+ * map's CONTENT keeps out: peaks never seat in one, town seats nudge clear,
+ * routes route around, labels treat them as collision obstacles. (An earlier
+ * same-day approach denied the field elevation under the footprint; the
+ * practitioner superseded it — furniture claims no terrain, only content.)
  * `seaFraction` (ho-08's datum): sea level as a fraction of the raw field max.
  * The datum is applied to the heightfield itself — subtract and clamp at zero
  * (src/field.js applySeaDatum) — so the shore is exactly 0, the sea is flat,
@@ -129,7 +130,7 @@ export function computeField(indexer, state, seed, opts = {}) {
   const positioned = computePositions(
     works.map((w) => ({ id: w.id, importance: w.importance, amplitude: w.importance })),
     seed,
-    { ...opts, reserve: opts.cartoucheReserve },
+    opts,
   );
   const weighted = positioned.map((p, i) => ({
     ...p,
@@ -231,9 +232,9 @@ export function computeTowns(indexer, state, field, opts = {}) {
     // The datum floor (ho-08): the heightfield is already datumed (sea = flat
     // 0), so seats stop a small standoff above the shore, never in the sea.
     const floor = (opts.seaFraction ?? 0) > 0 ? 0.02 * hf.max : -Infinity;
-    const seat = nudgeOutOfReserve(
+    const seat = nudgeOutOfReserves(
       seatDownhill(townSeat(anchors, centroid, opts), hf, footOffset, floor),
-      opts.cartoucheReserve,
+      opts.reserves ?? [],
       24,
     );
     const weight = indexer.settlementWeight(town.id);
@@ -256,16 +257,31 @@ export function computeTowns(indexer, state, field, opts = {}) {
 }
 
 /**
- * Push a point out of a furniture reserve (ho-08: the cartouche footprint),
- * exiting through the nearest expanded edge; points already clear are
- * untouched. Content never sits under the map's furniture.
+ * Push a point out of every furniture reserve (ho-08: the cartouche, the face
+ * key), exiting through each nearest expanded edge; points already clear are
+ * untouched. The footprints sit at opposite margins, so the sequential pass
+ * never nudges a point from one into another.
  * @param {{ x: number, y: number }} pt
- * @param {{ x: number, y: number, w: number, h: number } | undefined} r
+ * @param {{ x: number, y: number, w: number, h: number }[]} rects
+ * @param {number} pad
+ * @returns {{ x: number, y: number }}
+ */
+function nudgeOutOfReserves(pt, rects, pad) {
+  let out = pt;
+  for (const r of rects) out = nudgeOutOfReserve(out, r, pad);
+  return out;
+}
+
+/**
+ * Push a point out of one furniture reserve, exiting through the nearest
+ * expanded edge; points already clear are untouched. Content never sits
+ * under the map's furniture.
+ * @param {{ x: number, y: number }} pt
+ * @param {{ x: number, y: number, w: number, h: number }} r
  * @param {number} pad
  * @returns {{ x: number, y: number }}
  */
 function nudgeOutOfReserve(pt, r, pad) {
-  if (!r) return pt;
   if (
     pt.x < r.x - pad ||
     pt.x > r.x + r.w + pad ||

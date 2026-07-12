@@ -79,9 +79,9 @@ function gradAt(hf, x, y) {
  * @property {number} [minSep]   Minimal separation from `avoid` polylines in px.
  * @property {number} [floor]    The datum (sea level, absolute elevation) — routes climb out of
  *   ground below it; negative elevations prohibit roads and trails (ho-08).
- * @property {{ x: number, y: number, w: number, h: number }} [keepOut] Furniture footprint
- *   (the cartouche) routes may never enter — waypoints inside project out through the
- *   nearest edge (ho-08).
+ * @property {{ x: number, y: number, w: number, h: number }[]} [keepOuts] Furniture
+ *   footprints (the cartouche, the face key) routes may never enter — waypoints inside
+ *   any of them project out through the nearest edge (ho-08).
  */
 
 /**
@@ -167,9 +167,33 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
   const avoid = opts.avoid ?? [];
   const minSep = opts.minSep ?? 7;
   const floor = opts.floor ?? -Infinity;
-  const keepOut = opts.keepOut;
+  const keepOuts = opts.keepOuts ?? [];
   const KO_PAD = 8;
   const smooth = 0.2;
+  // Project a waypoint out of every furniture footprint through its nearest
+  // edge (the cartouche, the face key — footprints sit at opposite margins,
+  // so exiting one never lands in another).
+  const projectOut = (/** @type {number} */ wx, /** @type {number} */ wy) => {
+    for (const r of keepOuts) {
+      if (
+        wx >= r.x - KO_PAD &&
+        wx <= r.x + r.w + KO_PAD &&
+        wy >= r.y - KO_PAD &&
+        wy <= r.y + r.h + KO_PAD
+      ) {
+        const left = wx - (r.x - KO_PAD);
+        const right = r.x + r.w + KO_PAD - wx;
+        const top = wy - (r.y - KO_PAD);
+        const bottom = r.y + r.h + KO_PAD - wy;
+        const m = Math.min(left, right, top, bottom);
+        if (m === left) wx = r.x - KO_PAD;
+        else if (m === right) wx = r.x + r.w + KO_PAD;
+        else if (m === top) wy = r.y - KO_PAD;
+        else wy = r.y + r.h + KO_PAD;
+      }
+    }
+    return { x: wx, y: wy };
+  };
   for (let k = 0; k < iters; k++) {
     for (let i = 1; i < n; i++) {
       const p = pts[i];
@@ -208,27 +232,10 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
         px -= cnx * (drift + maxDrift);
         py -= cny * (drift + maxDrift);
       }
-      // Furniture keep-out (the cartouche): a waypoint inside the footprint
-      // exits through the nearest edge — routes go around the title block.
-      if (keepOut) {
-        const r = keepOut;
-        if (
-          px >= r.x - KO_PAD &&
-          px <= r.x + r.w + KO_PAD &&
-          py >= r.y - KO_PAD &&
-          py <= r.y + r.h + KO_PAD
-        ) {
-          const left = px - (r.x - KO_PAD);
-          const right = r.x + r.w + KO_PAD - px;
-          const top = py - (r.y - KO_PAD);
-          const bottom = r.y + r.h + KO_PAD - py;
-          const m = Math.min(left, right, top, bottom);
-          if (m === left) px = r.x - KO_PAD;
-          else if (m === right) px = r.x + r.w + KO_PAD;
-          else if (m === top) py = r.y - KO_PAD;
-          else py = r.y + r.h + KO_PAD;
-        }
-      }
+      // Furniture keep-out (the cartouche, the face key): a waypoint inside
+      // a footprint exits through its nearest edge — routes go around the
+      // map's furniture.
+      ({ x: px, y: py } = projectOut(px, py));
       // Minimal separation from road corridors — a trail may run alongside a
       // road, never on it (roads eat trails; the paint order does the eating,
       // this keeps the parallel stretch legible). Applied last so it wins.
@@ -252,6 +259,16 @@ export function terrainRoutedPath(hf, x1, y1, x2, y2, opts = {}) {
     for (let i = 1; i < n; i++) {
       pts[i].x = pts[i].x * (1 - smooth) + ((pts[i - 1].x + pts[i + 1].x) / 2) * smooth;
       pts[i].y = pts[i].y * (1 - smooth) + ((pts[i - 1].y + pts[i + 1].y) / 2) * smooth;
+    }
+  }
+  // The per-iteration smoothing runs AFTER the keep-out projection, so it can
+  // pull a waypoint back under the furniture; a final hard projection makes
+  // the documented contract true — waypoints never rest inside a footprint.
+  if (keepOuts.length > 0) {
+    for (let i = 1; i < n; i++) {
+      const q = projectOut(pts[i].x, pts[i].y);
+      pts[i].x = q.x;
+      pts[i].y = q.y;
     }
   }
   return pts;
@@ -501,7 +518,7 @@ export function computeRoadRoutes(edges, hf, opts = {}) {
           follow: opts.follow ?? 0.7,
           maxDrift: opts.maxDrift ?? 70,
           floor: opts.floor,
-          keepOut: opts.keepOut,
+          keepOuts: opts.keepOuts,
         })
       : bowedPoints(e.from.x, e.from.y, foot.x, foot.y, strHash(e.id), 0.12);
     return { pts, strength: e.strength ?? 1, id: e.id };
@@ -571,7 +588,7 @@ export function trailsSvg(edges, hf, opts = {}) {
         avoid: opts.avoid,
         minSep: opts.minSep,
         floor: opts.floor,
-        keepOut: opts.keepOut,
+        keepOuts: opts.keepOuts,
       });
       out += railAndRungsSvg(chaikin(pts, 2), opts);
     } else {

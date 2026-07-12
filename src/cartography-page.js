@@ -51,6 +51,7 @@ import {
 } from './label-map.js';
 import { beaconSvg, corpusFloorSvg } from './beacon-map.js';
 import { cartoucheSvg } from './cartouche-map.js';
+import { faceKeySvg, KEY_RESERVE } from './key-map.js';
 
 const indexer = createIndexer(await loadWorks('./works.json'));
 const gate = createGate(window);
@@ -158,6 +159,8 @@ const tuners = {
   cartoucheScale: 0.75, // session-8 cartouche, top-right corner (0 hides; corner selection parked; landed 2026-07-12)
   cartoucheBorder: 0.45, // hairline on the reserve edge — 0 is the unframed session-8 lock (open-water premise)
   cartoucheChop: 60, // chop edge length in cartouche-local px (0 hides; the seal signs large at right)
+  keyScale: 0.72, // session-9 face key, bottom-left corner (0 hides; the cartouche's junior sibling)
+  keyBorder: 0.45, // hairline on the key's reserve — matches the cartouche's landing (0 = the session-9 unframed lock)
 };
 
 /** The session-8 cartouche dropped into the top-right sea corner (the
@@ -169,19 +172,54 @@ const cartoucheG = (/** @type {import('./cartographer.js').CartographyField} */ 
   return `<g transform="translate(${x.toFixed(1)},16) scale(${cs})">${cartoucheSvg({ seed: field.seed, border: tuners.cartoucheBorder, chopSize: tuners.cartoucheChop })}</g>`;
 };
 
+/** The session-9 face key dropped into the bottom-left corner — the opposite
+ * margin from the cartouche (the artifact's placement check), visibly the
+ * junior of the two reserves. It draws before the cartouche: the title block
+ * still signs last. Margin selection is parked in-session. */
+const keyG = (/** @type {import('./cartographer.js').CartographyField} */ field) => {
+  const ks = tuners.keyScale;
+  if (ks <= 0) return '';
+  const y = field.heightfield.height - 200 * ks - 16;
+  return `<g transform="translate(16,${y.toFixed(1)}) scale(${ks})">${faceKeySvg({ seed: field.seed, border: tuners.keyBorder })}</g>`;
+};
+
+/** The face key's cream-box footprint in field coordinates — the module's
+ * local reserve placed and scaled, so content keep-out uses the box the
+ * reader sees, not the whole 320×200 local plate. */
+const keyRect = () => {
+  const ks = tuners.keyScale;
+  const ty = 620 - 200 * ks - 16;
+  return {
+    x: 16 + KEY_RESERVE.x * ks,
+    y: ty + KEY_RESERVE.y * ks,
+    w: KEY_RESERVE.w * ks,
+    h: KEY_RESERVE.h * ks,
+  };
+};
+
+/** The furniture footprints currently on the plate — the cartouche (top-right,
+ * its whole local box) and the face key (bottom-left, its cream box). Content
+ * keeps out of these; the terrain beneath them generates freely. */
+const furnitureReserves = () => {
+  /** @type {{ x: number, y: number, w: number, h: number }[]} */
+  const rects = [];
+  const cs = tuners.cartoucheScale;
+  if (cs > 0) rects.push({ x: 1000 - 320 * cs - 16, y: 16, w: 320 * cs, h: 200 * cs });
+  if (tuners.keyScale > 0) rects.push(keyRect());
+  return rects;
+};
+
 /** Every field computation shares this opts slice: the tuners, the ho-08 sea
  * datum (sea level as a fraction of the raw field max — the heightfield
- * arrives with the sea already flattened to zero), and the cartouche reserve
- * — the field DENIES elevation under the title block, so the terrain yields
- * a bay for the map's own signature (peaks keep out; the sea floods in). */
+ * arrives with the sea already flattened to zero), and the furniture reserves
+ * — peaks never seat under the cartouche or the key, but the terrain runs
+ * freely beneath both (furniture claims no terrain, only content). */
 const fieldOpts = () => {
-  const cs = tuners.cartoucheScale;
+  const reserves = furnitureReserves();
   return {
     ...tuners,
     seaFraction: tuners.waveThreshold,
-    ...(cs > 0
-      ? { cartoucheReserve: { x: 1000 - 320 * cs - 16, y: 16, w: 320 * cs, h: 200 * cs } }
-      : {}),
+    ...(reserves.length > 0 ? { reserves } : {}),
   };
 };
 
@@ -365,12 +403,14 @@ const placeNamesSvg = (field, towns) => {
     match: t.match,
     importance: indexer.getWork(t.id)?.importance ?? 0,
   }));
-  // The cartouche's box is a label obstacle: place names never enter it.
-  const cs = tuners.cartoucheScale;
-  const obstacles =
-    cs > 0
-      ? [{ x1: 1000 - 320 * cs - 16, y1: 16, x2: 1000 - 16, y2: 16 + 200 * cs }]
-      : [];
+  // The furniture boxes are label obstacles: place names never enter the
+  // cartouche or the face key.
+  const obstacles = furnitureReserves().map((r) => ({
+    x1: r.x,
+    y1: r.y,
+    x2: r.x + r.w,
+    y2: r.y + r.h,
+  }));
   return placeNameLayer(peakInputs, townInputs, { ...nameLayerOpts(), obstacles });
 };
 
@@ -477,11 +517,11 @@ const nameEl = (p) => {
  */
 const featuresSvg = (field, towns) => {
   const floor = tuners.waveThreshold > 0 ? 0.02 * field.heightfield.max : undefined;
-  const keepOut = fieldOpts().cartoucheReserve;
+  const keepOuts = furnitureReserves();
   const roadRoutes = computeRoadRoutes(computeRoadEdges(indexer, towns), field.heightfield, {
     follow: tuners.roadFollow,
     floor,
-    keepOut,
+    keepOuts,
   });
   // Trails draw FIRST and roads paint over them — roads eat trails; the trail
   // router also keeps a minimal separation from the road corridors, so a trail
@@ -494,7 +534,7 @@ const featuresSvg = (field, towns) => {
       clear: tuners.trailClear,
       avoid: roadRoutes.map((r) => r.pts),
       floor,
-      keepOut,
+      keepOuts,
     }) + roadsSvgFromRoutes(roadRoutes, { clear: tuners.roadClear })
   );
 };
@@ -545,6 +585,7 @@ const render = () => {
   });
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
   svg += placeNamesSvg(field, towns); // ALL place names, above everything, collision-checked
+  svg += keyG(field); // the face key — junior furniture, under the title block
   svg += cartoucheG(field); // the title block signs last — top-most furniture
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
@@ -668,6 +709,7 @@ const playWriting = (writeSteps, token, layers) => {
       pulse: true,
     }) +
     (showPeaks ? peakDotsSvg(field.peaks) : '') +
+    keyG(field) +
     cartoucheG(field);
 
   /** @type {import('./cartographer.js').CartographyTown[]} */
@@ -823,6 +865,8 @@ const TUNER_SECTIONS = [
     { key: 'cartoucheScale', label: 'cartouche scale (0 hides)', min: 0, max: 1, step: 0.02, locked: true },
     { key: 'cartoucheBorder', label: 'cartouche border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05, locked: true },
     { key: 'cartoucheChop', label: 'cartouche chop size (0 hides)', min: 0, max: 60, step: 1, locked: true },
+    { key: 'keyScale', label: 'face key scale (0 hides)', min: 0, max: 1, step: 0.02 },
+    { key: 'keyBorder', label: 'face key border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05 },
   ]},
 ];
 

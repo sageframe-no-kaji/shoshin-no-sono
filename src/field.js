@@ -36,9 +36,10 @@
  * @property {number} [noiseWeight] Amplitude of low-elevation crenellation noise.
  * @property {number} [radiusBase] Massif radius at importance 0.
  * @property {number} [radiusScale] Added radius per importance point.
- * @property {{ x: number, y: number, w: number, h: number }} [reserve] A furniture
- *   footprint (ho-08: the cartouche) no peak may seat in — best-candidate darts
- *   inside it (grown by a small standoff) are discarded.
+ * @property {{ x: number, y: number, w: number, h: number }[]} [reserves] Furniture
+ *   footprints (ho-08: the cartouche, then the face key — furniture is plural now)
+ *   no peak may seat in — best-candidate darts inside any of them (grown by a
+ *   small standoff) are discarded.
  */
 
 /**
@@ -124,17 +125,19 @@ export function computePositions(peaks, seed, opts) {
   /** @type {number[]} */
   const ys = [];
 
-  // The furniture keep-out (ho-08): a peak's CENTER never seats inside the
+  // The furniture keep-out (ho-08): a peak's CENTER never seats inside any
   // reserve footprint plus a standoff — the field suppression handles the
-  // flanks, but a summit under the cartouche would drown a work.
-  const rsv = o.reserve;
+  // flanks, but a summit under the furniture would drown a work.
+  const rsvs = o.reserves ?? [];
   const STANDOFF = 30;
   const inReserve = (/** @type {number} */ px, /** @type {number} */ py) =>
-    rsv != null &&
-    px >= rsv.x - STANDOFF &&
-    px <= rsv.x + rsv.w + STANDOFF &&
-    py >= rsv.y - STANDOFF &&
-    py <= rsv.y + rsv.h + STANDOFF;
+    rsvs.some(
+      (rsv) =>
+        px >= rsv.x - STANDOFF &&
+        px <= rsv.x + rsv.w + STANDOFF &&
+        py >= rsv.y - STANDOFF &&
+        py <= rsv.y + rsv.h + STANDOFF,
+    );
 
   for (let i = 0; i < n; i++) {
     let bx = minX;

@@ -162,29 +162,33 @@ describe('computePositions — furniture reserve keep-out (ho-08)', () => {
   const peaks = (n) =>
     Array.from({ length: n }, (_, i) => ({ id: `w${i}`, importance: 5, amplitude: 5 }));
 
-  it('no peak centre seats inside the reserve plus its standoff', () => {
-    const reserve = { x: 700, y: 16, w: 220, h: 140 }; // a top-right cartouche footprint
-    const pts = computePositions(peaks(40), 12345, { reserve });
-    for (const p of pts) {
-      const inside =
-        p.x >= reserve.x - 30 &&
-        p.x <= reserve.x + reserve.w + 30 &&
-        p.y >= reserve.y - 30 &&
-        p.y <= reserve.y + reserve.h + 30;
-      expect(inside).toBe(false);
+  it('no peak centre seats inside any reserve plus its standoff — furniture is plural', () => {
+    const cartouche = { x: 700, y: 16, w: 220, h: 140 }; // top-right
+    const key = { x: 54, y: 497, w: 154, h: 69 }; // bottom-left face key box
+    const pts = computePositions(peaks(40), 12345, { reserves: [cartouche, key] });
+    for (const reserve of [cartouche, key]) {
+      for (const p of pts) {
+        const inside =
+          p.x >= reserve.x - 30 &&
+          p.x <= reserve.x + reserve.w + 30 &&
+          p.y >= reserve.y - 30 &&
+          p.y <= reserve.y + reserve.h + 30;
+        expect(inside).toBe(false);
+      }
     }
   });
 
   it('the keep-out stays deterministic from the seed', () => {
-    const reserve = { x: 700, y: 16, w: 220, h: 140 };
-    const a = computePositions(peaks(12), 7, { reserve });
-    const b = computePositions(peaks(12), 7, { reserve });
+    const reserves = [{ x: 700, y: 16, w: 220, h: 140 }];
+    const a = computePositions(peaks(12), 7, { reserves });
+    const b = computePositions(peaks(12), 7, { reserves });
     expect(a).toEqual(b);
   });
 
-  it('without a reserve, placement is unchanged (back-compat)', () => {
+  it('without reserves (absent or empty), placement is unchanged (back-compat)', () => {
     const free = computePositions(peaks(12), 7, {});
     const same = computePositions(peaks(12), 7);
     expect(free).toEqual(same);
+    expect(computePositions(peaks(12), 7, { reserves: [] })).toEqual(same);
   });
 });

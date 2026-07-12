@@ -429,10 +429,10 @@ describe('createCartographer', () => {
   });
 });
 
-describe('cartoucheReserve — content keeps out of the furniture (ho-08)', () => {
+describe('reserves — content keeps out of the furniture (ho-08)', () => {
   it('no peak seats inside the reserve; the terrain beneath is NOT flattened', () => {
     const reserve = { x: 700, y: 16, w: 220, h: 140 };
-    const withR = computeField(indexer, empty, 12345, { cartoucheReserve: reserve });
+    const withR = computeField(indexer, empty, 12345, { reserves: [reserve] });
     for (const p of withR.peaks) {
       const inside =
         p.x >= reserve.x - 30 &&
@@ -461,7 +461,7 @@ describe('cartoucheReserve — content keeps out of the furniture (ho-08)', () =
     const field = computeField(indexer, empty, 42);
     const t0 = computeTowns(indexer, empty, field)[0];
     const reserve = { x: t0.seat.x - 40, y: t0.seat.y - 30, w: 80, h: 60 };
-    const t1 = computeTowns(indexer, empty, field, { cartoucheReserve: reserve }).find(
+    const t1 = computeTowns(indexer, empty, field, { reserves: [reserve] }).find(
       (t) => t.id === t0.id,
     );
     const pad = 24;
