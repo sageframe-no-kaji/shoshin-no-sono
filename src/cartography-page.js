@@ -150,7 +150,7 @@ const tuners = {
   waveInk: 0.78, // ink depth — feather opacity (locked)
   waveWild: 0.3, // randomness — per-band wavelength/amplitude variance (locked)
   roadFollow: 0.7, // road terrain-following strength — least-resistance routing
-  roadClear: 1.25, // road cream casing beyond the rails, per side
+  roadClear: 3, // road cream casing beyond the rails, per side (locked 2026-07-12)
   trailFollow: 0.35, // trail terrain-following strength — weaker; trails tolerate grade
   trailWeight: 0.7, // single stroke weight, rail and rungs alike
   trailTick: 2.2, // rung half-length in px
@@ -820,9 +820,9 @@ const TUNER_SECTIONS = [
     { key: 'waveWeight', label: 'wave: line weight', min: 0, max: 1, step: 0.02, locked: true },
     { key: 'waveInk', label: 'wave: ink depth', min: 0, max: 1, step: 0.02, locked: true },
     { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05, locked: true },
-    { key: 'cartoucheScale', label: 'cartouche scale (0 hides)', min: 0, max: 1, step: 0.02 },
-    { key: 'cartoucheBorder', label: 'cartouche border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05 },
-    { key: 'cartoucheChop', label: 'cartouche chop size (0 hides)', min: 0, max: 60, step: 1 },
+    { key: 'cartoucheScale', label: 'cartouche scale (0 hides)', min: 0, max: 1, step: 0.02, locked: true },
+    { key: 'cartoucheBorder', label: 'cartouche border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05, locked: true },
+    { key: 'cartoucheChop', label: 'cartouche chop size (0 hides)', min: 0, max: 60, step: 1, locked: true },
   ]},
 ];
 
