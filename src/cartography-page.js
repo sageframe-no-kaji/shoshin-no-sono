@@ -159,9 +159,9 @@ const tuners = {
   cartoucheScale: 0.75, // session-8 cartouche, top-right corner (0 hides; corner selection parked; landed 2026-07-12)
   cartoucheBorder: 0.45, // hairline on the reserve edge — 0 is the unframed session-8 lock (open-water premise)
   cartoucheChop: 60, // chop edge length in cartouche-local px (0 hides; the seal signs large at right)
-  keyScale: 0.72, // session-9 face key, bottom-left corner (0 hides; the cartouche's junior sibling)
-  keyBorder: 0.45, // hairline on the key's reserve — matches the cartouche's landing (0 = the session-9 unframed lock)
-  keyMargin: 10, // the cream box's gap from the plate's left/bottom edges — really in the corner, close to tight
+  keyScale: 0.64, // session-9 face key, bottom-left corner (0 hides; the cartouche's junior sibling; landed 2026-07-12)
+  keyBorder: 0.45, // hairline on the key's reserve — matches the cartouche's landing (0 = the session-9 unframed lock; locked 2026-07-12)
+  keyMargin: 10, // the cream box's gap from the plate's left/bottom edges — close to tight, not tight (locked 2026-07-12)
 };
 
 /** The session-8 cartouche dropped into the top-right sea corner (the
@@ -872,9 +872,9 @@ const TUNER_SECTIONS = [
     { key: 'cartoucheScale', label: 'cartouche scale (0 hides)', min: 0, max: 1, step: 0.02, locked: true },
     { key: 'cartoucheBorder', label: 'cartouche border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05, locked: true },
     { key: 'cartoucheChop', label: 'cartouche chop size (0 hides)', min: 0, max: 60, step: 1, locked: true },
-    { key: 'keyScale', label: 'face key scale (0 hides)', min: 0, max: 1, step: 0.02 },
-    { key: 'keyBorder', label: 'face key border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05 },
-    { key: 'keyMargin', label: 'face key corner gap', min: 0, max: 60, step: 1 },
+    { key: 'keyScale', label: 'face key scale (0 hides)', min: 0, max: 1, step: 0.02, locked: true },
+    { key: 'keyBorder', label: 'face key border (0 = unframed lock)', min: 0, max: 1.5, step: 0.05, locked: true },
+    { key: 'keyMargin', label: 'face key corner gap', min: 0, max: 60, step: 1, locked: true },
   ]},
 ];
 

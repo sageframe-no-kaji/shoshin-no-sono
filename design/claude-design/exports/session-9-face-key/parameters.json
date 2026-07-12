@@ -16,7 +16,7 @@
     "type": { "noun": "size 8.4, weight 500, tracking 0.13em, ink", "gloss": "size 9.4, weight 400, em-dash lead, roman grey #4A4A4A" },
     "layout": { "gutterX": 77, "labelX": 99, "firstBaseline": 82, "leading": 25 },
     "voice": "the session said three good lines beat five; the amendment lands on four — every mark on the face explained, only the beacon left for the verso's full legend",
-    "placement": "bottom-left corner at ~0.72 scale, opposite margin from the cartouche (the session's placement check); visibly the junior of the two reserves"
+    "placement": "bottom-left corner, opposite margin from the cartouche (the session's placement check); visibly the junior of the two reserves — landed by feel 2026-07-12 at scale 0.64, border 0.45, cream box anchored 10px off the corner"
   },
   "parked": [
     "which margin the pipeline prefers for the key relative to the chosen cartouche corner, and whether the two ever want to stack in one margin",
