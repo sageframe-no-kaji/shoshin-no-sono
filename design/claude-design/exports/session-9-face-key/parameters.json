@@ -3,7 +3,7 @@
   "question": "What does the face key look like?",
   "source": "claude.ai design project b5ef80fc — Face Key - Session 9.html",
   "chosen": "A — unframed reserve, three primitives, mark-samples in the gutter (also the session's own recommendation)",
-  "amendment": "the session's premise was open water and its A-lock unframed; the practitioner amended at implementation (2026-07-12) — the map face is land and water, so the reserve takes the cartouche's hairline border (0.45) so its edge holds over terrain, matching the cartouche's own same-day landing",
+  "amendment": "two implementation amendments (2026-07-12): (1) the session's premise was open water and its A-lock unframed — the map face is land and water, so the reserve takes the cartouche's hairline border (0.45) so its edge holds over terrain, matching the cartouche's own same-day landing; (2) the reserve grows 214×96 → 248×112 with the entries re-inset — the plate renders the glosses in the fallback serif (Georgia, wider than the artifact's webfont) and the longest line ran against the edge",
   "locked": {
     "aspect": "8:5 (320x200 local coordinates)",
     "reserve": { "x": 53, "y": 52, "width": 214, "height": 96, "note": "cream paint-over; hairline border per the amendment — the key's only frame" },

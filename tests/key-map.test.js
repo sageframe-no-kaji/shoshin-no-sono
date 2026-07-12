@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { faceKeySvg, KEY_RESERVE } from '../src/key-map.js';
 
 describe('faceKeySvg — session 9, variant A', () => {
-  it('carries its own cream reserve at the artifact geometry, exported for the page keep-out', () => {
-    expect(KEY_RESERVE).toEqual({ x: 53, y: 52, w: 214, h: 96 });
+  it('carries its own cream reserve, grown from the artifact for fallback-serif air, exported for the page keep-out', () => {
+    expect(KEY_RESERVE).toEqual({ x: 53, y: 52, w: 248, h: 112 });
     const svg = faceKeySvg();
-    expect(svg).toContain('<rect x="53" y="52" width="214" height="96" fill="#FDFCF9"/>');
+    expect(svg).toContain('<rect x="53" y="52" width="248" height="112" fill="#FDFCF9"/>');
   });
 
   it('takes the cartouche’s hairline border by default — dialable to the unframed session lock', () => {

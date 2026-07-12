@@ -33,9 +33,12 @@ const LATIN = 'Spectral, Georgia, serif';
 /**
  * The reserve footprint in the group's 320×200 local space — exported so the
  * page can compute the key's true content keep-out (the box the reader sees,
- * not the whole local plate).
+ * not the whole local plate). Grown from the artifact's 214×96 at
+ * implementation: the plate renders the glosses in the fallback serif
+ * (Georgia — wider than the artifact's webfont), and the longest line ran
+ * against the edge; the box takes real air on every side.
  */
-export const KEY_RESERVE = Object.freeze({ x: 53, y: 52, w: 214, h: 96 });
+export const KEY_RESERVE = Object.freeze({ x: 53, y: 52, w: 248, h: 112 });
 
 /** The three face entries. The glosses are the artifact's TIGHT voice, verbatim. */
 const ENTRIES = Object.freeze([
@@ -173,10 +176,11 @@ export function faceKeySvg(opts = {}) {
       `stroke="${REGISTER.ink}" stroke-width="${border.toFixed(2)}" opacity="0.85"/>`;
   }
 
-  // Three entries: mark-sample in the gutter, label beside it (artifact layout).
-  const gx = r.x + 24; // the swatch gutter's centre
-  const lx = r.x + 46; // the label's left edge
-  const y0 = r.y + 30; // first baseline
+  // Three entries: mark-sample in the gutter, label beside it (artifact
+  // layout, re-inset for the grown box so the padding reads on every side).
+  const gx = r.x + 28; // the swatch gutter's centre
+  const lx = r.x + 50; // the label's left edge
+  const y0 = r.y + 34; // first baseline
   const dy = 25; // leading
   for (let i = 0; i < ENTRIES.length; i++) {
     const by = y0 + i * dy;
