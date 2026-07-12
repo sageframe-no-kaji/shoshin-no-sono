@@ -1,12 +1,17 @@
 /**
  * Face key (session 9, variant A — design/claude-design/exports/
  * session-9-face-key/) — the map face's minimal apparatus, quad-sheet style:
- * three lines near the margin naming the three primitives a reader actually
- * needs (the work, the writing, the documentation link). Road and beacon go
- * to the verso's full legend (ho-08.5) — three good lines beat five. Each
- * entry carries a mark-sample drawn at the map's own character and weight
- * (a seeded hachure fan, ink blocks, the rail with rungs), so the key reads
- * as samples lifted from the sheet, not icons.
+ * four lines near the margin naming the marks a reader actually needs — the
+ * work, the writing, the documentation link, and the companion link. The
+ * session's A-lock carried three; the practitioner amended to add ROAD
+ * (2026-07-12): the face draws two line vocabularies, and a key that
+ * explains only one of them invites the very question it exists to answer.
+ * Its swatch and gloss come verbatim from the artifact's own variant-B
+ * vocabulary. The beacon stays on the verso's full legend (ho-08.5) — it
+ * reads as ornament until the verso explains it. Each entry carries a
+ * mark-sample drawn at the map's own character and weight (a seeded hachure
+ * fan, ink blocks, the rail with rungs, the cased double-line), so the key
+ * reads as samples lifted from the sheet, not icons.
  *
  * The session's A-lock was unframed on an open-water premise; the
  * practitioner amended at implementation (2026-07-12): the map face is land
@@ -36,15 +41,18 @@ const LATIN = 'Spectral, Georgia, serif';
  * not the whole local plate). Grown from the artifact's 214×96 at
  * implementation: the plate renders the glosses in the fallback serif
  * (Georgia — wider than the artifact's webfont), and the longest line ran
- * against the edge; the box takes real air on every side.
+ * against the edge; the box takes real air on every side. One leading taller
+ * again for the ROAD amendment.
  */
-export const KEY_RESERVE = Object.freeze({ x: 53, y: 52, w: 248, h: 112 });
+export const KEY_RESERVE = Object.freeze({ x: 53, y: 52, w: 248, h: 137 });
 
-/** The three face entries. The glosses are the artifact's TIGHT voice, verbatim. */
+/** The four face entries. The glosses are the artifact's voice, verbatim —
+ * peak/town/trail from the TIGHT list, road from the variant-B vocabulary. */
 const ENTRIES = Object.freeze([
   { swatch: 'peak', noun: 'PEAK', gloss: 'a work; height is weight.' },
   { swatch: 'town', noun: 'TOWN', gloss: 'the writing, at its foot.' },
   { swatch: 'trail', noun: 'TRAIL', gloss: 'to what a writing documents.' },
+  { swatch: 'road', noun: 'ROAD', gloss: 'joins companion writings.' },
 ]);
 
 /** @param {number} n */
@@ -120,6 +128,21 @@ function trailSwatch(cx, cy) {
 }
 
 /**
+ * Road sample: the cased double-line — paper casing, ink body, paper centre,
+ * leaving the map's two rails.
+ * @param {number} cx @param {number} cy
+ * @returns {string}
+ */
+function roadSwatch(cx, cy) {
+  const d = `M${f1(cx - 8)} ${f1(cy)} L${f1(cx + 8)} ${f1(cy)}`;
+  return (
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="6.4" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="4.4" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="2.2" stroke-linecap="round"/>`
+  );
+}
+
+/**
  * One key entry's mark-sample by kind.
  * @param {string} kind @param {number} cx @param {number} cy @param {number} seed
  * @returns {string}
@@ -127,6 +150,7 @@ function trailSwatch(cx, cy) {
 function swatch(kind, cx, cy, seed) {
   if (kind === 'peak') return peakSwatch(cx, cy, seed);
   if (kind === 'town') return townSwatch(cx, cy, seed);
+  if (kind === 'road') return roadSwatch(cx, cy);
   return trailSwatch(cx, cy);
 }
 
