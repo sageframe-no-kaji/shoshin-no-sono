@@ -39,7 +39,7 @@ import { revealedBlocks } from './settlements.js';
 import { chipVocabulary } from './grid.js';
 import { buildEmergenceTimeline, emergencePlan, scaleFn } from './emergence.js';
 import { computeRoadRoutes, roadsSvgFromRoutes, trailsSvg } from './feature-map.js';
-import { waterSvg } from './water-map.js';
+import { waterSvg, coastlineOverlaySvg } from './water-map.js';
 import { REGISTER } from './register.js';
 import {
   labelGlowFilter,
@@ -534,6 +534,9 @@ const render = () => {
   if (layers.iso) svg += elevationLabelsSvg(field.heightfield, { elevationScale: tuners.elevationScale });
   svg += featuresSvg(field, towns);
   svg += townsSvg(towns); // settlement buildings (labels go on the top layer)
+  // The island edge always reads: re-stroke the coast ink above the towns —
+  // a chart's shore line is never interrupted by its buildings.
+  svg += coastlineOverlaySvg(field.heightfield, { coastWeight: tuners.coastWeight });
   // signal-fire beacons, breathing at rest
   svg += beaconSvg(field.peaks, {
     beaconOpacity: tuners.beaconOpacity,

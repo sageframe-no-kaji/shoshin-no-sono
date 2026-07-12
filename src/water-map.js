@@ -209,6 +209,54 @@ export function seaDistance(hf, mask) {
 }
 
 /**
+ * The coastline path — the shore is ZERO; the ring hugs it just above. The
+ * outer-coast test floods the below-coast-level region from the boundary (the
+ * coast-level analog of the sea mask): every outer-shore segment rides that
+ * region's edge, however wide the gentle shore band is — measuring proximity
+ * to flat-zero water in cells broke the ring wherever the shore sloped
+ * gently. Enclosed flat pockets stay excluded (no lake outlines); sub-pixel
+ * slivers drop (stroked heavy with round caps they render as ink blobs).
+ * @param {Heightfield} hf
+ * @returns {string} SVG path `d`, or '' when there is no coast
+ */
+function coastPathD(hf) {
+  if (hf.max <= 0) return '';
+  const { cols, rows, cell } = hf;
+  const coastLevel = 0.02 * hf.max;
+  const coastMask = seaMask(hf, coastLevel);
+  const nearCoast = (/** @type {import('./contours.js').Segment} */ s) => {
+    if (Math.hypot(s[1].x - s[0].x, s[1].y - s[0].y) < 0.75) return false; // degenerate sliver
+    const i0 = Math.max(0, Math.min(cols - 1, Math.floor((s[0].x + s[1].x) / 2 / cell)));
+    const j0 = Math.max(0, Math.min(rows - 1, Math.floor((s[0].y + s[1].y) / 2 / cell)));
+    for (let dj = -1; dj <= 1; dj++) {
+      for (let di = -1; di <= 1; di++) {
+        const i = Math.max(0, Math.min(cols - 1, i0 + di));
+        const j = Math.max(0, Math.min(rows - 1, j0 + dj));
+        if (coastMask[j * cols + i]) return true;
+      }
+    }
+    return false;
+  };
+  const segs = extractContour(hf, coastLevel).filter(nearCoast);
+  return segs.length > 0 ? segsToPath(segs) : '';
+}
+
+/**
+ * The coastline INK stroke alone, no casing — an overlay the page draws ABOVE
+ * the settlements, so the island's edge always reads through a town's cream
+ * clearing (a chart's shore line is never interrupted by its buildings).
+ * @param {Heightfield} hf
+ * @param {{ coastWeight?: number }} [opts]
+ * @returns {string}
+ */
+export function coastlineOverlaySvg(hf, opts = {}) {
+  const d = coastPathD(hf);
+  if (!d) return '';
+  const w = (opts.coastWeight ?? 0.7).toFixed(2);
+  return `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="${w}" stroke-linecap="round" opacity="0.95"/>`;
+}
+
+/**
  * The full water treatment for a datumed heightfield: the coastline stroke at
  * the shore and the waterlining seaward of it. Empty string when there is no
  * field or no sea.
@@ -262,33 +310,8 @@ export function waterSvg(hf, opts = {}) {
     }
   }
 
-  // The coastline — the shore is ZERO; the ring hugs it just above, cream-
-  // cased so it stays crisp against the last hachures on the land side. The
-  // outer-coast test floods the below-coast-level region from the boundary
-  // (the coast-level analog of the sea mask): every outer-shore segment rides
-  // that region's edge, however wide the gentle shore band is — measuring
-  // proximity to flat-zero water in cells broke the ring wherever the shore
-  // sloped gently. Enclosed flat pockets stay excluded (no lake outlines).
-  // Sub-pixel fragments drop too: stroked heavy with round caps they render
-  // as ink blobs, which is what the coastline-weight dial was amplifying.
-  const coastLevel = 0.02 * hf.max;
-  const coastMask = seaMask(hf, coastLevel);
-  const nearCoast = (/** @type {import('./contours.js').Segment} */ s) => {
-    if (Math.hypot(s[1].x - s[0].x, s[1].y - s[0].y) < 0.75) return false; // degenerate sliver
-    const i0 = Math.max(0, Math.min(cols - 1, Math.floor((s[0].x + s[1].x) / 2 / cell)));
-    const j0 = Math.max(0, Math.min(rows - 1, Math.floor((s[0].y + s[1].y) / 2 / cell)));
-    for (let dj = -1; dj <= 1; dj++) {
-      for (let di = -1; di <= 1; di++) {
-        const i = Math.max(0, Math.min(cols - 1, i0 + di));
-        const j = Math.max(0, Math.min(rows - 1, j0 + dj));
-        if (coastMask[j * cols + i]) return true;
-      }
-    }
-    return false;
-  };
-  const coastSegs = extractContour(hf, coastLevel).filter(nearCoast);
-  if (coastSegs.length > 0) {
-    const d = segsToPath(coastSegs);
+  const d = coastPathD(hf);
+  if (d) {
     svg +=
       `<path d="${d}" fill="none" stroke="${REGISTER.paper}" stroke-width="${(coastWeight + 2).toFixed(2)}" stroke-linecap="round"/>` +
       `<path d="${d}" fill="none" stroke="${REGISTER.ink}" stroke-width="${coastWeight.toFixed(2)}" stroke-linecap="round"/>`;

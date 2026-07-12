@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { waterSvg, seaMask, seaDistance } from '../src/water-map.js';
+import { waterSvg, seaMask, seaDistance, coastlineOverlaySvg } from '../src/water-map.js';
 import { applySeaDatum } from '../src/field.js';
 
 /** Build a Heightfield from a per-point elevation function. */
@@ -236,5 +236,23 @@ describe('waterSvg', () => {
     // No waterline/coast vertex inside the crater bowl (radius < 30 of centre).
     const inside = coords.filter((p) => Math.hypot(p.x - 80, p.y - 80) < 24);
     expect(inside).toEqual([]);
+  });
+});
+
+describe('coastlineOverlaySvg — the shore reads above the settlements', () => {
+  it('is the ink stroke alone, no casing, weight dialable', () => {
+    const svg = coastlineOverlaySvg(island(), { coastWeight: 1.1 });
+    expect(svg).toContain('stroke="#2B2B2B" stroke-width="1.10"');
+    expect(svg).not.toContain('#FDFCF9'); // no cream — it overlays, never erases
+    expect((svg.match(/<path /g) ?? []).length).toBe(1);
+  });
+
+  it('matches the base coastline geometry and is empty without a coast', () => {
+    const overlay = coastlineOverlaySvg(island());
+    const base = waterSvg(island(), { waveInk: 0, waterlines: 0 });
+    const d = overlay.match(/d="([^"]+)"/)?.[1] ?? 'NO-MATCH';
+    expect(d.length).toBeGreaterThan(100);
+    expect(base).toContain(d); // the same ring the cased coast draws
+    expect(coastlineOverlaySvg(hfFrom(() => 5, 8))).toBe('');
   });
 });
