@@ -169,3 +169,15 @@ The feature/sea arc revised two locks and landed several new register rules; rec
 - **Two water languages, one dial each.** The Session-7 engraved sea is the committed register; waterlining (the Upolu survey register) stays available on its own count dial — they are alternatives, not layers.
 
 Edge semantics as implemented: roads = `companion_to` (town ↔ town); trails = `documents` (town → peak) + `validates` (peak ↔ peak). Succession (`descends_from`/`succeeded_by`) and `paired_with` twin peaks remain THE open ho-08 decisions — session 4's four carriers still on the table.
+
+## Session 8 — cartouche (locked, 2026-07-12)
+
+Three variants on the v3 prompt (sea-aware). **A locked — also the session's own recommendation.**
+
+**The cartouche: unframed cream reserve, terracotta rule, brush chop, hachure fan.** An unframed clearing is how a real chart cartouche sits on open water — *the reserve IS the frame* (the clearing-as-paint-over mechanism at title-block scale; the waves part around it). Steepest four-line hierarchy: 初心の園 leads at 44px; SHOSHIN NO SONO tracks wide beneath; a single terracotta rule with end ticks — the one permitted flourish — divides; the English steps down; the tagline whispers in italic annotation grey. A seeded peak-hachure fan names the register at the lower left; the brush chop (the repo's hanko) signs the lower right. Self-contained 8:5 group (320×200 local), dropped into an open-water corner at ~0.52 scale.
+
+**Variants rejected:** B (thin double-rule box — "begins to become a poster"); C (corner brackets, type alone — gentlest, but signs nothing).
+
+**Implemented:** `src/cartouche-map.js`, verbatim geometry, seeded from the layout seed; `cartouche scale` dial on the page (0 hides). Artifact + parameters banked at `exports/session-8-cartouche/`.
+
+**Parked in-session:** corner selection (which of the four sea corners, and mirroring the ornament for a left-hand placement); a scale-linked type ramp so the tagline drops out gracefully below a threshold size; whether the reserve edge ever wants a hairline coastline-style stroke against especially dense sea. Note: the page's greedy label placement doesn't know the cartouche's reserve exists — a place-name could in principle collide with it; ho-09's collision layer should treat the cartouche as an obstacle.

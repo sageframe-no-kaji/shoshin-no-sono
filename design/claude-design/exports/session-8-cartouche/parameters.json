@@ -1,0 +1,23 @@
+{
+  "session": 8,
+  "question": "What does the cartouche look like?",
+  "source": "claude.ai design project b5ef80fc — Cartouche - Session 8.html",
+  "chosen": "A — open reserve, terracotta rule, brush chop & hachure fan (also the session's own recommendation)",
+  "locked": {
+    "aspect": "8:5 (320x200 local coordinates)",
+    "reserve": { "x": 22, "y": 18, "width": 276, "height": 164, "note": "cream paint-over — the waves part around the cartouche; the reserve IS the frame" },
+    "native": { "text": "初心の園", "y": 72, "size": 44, "weight": 500, "tracking": "0.12em" },
+    "roman": { "text": "SHOSHIN NO SONO", "y": 96, "size": 11.5, "tracking": "0.34em", "color": "#4A4A4A" },
+    "rule": { "y": 108, "halfWidth": 42, "weight": 1.1, "ticks": true, "color": "terracotta — the one permitted flourish" },
+    "english": { "text": "The Garden of Beginner's Mind", "y": 127, "size": 13.5 },
+    "tagline": { "lines": ["An epistemology of learning, creation, and craft.", "The garden has gates on every side."], "y": [147, 158], "size": 8.2, "style": "italic, annotation grey" },
+    "registerSample": "peak-hachure fan, lower left, seeded",
+    "seal": "the brush chop image, lower right (repo asset shoshin-hanko.png), opacity 0.9",
+    "placement": "open-water corner at ~0.52 scale (the session's placement check used top-right)"
+  },
+  "parked": [
+    "corner selection — which of the four sea corners the pipeline prefers, and mirroring the ornament for a left-hand placement",
+    "a scale-linked type ramp so the tagline drops out gracefully below a threshold size",
+    "whether the reserve edge ever wants a hairline coastline-style stroke against especially dense sea"
+  ]
+}

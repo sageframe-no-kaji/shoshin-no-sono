@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartouche — Session 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FDFCF9; }
+  * { box-sizing: border-box; }
+  body { font-family: Spectral, Georgia, serif; color: #2B2B2B; }
+  .panel { position: relative; background: #FDFCF9; border: 1px solid #E7E3DA; box-shadow: 0 1px 0 rgba(0,0,0,0.03); }
+  .panel .corner { position: absolute; top: 12px; left: 14px; font: 600 20px Spectral, Georgia, serif; color: #2B2B2B; letter-spacing: 0.04em; z-index:1; }
+  .panel .name { position: absolute; top: 16px; right: 14px; font: 500 10.5px Spectral, Georgia, serif; letter-spacing: 0.16em; text-transform: uppercase; color: #9A958B; z-index:1; }
+  .cap { font: 400 13.5px/1.55 Spectral, Georgia, serif; color: #5C5C5C; letter-spacing: 0.005em; padding: 0 2px; }
+  .meta { font: 500 12px Spectral, Georgia, serif; letter-spacing: 0.30em; text-transform: uppercase; color: #9A958B; }
+  figure { margin: 0; }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;padding:56px 40px 72px;">
+  <div style="max-width:1120px;margin:0 auto;">
+
+    <header style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;border-bottom:1px solid #E7E3DA;padding-bottom:24px;">
+      <div class="meta" style="letter-spacing:0.34em;">Session 8 · Cartouche</div>
+      <h1 style="margin:0;font:300 34px/1.15 Spectral,Georgia,serif;color:#2B2B2B;letter-spacing:0.005em;">What does the cartouche look like?</h1>
+      <p style="margin:0;max-width:760px;font:400 15px/1.65 Spectral,Georgia,serif;color:#6B6B6B;">
+        The map&rsquo;s title block &mdash; the one place ornament is allowed. It sits in an open-water corner, so each variant is shown <em>on the sea</em>: the engraved wave texture from Session&nbsp;7 runs up to a clean cream reserve and stops, the waves parting around the block rather than running beneath it (the register&rsquo;s clearing-as-paint-over). The native title <span style="font-family:'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif;color:#2B2B2B;">初心の園</span> leads at every size; Spectral carries the roman, from Session&nbsp;3. Three variants vary exactly three axes &mdash; <strong style="font-weight:500;color:#3A3A3A;">frame treatment</strong>, <strong style="font-weight:500;color:#3A3A3A;">four-line hierarchy</strong>, and <strong style="font-weight:500;color:#3A3A3A;">accent &amp; register reference</strong>. Each cartouche is one self-contained SVG group with a fixed 8:5 aspect the pipeline drops into a corner at any scale.
+      </p>
+    </header>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:40px;">
+      <figure style="display:flex;flex-direction:column;gap:13px;">
+        <div class="panel"><span class="corner">A</span>
+          <svg id="vA" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <figcaption class="cap" id="cA"></figcaption>
+      </figure>
+      <figure style="display:flex;flex-direction:column;gap:13px;">
+        <div class="panel"><span class="corner">B</span>
+          <svg id="vB" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <figcaption class="cap" id="cB"></figcaption>
+      </figure>
+      <figure style="display:flex;flex-direction:column;gap:13px;">
+        <div class="panel"><span class="corner">C</span>
+          <svg id="vC" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <figcaption class="cap" id="cC"></figcaption>
+      </figure>
+    </div>
+
+    <!-- recommendation -->
+    <section style="margin-top:56px;border-top:1px solid #E7E3DA;padding-top:28px;display:flex;gap:40px;flex-wrap:wrap;">
+      <div style="flex:0 0 auto;">
+        <div class="meta" style="letter-spacing:0.28em;margin-bottom:14px;">Recommendation</div>
+        <div style="display:flex;align-items:baseline;gap:14px;">
+          <span style="font:300 64px Spectral,Georgia,serif;color:#2B2B2B;line-height:0.8;">A</span>
+          <span style="font:italic 400 15px Spectral,Georgia,serif;color:#6B6B6B;max-width:160px;">Open reserve · terracotta rule · brush chop &amp; hachure</span>
+        </div>
+      </div>
+      <p style="flex:1;min-width:340px;margin:0;font:400 16px/1.7 Spectral,Georgia,serif;color:#3A3A3A;max-width:580px;">
+        <strong style="font-weight:500;">A signs with the quietest authority.</strong> An unframed clearing is exactly how a real chart cartouche sits on open water &mdash; the reserve <em>is</em> the frame &mdash; and a single terracotta rule is the one permitted flourish, so it signs the territory without becoming a poster the way the double-ruled plate (B) begins to. The brush chop signs the territory and the hachure fan says &ldquo;this is the kind of map this is&rdquo; in a whisper, and at half size in a corner the block still steps cleanly from native to tagline without stealing the sea.
+      </p>
+    </section>
+
+    <!-- placement check -->
+    <section style="margin-top:44px;border-top:1px solid #E7E3DA;padding-top:24px;">
+      <div class="meta" style="letter-spacing:0.28em;margin-bottom:6px;">Placement check · variant A</div>
+      <p style="margin:0 0 22px;max-width:740px;font:400 14px/1.6 Spectral,Georgia,serif;color:#8A857C;">
+        The recommended cartouche dropped into the corner of a wider open-water plate at roughly half scale &mdash; the working case. It should hold its edge against the wave texture and read as a deliberate reserve, not a hole in the sea, without pulling the eye off the territory.
+      </p>
+      <div class="panel" style="max-width:620px;">
+        <svg id="place" viewBox="0 0 620 360" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;"></svg>
+      </div>
+    </section>
+
+    <div style="margin-top:46px;font:italic 400 13px/1.6 Spectral,Georgia,serif;color:#A8A39A;border-top:1px dashed #E7E3DA;padding-top:18px;max-width:1120px;">
+      parked &mdash; corner selection (which of the four sea corners the pipeline prefers, and mirroring the ornament for a left-hand placement), a scale-linked type ramp so the tagline drops out gracefully below a threshold size, and whether the reserve edge ever wants a hairline coastline-style stroke when it abuts especially dense sea.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var PAPER='#FDFCF9', INK='#2B2B2B', INK2='#4A4A4A', GRAY='#6B6B6B', FAINT='#8A857C', TERRA='#9A5B3C';
+  var LATIN='Spectral, Georgia, serif';
+  var CJK="'Hiragino Mincho ProN','Yu Mincho','Songti SC','Noto Serif JP',serif";
+  var NATIVE='初心の園';           // 初心の園
+  var ROMAN='Shoshin no Sono';
+  var ENGLISH='The Garden of Beginner’s Mind';
+  var TAG1='An epistemology of learning, creation, and craft.';
+  var TAG2='The garden has gates on every side.';
+
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function f1(n){return Math.round(n*10)/10;}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+  // ---- text helper ---------------------------------------------------------
+  function txt(x,y,size,weight,fill,tracking,content,o){
+    o=o||{};
+    var fam=o.cjk?CJK:LATIN;
+    var st='letter-spacing:'+tracking+'em;';
+    var extra=(o.italic?' font-style="italic"':'');
+    var str=o.upper?content.toUpperCase():content;
+    return '<text x="'+x+'" y="'+y+'" text-anchor="'+(o.anchor||'middle')+'" font-family="'+fam+'" '+
+      'font-size="'+size+'" font-weight="'+weight+'"'+extra+' fill="'+fill+'" style="'+st+'">'+esc(str)+'</text>';
+  }
+
+  // ---- sea texture in a rect (engraved crest lines + feather combs) --------
+  function sea(seed,x0,y0,x1,y1){
+    var rng=mulberry32(seed>>>0);
+    var crest='',feather='';
+    var gap=12;
+    for(var yb=y0+5; yb<=y1+2; yb+=gap){
+      var amp=2.2+rng()*2.4, wl=52+rng()*46, ph=rng()*6.28;
+      var pts=[],d='';
+      for(var x=x0;x<=x1;x+=4){
+        var yy=yb+amp*Math.sin(x*2*Math.PI/wl+ph)+(rng()-0.5)*0.5;
+        pts.push({x:x,y:yy});
+        d+=(x===x0?'M':'L')+f1(x)+' '+f1(yy);
+      }
+      crest+=d+' ';
+      for(var i=1;i<pts.length-1;i+=2){
+        if(rng()<0.24) continue;
+        var P=pts[i];
+        var L=3.2+rng()*3.4, dx=(rng()-0.5)*1.5;
+        feather+='M'+f1(P.x)+' '+f1(P.y+0.4)+' L'+f1(P.x+dx)+' '+f1(P.y+L)+' ';
+      }
+    }
+    return '<path d="'+feather+'" fill="none" stroke="'+GRAY+'" stroke-width="0.5" stroke-linecap="round" opacity="0.55"/>'+
+           '<path d="'+crest+'" fill="none" stroke="'+INK+'" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" opacity="0.68"/>';
+  }
+
+  // ---- register samples ----------------------------------------------------
+  // peak hachure tuft: short marks radiating outward along the local gradient
+  function hachure(cx,cy,seed){
+    var rng=mulberry32(seed>>>0),s='';
+    var n=11;
+    for(var i=0;i<n;i++){
+      var a=(i/(n-1))*Math.PI + (rng()-0.5)*0.12;       // fan across the downhill half
+      var jx=(rng()-0.5)*1.0, jy=(rng()-0.5)*1.0;
+      var r0=1.6+rng()*1.2;
+      var len=6+rng()*5;
+      var sx=cx+Math.cos(a)*r0+jx, sy=cy+Math.sin(a)*r0*0.6+jy;
+      var ex=sx+Math.cos(a)*len, ey=sy+Math.sin(a)*len*0.7+2;   // slight downhill bias
+      s+='M'+f1(sx)+' '+f1(sy)+' L'+f1(ex)+' '+f1(ey)+' ';
+    }
+    return '<path d="'+s+'" fill="none" stroke="'+INK2+'" stroke-width="0.55" stroke-linecap="round" opacity="0.8"/>';
+  }
+  // wave-comb fragment: one thin crest line carrying a few feathered hair-strokes
+  function comb(cx,cy,w,seed){
+    var rng=mulberry32(seed>>>0);
+    var pts=[],d='',half=w/2;
+    for(var x=-half;x<=half;x+=3){
+      var yy=cy+1.8*Math.sin(x*0.15)+(rng()-0.5)*0.3;
+      pts.push({x:cx+x,y:yy}); d+=(x===-half?'M':'L')+f1(cx+x)+' '+f1(yy);
+    }
+    var fe='';
+    for(var i=1;i<pts.length;i+=2){
+      if(rng()<0.12) continue;
+      var P=pts[i], L=2.8+rng()*2.4;
+      fe+='M'+f1(P.x)+' '+f1(P.y+0.3)+' L'+f1(P.x+(rng()-0.5)*0.9)+' '+f1(P.y+L)+' ';
+    }
+    return '<path d="'+fe+'" fill="none" stroke="'+GRAY+'" stroke-width="0.45" stroke-linecap="round" opacity="0.7"/>'+
+           '<path d="'+d+'" fill="none" stroke="'+INK+'" stroke-width="0.65" stroke-linecap="round" opacity="0.8"/>';
+  }
+  // seal-like mark: a small terracotta chop outline with an inscribed stroke (no fill)
+  function seal(cx,cy,r){
+    var s='';
+    s+='<rect x="'+f1(cx-r)+'" y="'+f1(cy-r)+'" width="'+f1(r*2)+'" height="'+f1(r*2)+'" rx="1" fill="none" stroke="'+TERRA+'" stroke-width="1"/>';
+    s+='<rect x="'+f1(cx-r+1.8)+'" y="'+f1(cy-r+1.8)+'" width="'+f1(r*2-3.6)+'" height="'+f1(r*2-3.6)+'" rx="0.6" fill="none" stroke="'+TERRA+'" stroke-width="0.4" opacity="0.7"/>';
+    // a spare inscribed mark — a stem with two ticks, reads as a chop glyph
+    s+='<path d="M'+f1(cx)+' '+f1(cy-r+3.6)+' L'+f1(cx)+' '+f1(cy+r-3.6)+
+        ' M'+f1(cx-2.4)+' '+f1(cy-1)+' L'+f1(cx+2.4)+' '+f1(cy-1)+
+        ' M'+f1(cx-2.4)+' '+f1(cy+2)+' L'+f1(cx+2.4)+' '+f1(cy+2)+'" fill="none" stroke="'+TERRA+'" stroke-width="0.8" stroke-linecap="round"/>';
+    return s;
+  }
+
+  // ---- the cartouche group (local 320x200 coords; includes its cream reserve) ----
+  // Returns a <g> string. The reserve is the paint-over that clears the sea beneath.
+  function cartouche(v,seed){
+    var g='', cx=160;
+    var RX=22, RY=18, RW=320-RX*2, RH=200-RY*2;   // reserve rect
+
+    // cream reserve (waves stop here)
+    g+='<rect x="'+RX+'" y="'+RY+'" width="'+RW+'" height="'+RH+'" fill="'+PAPER+'"/>';
+
+    if(v==='A'){
+      // --- unframed; dramatic hierarchy; terracotta rule + wave-comb sample
+      g+=txt(cx,72,44,500,INK,0.12,NATIVE,{cjk:true});
+      g+=txt(cx,96,11.5,400,INK2,0.34,ROMAN,{upper:true});
+      g+='<line x1="'+(cx-42)+'" y1="108" x2="'+(cx+42)+'" y2="108" stroke="'+TERRA+'" stroke-width="1.1" stroke-linecap="round"/>';
+      g+='<line x1="'+(cx-42)+'" y1="105" x2="'+(cx-42)+'" y2="111" stroke="'+TERRA+'" stroke-width="0.9"/>';
+      g+='<line x1="'+(cx+42)+'" y1="105" x2="'+(cx+42)+'" y2="111" stroke="'+TERRA+'" stroke-width="0.9"/>';
+      g+=txt(cx,127,13.5,400,INK,0.008,ENGLISH,{});
+      g+=txt(cx,147,8.2,400,GRAY,0.012,TAG1,{italic:true});
+      g+=txt(cx,158,8.2,400,GRAY,0.012,TAG2,{italic:true});
+      // register sample: peak-hachure fan, lower left
+      g+='<g transform="translate(0,0)">'+hachure(50,158,seed^0x5151)+'</g>';
+      // seal: the brush chop, baked terracotta, lower right
+      g+='<image href="assets/sf-chop-terra.png" x="256" y="140" width="27" height="27" opacity="0.9" preserveAspectRatio="xMidYMid meet"/>';
+    }
+    else if(v==='B'){
+      // --- thin double-rule box; formal/dense hierarchy; seal mark + hachure sample
+      g+='<rect x="30" y="26" width="260" height="148" fill="none" stroke="'+INK2+'" stroke-width="0.9"/>';
+      g+='<rect x="34" y="30" width="252" height="140" fill="none" stroke="'+INK2+'" stroke-width="0.55" opacity="0.85"/>';
+      g+=txt(cx,70,36,500,INK,0.10,NATIVE,{cjk:true});
+      g+=txt(cx,91,13,400,INK2,0.05,ROMAN,{italic:true});
+      g+='<line x1="'+(cx-70)+'" y1="100" x2="'+(cx+70)+'" y2="100" stroke="'+INK2+'" stroke-width="0.5" opacity="0.7"/>';
+      g+=txt(cx,113,10.5,400,INK2,0.20,ENGLISH,{upper:true});
+      g+=txt(cx,133,8,400,GRAY,0.01,TAG1,{italic:true});
+      g+=txt(cx,143,8,400,GRAY,0.01,TAG2,{italic:true});
+      g+='<g transform="translate(0,0)">'+hachure(58,156,seed^0x5151)+'</g>';
+      g+=seal(268,152,8);
+    }
+    else {
+      // --- partial corner rules; gentle even hierarchy; no accent, no register sample
+      var m=30, arm=15;
+      function bracket(x,y,sx,sy){
+        return '<path d="M'+f1(x+sx*arm)+' '+f1(y)+' L'+f1(x)+' '+f1(y)+' L'+f1(x)+' '+f1(y+sy*arm)+
+               '" fill="none" stroke="'+INK2+'" stroke-width="0.9" stroke-linecap="round" opacity="0.85"/>';
+      }
+      g+=bracket(m,m,1,1)+bracket(320-m,m,-1,1)+bracket(m,200-m,1,-1)+bracket(320-m,200-m,-1,-1);
+      g+=txt(cx,72,40,500,INK,0.10,NATIVE,{cjk:true});
+      g+=txt(cx,99,15,400,INK2,0.03,ROMAN,{});
+      g+=txt(cx,122,12.5,400,INK2,0.01,ENGLISH,{italic:true});
+      g+=txt(cx,145,9,400,GRAY,0.012,TAG1,{});
+      g+=txt(cx,157,9,400,GRAY,0.012,TAG2,{});
+    }
+    return '<g>'+g+'</g>';
+  }
+
+  var CAPS={
+    A:'Unframed &mdash; the cream reserve is the only edge. Steepest size jump: the native dominates, everything below whispers. A terracotta rule divides; a brush chop signs the lower right and a peak-hachure sample names the register at the lower left.',
+    B:'A thin engraved double-rule box. Denser, more even four-line stack with a spaced-cap English line. A terracotta seal-like chop and a peak-hachure sample fill the two lower corners.',
+    C:'Partial corner rules only &mdash; the block floats within four brackets. Gentlest hierarchy: native, roman and English step down evenly. No terracotta, no register sample; type alone.'
+  };
+
+  function paint(id,v){
+    var seed=(v.charCodeAt(0)*2654435761)>>>0;
+    document.getElementById(id).innerHTML =
+      sea(seed^0x1234, 0,0,320,200) + cartouche(v,seed);
+    var cel=document.getElementById('c'+v);
+    if(cel) cel.innerHTML=CAPS[v];
+  }
+  paint('vA','A'); paint('vB','B'); paint('vC','C');
+
+  // ---- placement check: variant A at ~half scale in the corner of a wide sea plate
+  (function(){
+    var W=620,H=360, s='';
+    s+=sea(0x2718, 0,0,W,H);
+    // drop the cartouche (native 320x200) into the top-right corner at scale 0.52
+    var sc=0.52, cw=320*sc, ch=200*sc;
+    var tx=W-cw-16, ty=16;
+    s+='<g transform="translate('+f1(tx)+','+f1(ty)+') scale('+sc+')">'+cartouche('A',(0x41*2654435761)>>>0)+'</g>';
+    document.getElementById('place').innerHTML=s;
+  })();
+})();
+</script>
+</body>
+</html>

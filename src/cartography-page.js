@@ -50,6 +50,7 @@ import {
   elevationLabelsSvg,
 } from './label-map.js';
 import { beaconSvg, corpusFloorSvg } from './beacon-map.js';
+import { cartoucheSvg } from './cartouche-map.js';
 
 const indexer = createIndexer(await loadWorks('./works.json'));
 const gate = createGate(window);
@@ -154,6 +155,16 @@ const tuners = {
   trailWeight: 0.7, // single stroke weight, rail and rungs alike
   trailTick: 2.2, // rung half-length in px
   trailClear: 1.6, // cream halo width — 0 is the session-5 uncased lock; >0 is the legibility dial
+  cartoucheScale: 0.52, // session-8 cartouche, top-right sea corner (0 hides; corner selection parked)
+};
+
+/** The session-8 cartouche dropped into the top-right sea corner (the
+ * artifact's placement check). Corner selection is parked in-session. */
+const cartoucheG = (/** @type {import('./cartographer.js').CartographyField} */ field) => {
+  const cs = tuners.cartoucheScale;
+  if (cs <= 0) return '';
+  const x = field.heightfield.width - 320 * cs - 16;
+  return `<g transform="translate(${x.toFixed(1)},16) scale(${cs})">${cartoucheSvg({ seed: field.seed })}</g>`;
 };
 
 /** Every field computation shares this opts slice: the tuners plus the ho-08
@@ -510,6 +521,7 @@ const render = () => {
   });
   if (showPeaks) svg += peakDotsSvg(field.peaks); // debug id dots, on toggle
   svg += placeNamesSvg(field, towns); // ALL place names, above everything, collision-checked
+  svg += cartoucheG(field); // the title block signs last — top-most furniture
   map.innerHTML = svg;
   seedOut.textContent = String(seed);
   pinned.textContent = gate.currentSeed() == null ? '(ephemeral — reload reseeds)' : '(pinned by ?seed)';
@@ -632,7 +644,8 @@ const playWriting = (writeSteps, token, layers) => {
       beaconImportance: tuners.beaconImportance,
       pulse: true,
     }) +
-    (showPeaks ? peakDotsSvg(field.peaks) : '');
+    (showPeaks ? peakDotsSvg(field.peaks) : '') +
+    cartoucheG(field);
 
   /** @type {import('./cartographer.js').CartographyTown[]} */
   const built = [];
@@ -784,6 +797,7 @@ const TUNER_SECTIONS = [
     { key: 'waveWeight', label: 'wave: line weight', min: 0, max: 1, step: 0.02, locked: true },
     { key: 'waveInk', label: 'wave: ink depth', min: 0, max: 1, step: 0.02, locked: true },
     { key: 'waveWild', label: 'wave: randomness', min: 0, max: 1.2, step: 0.05, locked: true },
+    { key: 'cartoucheScale', label: 'cartouche scale (0 hides)', min: 0, max: 1, step: 0.02 },
   ]},
 ];
 
