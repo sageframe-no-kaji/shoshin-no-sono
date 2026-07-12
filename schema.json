@@ -1,5 +1,5 @@
 {
-  "$comment": "Sageframe catalog source-of-truth. v4 — applies the four revisions queued in the Shoshin no Sono Kamae chain: (1) renamed `weight` → `importance` everywhere; (2) added `articulated_in` as optional per-edge field; (3) removed the composite-importance calculation from the rendering block — importance is now a direct manual integer driving peak height; (4) redefined `strength` as an integer 1/2/3 for documents-class edges per the editorial specificity convention. Other portions of the rendering block still describe the older force-directed-graph architecture before procedural cartography; the System Design at kamae/shoshin-no-sono-kamae-2-system-design.md supersedes those portions and is the operating source of truth for visualization.",
+  "$comment": "Sageframe catalog source-of-truth. v5 — adds the keisaku-derived family system (2026-07-11, data coming): `family` and `peak` on works, and the top-level `families` block — non-exclusive groupings rendered as ranges / grouped peaks, with `closeness` driving cartographic proximity. v4 applied the four revisions queued in the Shoshin no Sono Kamae chain: (1) renamed `weight` → `importance` everywhere; (2) added `articulated_in` as optional per-edge field; (3) removed the composite-importance calculation from the rendering block — importance is now a direct manual integer driving peak height; (4) redefined `strength` as an integer 1/2/3 for documents-class edges per the editorial specificity convention. Other portions of the rendering block still describe the older force-directed-graph architecture before procedural cartography; the System Design at kamae/shoshin-no-sono-kamae-2-system-design.md supersedes those portions and is the operating source of truth for visualization.",
 
   "document": {
     "$comment": "Site-level metadata. Rendered in header, footer, About page, and SEO tags.",
@@ -70,6 +70,16 @@
     }
   ],
 
+  "families": [
+    {
+      "$comment": "NEW (keisaku-derived, coming). Non-exclusive groupings rendered as ranges / grouped peaks. Works reference a family via their `family` field; this block carries the range-level attributes. Membership and closeness are curatorial — keisaku's glean manifest is the source of truth; this block is its public projection.",
+      "id": "string (slug, kebab-case)",
+      "name": "string (display name, e.g. 'Kṣetra-Ops')",
+      "closeness": "bonded | shared-code | suite | kindred. $comment: How tightly the family binds, tightest → loosest. 'bonded' = inseparable, one can't deploy/function without the other (kanyo/kanyo-viewer). 'shared-code' = distinct works sharing one codebase (edelmore diary/reader). 'suite' = distinct codebases, shared philosophy + site (Kṣetra-Ops). 'kindred' = same kind, no coupling (utilities). Drives cartographic proximity: massif / shared ridge / named range / scattered lowland hills.",
+      "peak_id": "string (work id) | null. $comment: The family's primary work — the summit that sub-peaks attach to. null for peer families with no single peak (e.g. edelmore's diary + reader as equal grouped peaks)."
+    }
+  ],
+
   "works": [
     {
       "$comment": "The atoms of the catalog. Unified collection — a work can be software, writing, an image, a website, a methodology, or a talk, declared via `media`. Each work is a complete record. Rendered as a peak in the cartography view OR a card in the grid view; click opens an in-place card with the work's CTA to its canonical home.",
@@ -95,6 +105,10 @@
       ],
 
       "group": "string (references work_groups.id). $comment: Exclusive grouping — exactly one. Drives section placement in grid view and group-filter behavior in cartography view.",
+
+      "family": "string (family id, kebab-case) | null. $comment: NEW (keisaku-derived, coming). Non-exclusive grouping that ties works into one rendered range/cluster — e.g. 'kshetra-ops' = palana + sharibako + forteller. Distinct from `group`: `group` is the single exclusive category a work sits in; `family` is an additional 'these are drawn together' relation. A work has exactly one group and at most one family. Range-level attributes live in the top-level `families` block. null = not in a family. Renders as grouped peaks / a named range.",
+
+      "peak": "peak | sub-peak | null. $comment: NEW (keisaku-derived, coming). A work's role within its `family`. 'peak' = an independent summit; 'sub-peak' = subordinate to the family's peak (kanyo→kanyo-viewer, palana→forteller), drawn nested against it rather than as its own summit — the subordination `importance` (peak height) cannot express. null when `family` is null.",
 
       "themes": [
         "string. $comment: Curatorial themes from theme_vocabulary. 1–3 per work. Captures the *concern* the work addresses — the lens through which it can be read, as distinct from tags (which describe topical/technical content). Drives filter behavior: filtering by theme produces a Venice where works sharing that theme are the prominent peaks."

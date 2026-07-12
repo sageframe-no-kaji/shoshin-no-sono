@@ -110,6 +110,28 @@ export function validateWorks(data) {
   }
   const byId = new Map(works.map((/** @type {any} */ w) => [w.id, w]));
 
+  // families (schema v5, keisaku-derived — optional until the data lands;
+  // validated strictly wherever present).
+  const CLOSENESS = new Set(['bonded', 'shared-code', 'suite', 'kindred']);
+  const familyIds = new Set();
+  for (const f of data?.families ?? []) {
+    const fid = f.id ?? '<missing family id>';
+    if (typeof f.id !== 'string' || !SLUG_RE.test(f.id)) {
+      errors.push(`family ${fid}: id is not a kebab-case slug`);
+    }
+    if (familyIds.has(f.id)) errors.push(`duplicate family id: ${f.id}`);
+    familyIds.add(f.id);
+    if (typeof f.name !== 'string' || f.name.length === 0) {
+      errors.push(`family ${fid}: name is required`);
+    }
+    if (!CLOSENESS.has(f.closeness)) {
+      errors.push(`family ${fid}: closeness must be bonded | shared-code | suite | kindred`);
+    }
+    if (f.peak_id != null && !byId.has(f.peak_id)) {
+      errors.push(`family ${fid}: dangling peak_id ${f.peak_id}`);
+    }
+  }
+
   for (const w of works) {
     const id = w.id ?? '<missing id>';
     for (const f of REQUIRED_FIELDS) {
@@ -126,6 +148,18 @@ export function validateWorks(data) {
       errors.push(`${id}: media must be a non-empty subset of the media vocabulary`);
     }
     if (!groups.has(w.group)) errors.push(`${id}: unknown group ${w.group}`);
+    // family / peak (schema v5) — optional fields; strict when present.
+    if (w.family != null && !familyIds.has(w.family)) {
+      errors.push(`${id}: unknown family ${w.family}`);
+    }
+    if (w.peak != null) {
+      if (w.peak !== 'peak' && w.peak !== 'sub-peak') {
+        errors.push(`${id}: peak must be 'peak' | 'sub-peak' | null`);
+      }
+      if (w.family == null) {
+        errors.push(`${id}: peak is set but family is null — peak is a role within a family`);
+      }
+    }
     const wThemes = Array.isArray(w.themes) ? w.themes : [];
     if (
       wThemes.length < 1 ||

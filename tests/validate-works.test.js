@@ -213,3 +213,80 @@ describe('validateWorks on degenerate documents', () => {
     expect(text).toContain('<missing id>: id is not a kebab-case slug');
   });
 });
+
+describe('validateWorks — families (schema v5, optional until the data lands)', () => {
+  /** A well-formed family injected into the real corpus. @param {any} d */
+  const addFamily = (d) => {
+    d.families = [{ id: 'kshetra-ops', name: 'Kṣetra-Ops', closeness: 'suite', peak_id: 'forteller' }];
+  };
+
+  it('a well-formed family block passes', () => {
+    expect(corrupt(addFamily)).toEqual([]);
+  });
+
+  it('a well-formed family membership passes (family + peak role)', () => {
+    const errors = corrupt((d) => {
+      addFamily(d);
+      const f = d.works.find((/** @type {any} */ w) => w.id === 'forteller');
+      f.family = 'kshetra-ops';
+      f.peak = 'peak';
+      const p = d.works.find((/** @type {any} */ w) => w.id === 'palana');
+      p.family = 'kshetra-ops';
+      p.peak = 'sub-peak';
+    });
+    expect(errors).toEqual([]);
+  });
+
+  it('rejects a non-slug family id', () => {
+    const errors = corrupt((d) => {
+      d.families = [{ id: 'Kshetra Ops', name: 'Kṣetra-Ops', closeness: 'suite', peak_id: null }];
+    });
+    expect(errors.join('\n')).toContain('id is not a kebab-case slug');
+  });
+
+  it('rejects a duplicate family id', () => {
+    const errors = corrupt((d) => {
+      d.families = [
+        { id: 'kshetra-ops', name: 'A', closeness: 'suite', peak_id: null },
+        { id: 'kshetra-ops', name: 'B', closeness: 'kindred', peak_id: null },
+      ];
+    });
+    expect(errors.join('\n')).toContain('duplicate family id');
+  });
+
+  it('rejects a missing family name and an unknown closeness', () => {
+    const errors = corrupt((d) => {
+      d.families = [{ id: 'utilities', name: '', closeness: 'entangled', peak_id: null }];
+    });
+    const text = errors.join('\n');
+    expect(text).toContain('name is required');
+    expect(text).toContain('closeness must be bonded | shared-code | suite | kindred');
+  });
+
+  it('rejects a dangling peak_id', () => {
+    const errors = corrupt((d) => {
+      d.families = [{ id: 'utilities', name: 'Utilities', closeness: 'kindred', peak_id: 'ghost-work' }];
+    });
+    expect(errors.join('\n')).toContain('dangling peak_id ghost-work');
+  });
+
+  it('rejects a work referencing an unknown family', () => {
+    const errors = corrupt((d) => {
+      d.works[0].family = 'no-such-family';
+    });
+    expect(errors.join('\n')).toContain('unknown family no-such-family');
+  });
+
+  it('rejects an invalid peak role, and a peak role without a family', () => {
+    const errors = corrupt((d) => {
+      addFamily(d);
+      const f = d.works.find((/** @type {any} */ w) => w.id === 'forteller');
+      f.family = 'kshetra-ops';
+      f.peak = 'summit'; // not in the vocabulary
+      d.works[0].peak = 'peak'; // family is null on this work
+    });
+    const text = errors.join('\n');
+    expect(text).toContain("peak must be 'peak' | 'sub-peak' | null");
+    expect(text).toContain('peak is set but family is null');
+  });
+});
