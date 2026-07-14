@@ -1,0 +1,7 @@
+# Shoshin no Sono — description
+
+The public catalog of the Sageframe body of work — a procedurally generated interference cartography at sageframe.net that renders every project as one navigable territory and routes visitors to each work's canonical home.
+
+初心の園, the Garden of Beginner's Mind, is where a scatter of software, methodology, writing, and websites becomes legible as a single body of work. It reads works.json — the hand-maintained catalog — and draws it as terrain: works rise as peaks, essays settle as towns that populate by publication date, and typed relationships become cartographic features — ridges for lineage, trails for validation, roads for written reference. Every filter produces a fresh survey of the same data: same territory, different drawing, each one honest. The architecture is always-link — the catalog never republishes content, it routes to canonical homes, and adding a work updates the territory immediately, so the next visitor meets it as a new peak in proper topographic context. It is the public projection of the body of work: the map that argues, by drawing the relationships, that these are one project rather than scattered efforts.
+
+No-build vanilla HTML, JavaScript, and CSS — d3-force for graph physics and SVG marching-squares contours for rendering — over a single works.json in git, with Sveltia CMS and a Cloudflare Worker (Anthropic Claude API) for assisted entry, deployed on Cloudflare Pages; in active development on the labs branch, not yet in production.
