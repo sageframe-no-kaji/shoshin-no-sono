@@ -40,6 +40,38 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_FIELDS = ['last_updated', 'tech_stack', 'word_count', 'status', 'license'];
 
 /**
+ * House style (2026-07-16 ruling): em dashes are Chicago — closed up, no
+ * surrounding spaces. Applied to prose only; labels and vocabulary strings
+ * (outlet, deployment labels, names) are data, not language, and stay as
+ * declared because matching depends on them.
+ * @param {string | null | undefined} s
+ * @returns {string | null}
+ */
+export function chicago(s) {
+  if (s == null) return null;
+  return s.replace(/\s+—\s+/g, '—');
+}
+
+/** Prose fields on a work that take the Chicago pass. */
+const PROSE_FIELDS = ['hero', 'short_description', 'personal_stake'];
+
+/**
+ * Apply the Chicago em-dash style to every prose surface of a work, in place.
+ * @param {any} w
+ */
+function chicagoWork(w) {
+  for (const f of PROSE_FIELDS) {
+    if (typeof w[f] === 'string') w[f] = chicago(w[f]);
+  }
+  if (Array.isArray(w.substantive_description)) {
+    w.substantive_description = w.substantive_description.map((/** @type {string} */ p) => chicago(p));
+  }
+  for (const r of w.relationships ?? []) {
+    if (typeof r.note === 'string') r.note = chicago(r.note);
+  }
+}
+
+/**
  * Normalize a repo reference to a public https URL.
  * git@github-no-kaji:org/repo.git → https://github.com/org/repo
  * @param {string | null | undefined} repo
@@ -299,13 +331,26 @@ export function buildWorksNext(local, pub, overlay) {
     report.push(`patched: ${id} (${Object.keys(patch).join(', ')})`);
   }
 
+  // House style pass — prose surfaces only.
+  for (const w of works) chicagoWork(w);
+  const families = (overlay.families ?? []).map((/** @type {any} */ f) => ({
+    ...f,
+    description: chicago(f.description),
+  }));
+  const workGroups = (local.work_groups ?? []).map((/** @type {any} */ g) => ({
+    ...g,
+    intro: typeof g.intro === 'string' ? chicago(g.intro) : g.intro,
+  }));
+
   const data = {
     ...local,
     document: {
       ...local.document,
+      purpose: chicago(local.document?.purpose),
       last_updated: new Date().toISOString().slice(0, 10),
     },
-    families: overlay.families ?? [],
+    work_groups: workGroups,
+    families,
     works,
   };
   return { data, report };

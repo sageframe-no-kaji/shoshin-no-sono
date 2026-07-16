@@ -7,6 +7,7 @@ import {
   mergeSharedWork,
   scaffoldWork,
   buildWorksNext,
+  chicago,
 } from '../scripts/build-works-next.mjs';
 import { validateWorks } from '../scripts/validate-works.mjs';
 
@@ -234,6 +235,51 @@ describe('scaffoldWork', () => {
     expect(w.relationships).toEqual([
       { target: 'b', type: 'companion_to', strength: null, articulated_in: null, note: null },
     ]);
+  });
+});
+
+describe('chicago em-dash style', () => {
+  it('closes up spaced em dashes and leaves closed ones alone', () => {
+    expect(chicago('the map — the territory')).toBe('the map—the territory');
+    expect(chicago('already—closed')).toBe('already—closed');
+    expect(chicago(null)).toBeNull();
+  });
+
+  it('applies to every prose surface of the built catalog, and not to labels', () => {
+    const local = real();
+    const { data } = buildWorksNext(
+      local,
+      { works: [] },
+      {
+        families: [
+          {
+            id: 'kanyo',
+            name: 'Kanyō',
+            closeness: 'bonded',
+            peak_id: 'kanyo',
+            parent: null,
+            description: 'the pipeline — and its viewer',
+            color: null,
+          },
+        ],
+        patch: { kanyo: { family: 'kanyo', peak: 'peak' } },
+      },
+    );
+    expect(data.families[0].description).toBe('the pipeline—and its viewer');
+    const prose = data.works.flatMap((/** @type {any} */ w) => [
+      w.hero ?? '',
+      w.short_description ?? '',
+      w.personal_stake ?? '',
+      ...(w.substantive_description ?? []),
+      ...(w.relationships ?? []).map((/** @type {any} */ r) => r.note ?? ''),
+    ]);
+    expect(prose.some((/** @type {string} */ s) => s.includes(' — '))).toBe(false);
+    for (const g of data.work_groups) {
+      expect(g.intro ?? '').not.toContain(' — ');
+    }
+    // outlet strings are vocabulary, not prose — untouched.
+    const fc = data.works.find((/** @type {any} */ w) => w.id === 'falcon-cameras');
+    expect(fc.outlet).toBe('Substack — Constructive Interference');
   });
 });
 
