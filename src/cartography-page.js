@@ -81,6 +81,7 @@ const tuners = {
   importanceScale: 0.6, // how much a peak's importance scales its label, like a real map (ho-07.6)
   townLabelScale: 0.85, // town label type — its own dial (ho-07.6)
   townInk: 0.32, // settlement building lightness 0 (ink) → 1 (light warm grey) — ho-07.6
+  townClear: 4, // cream clearing half-width around the buildings — the last clearing to get a dial
 
   // ho-07 towns
   anchorBias: 4,
@@ -306,6 +307,7 @@ const TOWN_TUNER_SPECS = [
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
   { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
+  { key: 'townClear', label: 'town clearing', min: 0, max: 16, step: 0.5 },
 ];
 
 /** Place names, iso elevation labels, town labels, and label treatment. @type {TunerSpec[]} */
@@ -376,7 +378,7 @@ const oneTownSvg = (t, fraction, drawLabel = true) => {
   const fade = pos - fullCount; // the in-progress house's opacity
   const ink = townInkColor(tuners.townInk);
   const visible = ordered.slice(0, fullCount);
-  let inner = settlementClearingSvg(visible, 4) + settlementSvg(visible, { ink });
+  let inner = settlementClearingSvg(visible, tuners.townClear) + settlementSvg(visible, { ink });
   if (fullCount < n && fade > 0.001) {
     inner += `<g opacity="${fade.toFixed(2)}">${settlementSvg([ordered[fullCount]], { ink })}</g>`;
   }
