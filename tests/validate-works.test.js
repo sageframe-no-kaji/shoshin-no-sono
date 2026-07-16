@@ -290,3 +290,111 @@ describe('validateWorks — families (schema v5, optional until the data lands)'
     expect(text).toContain('peak is set but family is null');
   });
 });
+
+describe('validateWorks — nested ranges and sibling anchors (schema v5.1)', () => {
+  /** Kṣetra-Ops holding two child ranges, per the corpus-inject rulings. @param {any} d */
+  const addNestedFamilies = (d) => {
+    d.families = [
+      {
+        id: 'kshetra-ops',
+        name: 'Kṣetra-Ops',
+        closeness: 'suite',
+        peak_id: 'palana',
+        parent: null,
+        description: 'An honest system for user responsibility and power over your own machines.',
+        color: '#8a6d3b',
+      },
+      { id: 'shojiki', name: 'Shōjiki (正直)', closeness: 'suite', peak_id: 'palana', parent: 'kshetra-ops' },
+      { id: 'nen', name: 'Nen (念)', closeness: 'suite', peak_id: 'hozo', parent: 'kshetra-ops' },
+    ];
+  };
+
+  it('a well-formed nested range block passes, description and color included', () => {
+    expect(corrupt(addNestedFamilies)).toEqual([]);
+  });
+
+  it('rejects a dangling parent', () => {
+    const errors = corrupt((d) => {
+      d.families = [{ id: 'shojiki', name: 'Shōjiki', closeness: 'suite', peak_id: null, parent: 'ghost-range' }];
+    });
+    expect(errors.join('\n')).toContain('dangling parent ghost-range');
+  });
+
+  it('rejects a self-referencing parent', () => {
+    const errors = corrupt((d) => {
+      d.families = [{ id: 'shojiki', name: 'Shōjiki', closeness: 'suite', peak_id: null, parent: 'shojiki' }];
+    });
+    expect(errors.join('\n')).toContain('parent references itself');
+  });
+
+  it('rejects nesting deeper than one level', () => {
+    const errors = corrupt((d) => {
+      addNestedFamilies(d);
+      d.families.push({ id: 'deeper', name: 'Deeper', closeness: 'suite', peak_id: null, parent: 'shojiki' });
+    });
+    expect(errors.join('\n')).toContain('is itself a child range — one level deep only');
+  });
+
+  it('rejects a non-string description and a malformed color', () => {
+    const errors = corrupt((d) => {
+      d.families = [
+        { id: 'nen', name: 'Nen', closeness: 'suite', peak_id: null, description: 42, color: 'chartreuse' },
+      ];
+    });
+    const text = errors.join('\n');
+    expect(text).toContain('description must be a string or null');
+    expect(text).toContain('color must be a #rrggbb hex string or null');
+  });
+
+  /** The Kekkai shape: peer summits with instruments anchored to one of them. @param {any} d */
+  const addKekkai = (d) => {
+    d.families = [{ id: 'kekkai', name: 'Kekkai (結界)', closeness: 'suite', peak_id: null }];
+    const sutra = d.works.find((/** @type {any} */ w) => w.id === 'sutra');
+    sutra.family = 'kekkai';
+    sutra.peak = 'peak';
+    const kiku = d.works.find((/** @type {any} */ w) => w.id === 'kiku');
+    kiku.family = 'kekkai';
+    kiku.peak = 'sub-peak';
+    kiku.peak_of = 'sutra';
+  };
+
+  it('a sub-peak anchored to a sibling peak passes', () => {
+    expect(corrupt(addKekkai)).toEqual([]);
+  });
+
+  it('rejects peak_of on a work that is not a sub-peak', () => {
+    const errors = corrupt((d) => {
+      addKekkai(d);
+      const kiku = d.works.find((/** @type {any} */ w) => w.id === 'kiku');
+      kiku.peak = 'peak';
+    });
+    expect(errors.join('\n')).toContain("peak_of is set but peak is not 'sub-peak'");
+  });
+
+  it('rejects a dangling peak_of', () => {
+    const errors = corrupt((d) => {
+      addKekkai(d);
+      const kiku = d.works.find((/** @type {any} */ w) => w.id === 'kiku');
+      kiku.peak_of = 'ghost-summit';
+    });
+    expect(errors.join('\n')).toContain('dangling peak_of ghost-summit');
+  });
+
+  it('rejects a self-referencing peak_of', () => {
+    const errors = corrupt((d) => {
+      addKekkai(d);
+      const kiku = d.works.find((/** @type {any} */ w) => w.id === 'kiku');
+      kiku.peak_of = 'kiku';
+    });
+    expect(errors.join('\n')).toContain('peak_of references itself');
+  });
+
+  it('rejects a peak_of anchor outside the family', () => {
+    const errors = corrupt((d) => {
+      addKekkai(d);
+      const kiku = d.works.find((/** @type {any} */ w) => w.id === 'kiku');
+      kiku.peak_of = 'hozo'; // real work, not in kekkai
+    });
+    expect(errors.join('\n')).toContain('peak_of hozo is not in the same family');
+  });
+});

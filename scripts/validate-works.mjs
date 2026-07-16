@@ -113,7 +113,9 @@ export function validateWorks(data) {
   // families (schema v5, keisaku-derived — optional until the data lands;
   // validated strictly wherever present).
   const CLOSENESS = new Set(['bonded', 'shared-code', 'suite', 'kindred']);
+  const HEX_RE = /^#[0-9a-fA-F]{6}$/;
   const familyIds = new Set();
+  const familyById = new Map();
   for (const f of data?.families ?? []) {
     const fid = f.id ?? '<missing family id>';
     if (typeof f.id !== 'string' || !SLUG_RE.test(f.id)) {
@@ -121,6 +123,7 @@ export function validateWorks(data) {
     }
     if (familyIds.has(f.id)) errors.push(`duplicate family id: ${f.id}`);
     familyIds.add(f.id);
+    familyById.set(f.id, f);
     if (typeof f.name !== 'string' || f.name.length === 0) {
       errors.push(`family ${fid}: name is required`);
     }
@@ -129,6 +132,26 @@ export function validateWorks(data) {
     }
     if (f.peak_id != null && !byId.has(f.peak_id)) {
       errors.push(`family ${fid}: dangling peak_id ${f.peak_id}`);
+    }
+    if (f.description != null && typeof f.description !== 'string') {
+      errors.push(`family ${fid}: description must be a string or null`);
+    }
+    if (f.color != null && (typeof f.color !== 'string' || !HEX_RE.test(f.color))) {
+      errors.push(`family ${fid}: color must be a #rrggbb hex string or null`);
+    }
+  }
+  // parent (schema v5.1): a range within a range, one level deep. Validated
+  // after the first pass so forward references between families resolve.
+  for (const f of data?.families ?? []) {
+    if (f.parent == null) continue;
+    const fid = f.id ?? '<missing family id>';
+    const parent = familyById.get(f.parent);
+    if (f.parent === f.id) {
+      errors.push(`family ${fid}: parent references itself`);
+    } else if (!parent) {
+      errors.push(`family ${fid}: dangling parent ${f.parent}`);
+    } else if (parent.parent != null) {
+      errors.push(`family ${fid}: parent ${f.parent} is itself a child range — one level deep only`);
     }
   }
 
@@ -158,6 +181,21 @@ export function validateWorks(data) {
       }
       if (w.family == null) {
         errors.push(`${id}: peak is set but family is null — peak is a role within a family`);
+      }
+    }
+    // peak_of (schema v5.1): a sub-peak's anchor when it nests against a named
+    // sibling rather than the family summit.
+    if (w.peak_of != null) {
+      if (w.peak !== 'sub-peak') {
+        errors.push(`${id}: peak_of is set but peak is not 'sub-peak'`);
+      }
+      const anchor = byId.get(w.peak_of);
+      if (w.peak_of === w.id) {
+        errors.push(`${id}: peak_of references itself`);
+      } else if (!anchor) {
+        errors.push(`${id}: dangling peak_of ${w.peak_of}`);
+      } else if (anchor.family !== w.family) {
+        errors.push(`${id}: peak_of ${w.peak_of} is not in the same family`);
       }
     }
     const wThemes = Array.isArray(w.themes) ? w.themes : [];

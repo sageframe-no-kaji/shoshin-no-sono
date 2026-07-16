@@ -1,0 +1,620 @@
+{
+  "$comment": "Corpus-inject editorial overlay (2026-07-15). Holds every human judgment of the keisaku corpus injection so the merge is re-runnable: scripts/build-works-next.mjs composes works.json (editorial base) + keisaku's aggregate public.json (derived freshness) + this file into works.next.json. When keisaku regenerates, re-run the script — the judgment here survives. Provisional dates are flagged in $flags; the ordinal (conceived) refinement pass comes last, per the session ruling.",
+
+  "$flags": [
+    "UPSTREAM: public.json carries a duplicate id 'pink-teaming' (site work + manifesto essay). Handled here by folding the essay record's deployments into the site work; fix at the keisaku layer eventually.",
+    "UPSTREAM: pink-teaming-how-the-page-reads has a wrong short_description in public.json (a copy of the falcon-cameras essay's). Overridden in patch below.",
+    "PROVISIONAL: every injected work's conceived date is a placeholder (≈ created). The ordinal pass refines these last.",
+    "PROVISIONAL: ho-actually repo URL, created and publication dates are guesses — confirm.",
+    "MISSING URL: i-just-want-to-own-my-audiobooks (Medium) and everybody-is-making-out-with-ai-in-the-back-of-the-bus (Substack) have no deployment URL in public.json — supply the canonical links.",
+    "MOVED: m4bookmaker production-systems → personal-utilities per the classes-of-work suites document (Utilities: m4Bookmaker, audiobook-qc, PPTX Builder). Review.",
+    "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted."
+  ],
+
+  "id_map": {
+    "image-2-ppt-dev": "pptx-builder",
+    "i-built-a-computer-vision-system-for-harvard-s-falcon-cameras": "falcon-cameras"
+  },
+
+  "include": [
+    "keisaku",
+    "shoshin-no-sono",
+    "sage-zfs",
+    "sageframe-mcp",
+    "sharibako",
+    "voice-dna",
+    "superposition",
+    "kanyo-viewer",
+    "audiobook-qc",
+    "image-2-ppt-dev",
+    "pink-reader",
+    "interference",
+    "the-wrong-rand",
+    "everybody-is-lying",
+    "i-just-want-to-own-my-audiobooks",
+    "a-condition-of-the-dash",
+    "walking-without-google-maps",
+    "the-bootstrapper-s-catch-22",
+    "thinking-outside-the-skull",
+    "prompting-not-programming",
+    "bad-vibes",
+    "your-machines-are-not-strangers",
+    "everybody-is-making-out-with-ai-in-the-back-of-the-bus",
+    "everybody-is-shipping-work-nobody-asked-for",
+    "pink-teaming-how-the-page-reads",
+    "pink-teaming-the-practice-of-reading",
+    "a-talk-given-to-the-honors-program-students-of-eureka-college-2010",
+    "harvard-gsd-walking-the-rhizome-2002",
+    "personal-statement-for-fulbright-application-2003",
+    "thresholds-journal-of-visual-culture-vol-26-2002"
+  ],
+
+  "families": [
+    {
+      "id": "kanyo",
+      "name": "Kanyō",
+      "closeness": "bonded",
+      "peak_id": "kanyo",
+      "parent": null,
+      "description": "Production computer vision in real-world deployment — the existence proof that a disciplined practitioner with no formal engineering background can ship domain-specific AI that runs around the clock and matters to someone. The deployment context is the argument: a peregrine falcon is not a benchmark, and Harvard FAS is not a test environment — the system runs in production for a researcher who needed it to work. Kanyō is the detection pipeline; the Viewer is its bonded public companion, meaningful only because of the system it renders.",
+      "color": null
+    },
+    {
+      "id": "edelmore",
+      "name": "Edelmore",
+      "closeness": "shared-code",
+      "peak_id": null,
+      "parent": null,
+      "description": "Scale-of-one design as a legitimate target: a book-shaped diary and a read-along reader, built for specific children the existing options were failing, sharing one codebase, one book metaphor, one narration stack, one cottage-core identity. A tool made for one person, at the scale it was meant for, is not a small project but a complete one.",
+      "color": null
+    },
+    {
+      "id": "kshetra-ops",
+      "name": "Kṣetra-Ops",
+      "closeness": "suite",
+      "peak_id": "palana",
+      "parent": null,
+      "description": "An honest system for user responsibility and power over your own machines — the functionality of deep infrastructure control without the ceremony of Linux exclusionism. The dominant tooling story offers a false choice: accept the black box of someone else's server-side control, or earn power the hard way through CLI-only asceticism that gatekeeps as much as it enables. Kṣetra-Ops refuses both. It provides GUI tools that fully support the command line beneath them, so that rolling your own and going CLI-only become unnecessary rather than mandatory. If the push for sovereignty means trading the black box of server-side control for the black box of local control, nothing has been gained — so Kṣetra-Ops opens the box and keeps it. It is a discipline of power held in the open.",
+      "color": null
+    },
+    {
+      "id": "shojiki",
+      "name": "Shōjiki (正直)",
+      "closeness": "suite",
+      "peak_id": "palana",
+      "parent": "kshetra-ops",
+      "description": "正直 — honesty as tooling. The devops heart of Kṣetra-Ops: Pālana's operational workbench at the summit, Forteller's declarative configuration push as its plugin, Sharibako's age-encrypted secrets vault, and sageframe-mcp exposing the same live infrastructure state to agents. Power over your own machines, held in the open.",
+      "color": null
+    },
+    {
+      "id": "nen",
+      "name": "Nen (念)",
+      "closeness": "suite",
+      "peak_id": "hozo",
+      "parent": "kshetra-ops",
+      "description": "念 — mindfulness as backup discipline. Hōzō pushes ZFS snapshots to a wake-on-demand remote node; Sage ZFS maps, witnesses, and judges the whole protection graph that Hōzō and its kin operate within. Together they are the memory-keeping layer of Kṣetra-Ops: what the homelab's data protection defends, declared, verified, and explained.",
+      "color": null
+    },
+    {
+      "id": "ho",
+      "name": "The Ho Range",
+      "closeness": "suite",
+      "peak_id": "ho-system",
+      "parent": null,
+      "description": "The operating discipline beneath everything else — a way of building real software with AI while keeping architectural authority and genuine understanding. The dominant frame for AI-assisted development assumes the model leads and the human gestures, accepts, or rejects; the Ho methodologies refuse it. They treat AI as an implementation partner inside a discipline the human owns: architectural decisions made consciously, every session bounded, every artifact reviewed, and an honest account kept of what is understood versus delegated. The purpose is not merely to produce systems but to produce a practitioner, someone whose judgment deepens with each build rather than atrophying. It is the foundation the rest of the body of work stands on.",
+      "color": null
+    },
+    {
+      "id": "actually",
+      "name": "The Actually Range",
+      "closeness": "suite",
+      "peak_id": "star-actually",
+      "parent": "ho",
+      "description": "The engine and its editions. star-actually is the domain-blind loom that weaves depth-layered markdown into navigable, terminal-aesthetic knowledge sites — knowledge organized by question and relationship rather than by product surface. SSH, Actually and Ho, Actually are its live instances: each a separate content repo pinning the shared engine, each proving in a different direction — outward to a famously badly-documented domain, inward to the methodology itself — that the approach generalizes.",
+      "color": null
+    },
+    {
+      "id": "sageframe",
+      "name": "Sageframe",
+      "closeness": "suite",
+      "peak_id": "sageframe",
+      "parent": null,
+      "description": "The Sageframe Knowledge System — the organizing frame the whole body of work grew out of, and the works that keep it true. The vault holds the thinking; Keisaku derives the state from the artifacts that already carry it; Shoshin no Sono draws the map that argues the works are one project. The tallest peak on the map because everything else is downstream of it: the system that makes the rest legible.",
+      "color": null
+    },
+    {
+      "id": "kekkai",
+      "name": "Kekkai (結界)",
+      "closeness": "suite",
+      "peak_id": null,
+      "parent": null,
+      "description": "結界 — the ritual boundary. The instruments for holding onto your judgment, your voice, and your authorship across a long collaboration with a machine. Sustained collaboration with a capable model exerts a slow pressure — drift, sycophancy, the quiet migration of your voice toward the machine's — none of it visible in any single session and all of it compounding over months. The program treats that erosion as the real safety problem: Sutra is the human surface where the writing happens; Shodō is provenance and search over the AI corpus; and around Interference gather the relationship instruments — Voice DNA, Superposition, Kiku, Destructive Interference. The organizing metaphor is constructive interference: human voice and machine assistance either cancel or reinforce, depending on whether they are held in phase.",
+      "color": null
+    },
+    {
+      "id": "constructive-interference",
+      "name": "Constructive Interference",
+      "closeness": "bonded",
+      "peak_id": "constructive-interference",
+      "parent": null,
+      "description": "The writing practice as its own terrain. Constructive Interference at sageframe.substack.com is the mountain; the collected essays are the city at its base; the Medium outlet is a lower shoulder toward a second audience. Project essays settle as towns near the works they document — the rest gather here. The writing is the argument the work makes about itself, in public.",
+      "color": null
+    }
+  ],
+
+  "patch": {
+    "ho-system": { "family": "ho", "peak": "peak" },
+    "dandori": {
+      "family": "ho",
+      "peak": "peak",
+      "deployment": [
+        { "label": "Claude Skill (GitHub)", "url": "https://github.com/sageframe-no-kaji/dandori" }
+      ]
+    },
+    "kinhin": { "family": "ho", "peak": "sub-peak" },
+    "star-actually": { "family": "actually", "peak": "peak" },
+    "ssh-actually": { "family": "actually", "peak": "sub-peak" },
+    "sageframe": { "family": "sageframe", "peak": "peak", "repo": "https://github.com/sageframe-irori/sageframe-vault" },
+    "kanyo": { "family": "kanyo", "peak": "peak" },
+    "hozo": { "family": "nen", "peak": "peak" },
+    "palana": { "family": "shojiki", "peak": "peak" },
+    "forteller": { "family": "shojiki", "peak": "sub-peak" },
+    "edelmore-diary": { "family": "edelmore", "peak": "peak" },
+    "edelmore-reader": { "family": "edelmore", "peak": "peak" },
+    "sutra": { "family": "kekkai", "peak": "peak", "importance": 9 },
+    "shodo": { "family": "kekkai", "peak": "peak" },
+    "kiku": { "family": "kekkai", "peak": "sub-peak", "peak_of": "interference" },
+    "destructive-interference": { "family": "kekkai", "peak": "sub-peak", "peak_of": "interference" },
+    "m4bookmaker": { "group": "personal-utilities", "sort_order_within_group": 10 },
+    "pink-teaming": {
+      "deployment": [
+        { "label": "Manifesto site", "url": "https://pinkteaming.net" },
+        { "label": "The manifesto", "url": "https://pinkteaming.net/manifesto/" },
+        { "label": "Practice essay", "url": "https://pinkteaming.net/practice" },
+        { "label": "Manifesto on Substack", "url": "https://sageframe.substack.com/p/pink-teaming" }
+      ]
+    },
+
+    "keisaku": {
+      "name": "Keisaku",
+      "native_script": "警策",
+      "native_translation": "The awakening stick",
+      "hero": "The truth, derived — never maintained.",
+      "importance": 5,
+      "group": "knowledge-architecture",
+      "themes": ["continuity", "knowledge"],
+      "family": "sageframe",
+      "peak": "sub-peak",
+      "sort_order_within_group": 30,
+      "conceived": "2026-07-09"
+    },
+    "shoshin-no-sono": {
+      "name": "Shoshin no Sono",
+      "native_script": "初心の園",
+      "native_translation": "The Garden of Beginner's Mind",
+      "hero": "The map that argues the works are one project.",
+      "importance": 6,
+      "group": "knowledge-architecture",
+      "themes": ["knowledge", "attention"],
+      "family": "sageframe",
+      "peak": "sub-peak",
+      "sort_order_within_group": 40,
+      "conceived": "2026-05-18"
+    },
+    "sage-zfs": {
+      "importance": 3,
+      "group": "infrastructure",
+      "themes": ["infrastructure", "continuity"],
+      "family": "nen",
+      "peak": "peak",
+      "sort_order_within_group": 40,
+      "conceived": "2026-07-10",
+      "relationships": [
+        {
+          "target": "hozo",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Hōzō executes the replication edges; Sage ZFS maps and judges the whole protection graph they live in. Together: the Nen backup discipline."
+        }
+      ]
+    },
+    "sageframe-mcp": {
+      "importance": 3,
+      "group": "infrastructure",
+      "themes": ["infrastructure", "knowledge"],
+      "family": "shojiki",
+      "peak": "sub-peak",
+      "sort_order_within_group": 50,
+      "conceived": "2026-06-30"
+    },
+    "sharibako": {
+      "name": "Sharibako",
+      "native_script": "舎利箱",
+      "native_translation": "Reliquary box",
+      "importance": 3,
+      "group": "infrastructure",
+      "themes": ["sovereignty", "infrastructure"],
+      "family": "shojiki",
+      "peak": "peak",
+      "sort_order_within_group": 30,
+      "conceived": "2026-06-30"
+    },
+    "voice-dna": {
+      "name": "Voice DNA",
+      "importance": 5,
+      "group": "constructive-interference",
+      "themes": ["relationship", "continuity"],
+      "family": "kekkai",
+      "peak": "sub-peak",
+      "peak_of": "interference",
+      "sort_order_within_group": 60,
+      "conceived": "2026-07-02"
+    },
+    "superposition": {
+      "name": "Superposition",
+      "importance": 5,
+      "group": "constructive-interference",
+      "themes": ["relationship", "agency"],
+      "family": "kekkai",
+      "peak": "sub-peak",
+      "peak_of": "interference",
+      "sort_order_within_group": 70,
+      "conceived": "2026-07-02",
+      "relationships": [
+        {
+          "target": "voice-dna",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The method inverted: Voice DNA reads a finished corpus; Superposition extracts voice by reaction from someone who cannot yet name it."
+        }
+      ]
+    },
+    "kanyo-viewer": {
+      "name": "Kanyō Viewer",
+      "importance": 4,
+      "group": "production-systems",
+      "themes": ["attention", "craft"],
+      "family": "kanyo",
+      "peak": "sub-peak",
+      "sort_order_within_group": 15,
+      "conceived": "2026-01-14"
+    },
+    "audiobook-qc": {
+      "importance": 3,
+      "group": "personal-utilities",
+      "themes": ["craft", "sovereignty"],
+      "sort_order_within_group": 20,
+      "conceived": "2026-02-27",
+      "relationships": [
+        {
+          "target": "m4bookmaker",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The natural companion in the audiobook workflow: audiobook-qc finds the defects worth fixing before m4Bookmaker assembles the book."
+        }
+      ]
+    },
+    "pptx-builder": {
+      "name": "PPTX Builder",
+      "importance": 2,
+      "group": "personal-utilities",
+      "themes": ["sovereignty"],
+      "sort_order_within_group": 30,
+      "conceived": "2025-10-23"
+    },
+    "pink-reader": {
+      "importance": 2,
+      "group": "interactive-demonstrations",
+      "themes": ["attention"],
+      "sort_order_within_group": 30,
+      "conceived": "2026-05-03",
+      "relationships": [
+        {
+          "target": "reading-instrument",
+          "type": "descends_from",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The Reading Instrument generalized to whatever a reader brings."
+        }
+      ]
+    },
+    "interference": {
+      "name": "Interference",
+      "hero": "Voice and machine, held in phase.",
+      "importance": 9,
+      "featured": true,
+      "group": "constructive-interference",
+      "themes": ["relationship", "knowledge"],
+      "family": "kekkai",
+      "peak": "peak",
+      "sort_order_within_group": 10,
+      "conceived": "2026-07-03"
+    },
+
+    "the-wrong-rand": {
+      "importance": 2,
+      "group": "writing",
+      "themes": ["relationship"],
+      "sort_order_within_group": 70,
+      "conceived": "2026-02-25"
+    },
+    "everybody-is-lying": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["craft", "relationship"],
+      "sort_order_within_group": 80,
+      "conceived": "2026-04-08",
+      "relationships": [
+        { "target": "judgment-at-scale", "type": "documents", "strength": 2, "articulated_in": null, "note": null },
+        { "target": "the-empty-container", "type": "documents", "strength": 2, "articulated_in": null, "note": null }
+      ]
+    },
+    "i-just-want-to-own-my-audiobooks": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["sovereignty"],
+      "sort_order_within_group": 90,
+      "conceived": "2026-03-10",
+      "relationships": [
+        { "target": "m4bookmaker", "type": "documents", "strength": 3, "articulated_in": null, "note": null }
+      ]
+    },
+    "a-condition-of-the-dash": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["relationship", "craft"],
+      "sort_order_within_group": 100,
+      "conceived": "2026-02-14",
+      "relationships": [
+        { "target": "destructive-interference", "type": "documents", "strength": 1, "articulated_in": null, "note": null }
+      ]
+    },
+    "walking-without-google-maps": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["craft", "attention"],
+      "sort_order_within_group": 110,
+      "conceived": "2026-02-20",
+      "relationships": [
+        { "target": "ho-system", "type": "argues_for", "strength": null, "articulated_in": null, "note": null }
+      ]
+    },
+    "the-bootstrapper-s-catch-22": {
+      "importance": 2,
+      "group": "writing",
+      "themes": ["agency"],
+      "sort_order_within_group": 120,
+      "conceived": "2026-03-05"
+    },
+    "thinking-outside-the-skull": {
+      "importance": 4,
+      "group": "writing",
+      "themes": ["knowledge", "relationship"],
+      "sort_order_within_group": 130,
+      "conceived": "2026-03-05",
+      "relationships": [
+        { "target": "shodo", "type": "argues_for", "strength": null, "articulated_in": null, "note": "The extended-mind argument Shodō was built to instrument." }
+      ]
+    },
+    "prompting-not-programming": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["craft", "agency"],
+      "sort_order_within_group": 140,
+      "conceived": "2026-03-14",
+      "relationships": [
+        { "target": "m4bookmaker", "type": "documents", "strength": 2, "articulated_in": null, "note": null },
+        { "target": "ho-system", "type": "argues_for", "strength": null, "articulated_in": null, "note": null }
+      ]
+    },
+    "bad-vibes": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["agency", "relationship"],
+      "sort_order_within_group": 150,
+      "conceived": "2026-03-14",
+      "relationships": [
+        { "target": "ho-system", "type": "argues_for", "strength": null, "articulated_in": null, "note": null }
+      ]
+    },
+    "your-machines-are-not-strangers": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["continuity", "sovereignty"],
+      "sort_order_within_group": 160,
+      "conceived": "2026-03-21",
+      "relationships": [
+        { "target": "hozo", "type": "documents", "strength": 1, "articulated_in": null, "note": null }
+      ]
+    },
+    "everybody-is-making-out-with-ai-in-the-back-of-the-bus": {
+      "importance": 2,
+      "group": "writing",
+      "themes": ["relationship"],
+      "sort_order_within_group": 170,
+      "conceived": "2026-04-20"
+    },
+    "everybody-is-shipping-work-nobody-asked-for": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["agency", "craft"],
+      "sort_order_within_group": 180,
+      "conceived": "2026-05-01",
+      "relationships": [
+        { "target": "dandori", "type": "argues_for", "strength": null, "articulated_in": null, "note": "The delegation-without-authority failure Dandori exists to prevent." }
+      ]
+    },
+    "pink-teaming-how-the-page-reads": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["attention"],
+      "sort_order_within_group": 190,
+      "conceived": "2026-05-01",
+      "short_description": "How the Pink Teaming manifesto page reads — the Reading Instrument documented: the four-zone reading surface, the sustained pace, the discipline the page itself performs on its reader.",
+      "relationships": [
+        { "target": "reading-instrument", "type": "documents", "strength": 2, "articulated_in": null, "note": null },
+        { "target": "pink-teaming", "type": "documents", "strength": 2, "articulated_in": null, "note": null }
+      ]
+    },
+    "pink-teaming-the-practice-of-reading": {
+      "importance": 3,
+      "group": "writing",
+      "themes": ["attention", "relationship"],
+      "status": "published",
+      "sort_order_within_group": 200,
+      "conceived": "2026-04-30",
+      "relationships": [
+        { "target": "pink-teaming", "type": "documents", "strength": 3, "articulated_in": null, "note": null }
+      ]
+    },
+    "a-talk-given-to-the-honors-program-students-of-eureka-college-2010": {
+      "importance": 2,
+      "group": "archived",
+      "themes": ["knowledge"],
+      "sort_order_within_group": 20
+    },
+    "harvard-gsd-walking-the-rhizome-2002": {
+      "importance": 2,
+      "group": "archived",
+      "themes": ["attention", "knowledge"],
+      "sort_order_within_group": 30
+    },
+    "personal-statement-for-fulbright-application-2003": {
+      "importance": 2,
+      "group": "archived",
+      "themes": ["craft"],
+      "sort_order_within_group": 40
+    },
+    "thresholds-journal-of-visual-culture-vol-26-2002": {
+      "importance": 2,
+      "group": "archived",
+      "themes": ["knowledge"],
+      "sort_order_within_group": 50
+    }
+  },
+
+  "new_works": [
+    {
+      "id": "ho-actually",
+      "name": "Ho, Actually",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The methodology, taught under its own discipline.",
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": ["website", "writing"],
+      "group": "knowledge-architecture",
+      "family": "actually",
+      "peak": "sub-peak",
+      "themes": ["knowledge", "craft"],
+      "status": "live",
+      "tags": ["content", "knowledge-architecture", "ho-system", "methodology", "htmx"],
+      "repo": "https://github.com/sageframe-no-kaji/ho-actually",
+      "license": null,
+      "deployment": [
+        { "label": "Live edition", "url": "https://star-actually.sageframe.net/ho-actually/" }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-07-01",
+      "outlet": "Self-published static site",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-01",
+      "conceived": "2026-06-15",
+      "last_updated": "2026-07-10",
+      "short_description": "The Ho System taught as a navigable graph — a depth-layered guide to the methodology, built on the *, Actually engine. Enter with a question, dial the depth, stop when you understand enough.",
+      "substantive_description": [
+        "The second live instance of *, Actually, and the reflexive one: the methodology documented under its own discipline. Where SSH, Actually proves the engine generalizes outward to an external domain, Ho, Actually turns it inward — the Ho System's concepts, stages, and document chain organized by question and relationship rather than by chapter order, each node readable at the depth the reader needs."
+      ],
+      "relationships": [
+        {
+          "target": "star-actually",
+          "type": "operationalizes",
+          "strength": null,
+          "articulated_in": null,
+          "note": "A content repo supplying nodes and a site.yaml to the shared engine."
+        },
+        { "target": "ho-system", "type": "documents", "strength": 3, "articulated_in": null, "note": null }
+      ],
+      "images": { "preview": null, "gallery": [] },
+      "sort_order_within_group": 25
+    },
+    {
+      "id": "constructive-interference",
+      "name": "Constructive Interference",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The writing is the argument the work makes about itself, in public.",
+      "importance": 9,
+      "color": null,
+      "featured": true,
+      "media": ["writing", "website"],
+      "group": "writing",
+      "family": "constructive-interference",
+      "peak": "peak",
+      "themes": ["relationship", "continuity"],
+      "status": "live",
+      "tags": ["essays", "substack", "human-ai-collaboration", "writing-practice"],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        { "label": "Substack — Constructive Interference", "url": "https://sageframe.substack.com" }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-02-10",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-10",
+      "conceived": "2026-01-15",
+      "last_updated": "2026-07-09",
+      "short_description": "The essay practice of the body of work — Constructive Interference at sageframe.substack.com, where the collaboration writes about itself: methodology, voice, agency, and what months of working with a machine actually do to a practitioner. The mountain the collected writings settle beneath.",
+      "substantive_description": [
+        "Human voice and machine assistance can either cancel or reinforce, depending on whether they are held in phase — the wave metaphor the whole body of work draws its name from. The Substack is where that thesis is worked out in public, essay by essay: not documentation of the tools but the argument they exist inside. Project essays settle as towns near the works they document; the rest gather here, a city at the mountain's base."
+      ],
+      "relationships": [],
+      "images": { "preview": null, "gallery": [] },
+      "sort_order_within_group": 5
+    },
+    {
+      "id": "medium-outlet",
+      "name": "Sageframe on Medium",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": ["website"],
+      "group": "writing",
+      "family": "constructive-interference",
+      "peak": "sub-peak",
+      "themes": ["continuity"],
+      "status": "live",
+      "tags": ["essays", "medium", "outlet"],
+      "repo": null,
+      "license": null,
+      "deployment": [{ "label": "Medium", "url": "https://medium.com/@sageframe" }],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-13",
+      "conceived": "2026-03-01",
+      "last_updated": "2026-04-23",
+      "short_description": "The second outlet — selected essays republished for a broader audience at medium.com/@sageframe. A lower shoulder on the Constructive Interference mountain.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": { "preview": null, "gallery": [] },
+      "sort_order_within_group": 7
+    }
+  ]
+}
