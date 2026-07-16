@@ -152,7 +152,14 @@
       ]
     },
     "kinhin": { "family": "ho", "peak": "sub-peak" },
-    "star-actually": { "family": "actually", "peak": "peak" },
+    "star-actually": {
+      "family": "actually",
+      "peak": "peak",
+      "deployment": [
+        { "label": "*, Actually", "url": "https://star-actually.sageframe.net" },
+        { "label": "Engine repo", "url": "https://github.com/sageframe-no-kaji/star-actually" }
+      ]
+    },
     "ssh-actually": {
       "family": "actually",
       "peak": "sub-peak",
