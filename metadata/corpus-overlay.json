@@ -9,7 +9,7 @@
     "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted.",
     "IMPORTANCE (2026-07-15 rulings): m4bookmaker 5 → 6 (earning, most-starred repo); kanyo 8 → 7 — NOTE this is a demotion from the prior 8, applied per the practitioner's words; bounce if 8 was meant to stand.",
     "IMPORTANCE (2026-07-16 full review): resonance-field 3, star-actually 5, voice-dna/superposition 6, kinhin 5, edelmore-diary 6, pink-teaming 8 (the lone tertiary mountain), sage-zfs 4, keisaku 7. pink-reader and reading-instrument were absent from the reviewed list — values unchanged (2 and 6), pending the practitioner.",
-    "ORDINALS (2026-07-16 ruling): the emergence sequence 1-30 is practitioner-ruled and held in the ordinal field (schema v5.2) — it deliberately contradicts conceived-date order in places, so it must never be re-derived from dates. reading-instrument has NO ordinal yet (absent from the ruling) — pending. Towns (writing) stay null and populate by publication_date. RENDERING QUEUED: src/emergence.js still keys on conceived; consuming ordinal-else-conceived is banked ho work."
+    "ORDINALS (2026-07-16 ruling, final): emergence sequence 1-31, practitioner-ruled, held in the ordinal field (schema v5.2) — deliberately contradicts conceived-date order in places; never re-derive from dates. reading-instrument rises 25 (right after pink-teaming, before pink-reader); its height stands at 6, unreviewed. Towns (writing) stay null by design and populate by publication_date. RENDERING QUEUED: src/emergence.js still keys on conceived; ordinal-else-conceived is banked ho work."
   ],
   "id_map": {
     "image-2-ppt-dev": "pptx-builder",
@@ -192,7 +192,7 @@
           "url": "https://github.com/sageframe-dharma/star-actually"
         }
       ],
-      "ordinal": 28
+      "ordinal": 29
     },
     "sageframe": {
       "family": "sageframe",
@@ -230,7 +230,7 @@
     "edelmore-reader": {
       "family": "edelmore",
       "peak": "peak",
-      "ordinal": 26
+      "ordinal": 27
     },
     "sutra": {
       "family": "kekkai",
@@ -298,7 +298,7 @@
       "peak": "sub-peak",
       "sort_order_within_group": 30,
       "conceived": "2026-07-09",
-      "ordinal": 30
+      "ordinal": 31
     },
     "shoshin-no-sono": {
       "name": "Shoshin no Sono",
@@ -315,7 +315,7 @@
       "peak": "sub-peak",
       "sort_order_within_group": 40,
       "conceived": "2026-05-18",
-      "ordinal": 27
+      "ordinal": 28
     },
     "sage-zfs": {
       "importance": 4,
@@ -337,7 +337,7 @@
           "note": "Hōzō executes the replication edges; Sage ZFS maps and judges the whole protection graph they live in. Together: the Nen backup discipline."
         }
       ],
-      "ordinal": 29
+      "ordinal": 30
     },
     "sageframe-mcp": {
       "importance": 3,
@@ -469,7 +469,7 @@
           "note": "The Reading Instrument generalized to whatever a reader brings."
         }
       ],
-      "ordinal": 25
+      "ordinal": 26
     },
     "interference": {
       "name": "Interference",
@@ -801,6 +801,9 @@
     },
     "glassroom": {
       "ordinal": 22
+    },
+    "reading-instrument": {
+      "ordinal": 25
     }
   },
   "new_works": [
@@ -878,7 +881,7 @@
         "gallery": []
       },
       "sort_order_within_group": 25,
-      "ordinal": 28
+      "ordinal": 29
     },
     {
       "id": "constructive-interference",
