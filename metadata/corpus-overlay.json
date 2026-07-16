@@ -54,7 +54,7 @@
       "closeness": "bonded",
       "peak_id": "kanyo",
       "parent": null,
-      "description": "Production computer vision in real-world deployment — the existence proof that a disciplined practitioner with no formal engineering background can ship domain-specific AI that runs around the clock and matters to someone. The deployment context is the argument: a peregrine falcon is not a benchmark, and Harvard FAS is not a test environment — the system runs in production for a researcher who needed it to work. Kanyō is the detection pipeline; the Viewer is its bonded public companion, meaningful only because of the system it renders.",
+      "description": "A computer-vision system that has watched Harvard's falcon cameras around the clock since early 2026, and the public website where anyone can browse what it saw. Kanyō does the watching — detecting birds, recording arrivals and departures, sending alerts. The Viewer turns those recordings into a site you can visit. Built by a designer with no engineering background, running in production for a real researcher — the proof that the methodology works.",
       "color": null
     },
     {
@@ -63,7 +63,7 @@
       "closeness": "shared-code",
       "peak_id": null,
       "parent": null,
-      "description": "Scale-of-one design as a legitimate target: a book-shaped diary and a read-along reader, built for specific children the existing options were failing, sharing one codebase, one book metaphor, one narration stack, one cottage-core identity. A tool made for one person, at the scale it was meant for, is not a small project but a complete one.",
+      "description": "Two reading-and-writing tools built for my own children, sharing one codebase and one idea: software can feel like a real book. The Diary opens to today's page, takes dictation, and reads entries back aloud. The Reader turns an ebook into a read-along book, each word glowing as it is spoken. Built for specific kids the mainstream options were failing — a tool made for one person, done fully, is a complete project.",
       "color": null
     },
     {
@@ -72,7 +72,7 @@
       "closeness": "suite",
       "peak_id": "palana",
       "parent": null,
-      "description": "An honest system for user responsibility and power over your own machines — the functionality of deep infrastructure control without the ceremony of Linux exclusionism. The dominant tooling story offers a false choice: accept the black box of someone else's server-side control, or earn power the hard way through CLI-only asceticism that gatekeeps as much as it enables. Kṣetra-Ops refuses both. It provides GUI tools that fully support the command line beneath them, so that rolling your own and going CLI-only become unnecessary rather than mandatory. If the push for sovereignty means trading the black box of server-side control for the black box of local control, nothing has been gained — so Kṣetra-Ops opens the box and keeps it. It is a discipline of power held in the open.",
+      "description": "Tools for people who run their own servers and want to actually understand them. Most options force a choice: hand control to someone else's cloud, or earn it the hard way at the command line. These tools refuse the choice — friendly interfaces that keep the command line's full power and transparency underneath. Power over your own machines, held in the open.",
       "color": null
     },
     {
@@ -81,7 +81,7 @@
       "closeness": "suite",
       "peak_id": "palana",
       "parent": "kshetra-ops",
-      "description": "正直 — honesty as tooling. The devops heart of Kṣetra-Ops: Pālana's operational workbench at the summit, Forteller's declarative configuration push as its plugin, Sharibako's age-encrypted secrets vault, and sageframe-mcp exposing the same live infrastructure state to agents. Power over your own machines, held in the open.",
+      "description": "The hands-on-the-machines toolkit. Pālana is the workbench for managing files and services across your servers; Forteller pushes configuration out from one source of truth; Sharibako keeps API keys and secrets encrypted on your own disk; sageframe-mcp lets AI agents read the same live picture of the machines. Named 正直 — honesty — because every tool shows you exactly what it is doing.",
       "color": null
     },
     {
@@ -90,7 +90,7 @@
       "closeness": "suite",
       "peak_id": "hozo",
       "parent": "kshetra-ops",
-      "description": "念 — mindfulness as backup discipline. Hōzō pushes ZFS snapshots to a wake-on-demand remote node; Sage ZFS maps, witnesses, and judges the whole protection graph that Hōzō and its kin operate within. Together they are the memory-keeping layer of Kṣetra-Ops: what the homelab's data protection defends, declared, verified, and explained.",
+      "description": "The backup discipline. Hōzō copies data snapshots to a backup machine that wakes only when needed and sleeps the rest of the time; Sage ZFS checks the whole backup picture — what is protected, what is stale, what would actually restore. Named 念 — mindfulness — because a backup is a promise you have to keep checking.",
       "color": null
     },
     {
@@ -99,7 +99,7 @@
       "closeness": "suite",
       "peak_id": "ho-system",
       "parent": null,
-      "description": "The operating discipline beneath everything else — a way of building real software with AI while keeping architectural authority and genuine understanding. The dominant frame for AI-assisted development assumes the model leads and the human gestures, accepts, or rejects; the Ho methodologies refuse it. They treat AI as an implementation partner inside a discipline the human owns: architectural decisions made consciously, every session bounded, every artifact reviewed, and an honest account kept of what is understood versus delegated. The purpose is not merely to produce systems but to produce a practitioner, someone whose judgment deepens with each build rather than atrophying. It is the foundation the rest of the body of work stands on.",
+      "description": "The methodology everything else on this map was built with. The Ho System is a discipline for building real software with AI while keeping your own judgment: the human makes the architectural decisions, the AI implements, and every session is bounded and reviewed. Dandori extends the discipline to autonomous agents; Kinhin is the workbench where a practitioner watches their own practice develop. The claim, proven by the rest of this map: you can ship serious software with AI without becoming someone who cannot ship alone.",
       "color": null
     },
     {
@@ -108,7 +108,7 @@
       "closeness": "suite",
       "peak_id": "star-actually",
       "parent": "ho",
-      "description": "The engine and its editions. star-actually is the domain-blind loom that weaves depth-layered markdown into navigable, terminal-aesthetic knowledge sites — knowledge organized by question and relationship rather than by product surface. SSH, Actually and Ho, Actually are its live instances: each a separate content repo pinning the shared engine, each proving in a different direction — outward to a famously badly-documented domain, inward to the methodology itself — that the approach generalizes.",
+      "description": "A better way to teach technical subjects, and the sites that prove it. star-actually is the engine: it turns a folder of layered explanations into a website where you arrive with a question and read only as deep as you need. SSH, Actually teaches the tools every developer pretends to understand; Ho, Actually teaches the methodology this whole body of work runs on.",
       "color": null
     },
     {
@@ -117,7 +117,7 @@
       "closeness": "suite",
       "peak_id": "sageframe",
       "parent": null,
-      "description": "The Sageframe Knowledge System — the organizing frame the whole body of work grew out of, and the works that keep it true. The vault holds the thinking; Keisaku derives the state from the artifacts that already carry it; Shoshin no Sono draws the map that argues the works are one project. The tallest peak on the map because everything else is downstream of it: the system that makes the rest legible.",
+      "description": "The system that holds the body of work together. The Sageframe vault is where the thinking lives; Keisaku reads the current state of every project straight from the work itself, so the record is never stale; and Shoshin no Sono — the map you are looking at — draws it all as one territory. The tallest peak because everything else grew out of it.",
       "color": null
     },
     {
@@ -126,7 +126,7 @@
       "closeness": "suite",
       "peak_id": null,
       "parent": null,
-      "description": "結界 — the ritual boundary. The instruments for holding onto your judgment, your voice, and your authorship across a long collaboration with a machine. Sustained collaboration with a capable model exerts a slow pressure — drift, sycophancy, the quiet migration of your voice toward the machine's — none of it visible in any single session and all of it compounding over months. The program treats that erosion as the real safety problem: Sutra is the human surface where the writing happens; Shodō is provenance and search over the AI corpus; and around Interference gather the relationship instruments — Voice DNA, Superposition, Kiku, Destructive Interference. The organizing metaphor is constructive interference: human voice and machine assistance either cancel or reinforce, depending on whether they are held in phase.",
+      "description": "Instruments for a hard question: when you work with AI for months, how do you keep the work — and the voice — yours? Sutra is a writing tool with the power of version control and none of its interface; Shodō makes years of AI conversations searchable; and around the Interference site gather the four instruments that catch the drift — Voice DNA mirrors your voice back to you, Superposition helps a non-writer produce something genuinely theirs, Kiku scans a conversation history for known failure patterns, and Destructive Interference names the eight ways AI-shaped prose goes wrong. Named 結界 — the ritual boundary.",
       "color": null
     },
     {
@@ -135,7 +135,7 @@
       "closeness": "bonded",
       "peak_id": "constructive-interference",
       "parent": null,
-      "description": "The writing practice as its own terrain. Constructive Interference at sageframe.substack.com is the mountain; the collected essays are the city at its base; the Medium outlet is a lower shoulder toward a second audience. Project essays settle as towns near the works they document — the rest gather here. The writing is the argument the work makes about itself, in public.",
+      "description": "The essays. Constructive Interference on Substack is where this work writes about itself — the methodology, the tools, and what months of collaboration with a machine actually feel like. Essays about a specific project settle on the map beside that project; the rest gather here, a city at the mountain's base.",
       "color": null
     }
   ],
