@@ -199,6 +199,24 @@ describe('validateWorks — conceived / named (ho-07.1)', () => {
   });
 });
 
+describe('validateWorks — ordinal (schema v5.2)', () => {
+  it('accepts a valid ordinal and a shared (tie) ordinal', () => {
+    const errors = corrupt((d) => {
+      d.works.find((/** @type {any} */ w) => w.id === 'palana').ordinal = 5;
+      d.works.find((/** @type {any} */ w) => w.id === 'forteller').ordinal = 5; // ties share a beat
+    });
+    expect(errors).toEqual([]);
+  });
+
+  it('rejects a non-integer or below-one ordinal', () => {
+    const errors = corrupt((d) => {
+      d.works.find((/** @type {any} */ w) => w.id === 'palana').ordinal = 1.5;
+      d.works.find((/** @type {any} */ w) => w.id === 'forteller').ordinal = 0;
+    });
+    expect(errors.filter((e) => e.includes('ordinal must be an integer >= 1'))).toHaveLength(2);
+  });
+});
+
 describe('validateWorks on degenerate documents', () => {
   it('tolerates an empty document without throwing', () => {
     expect(validateWorks({})).toEqual([]);

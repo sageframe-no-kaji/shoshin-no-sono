@@ -226,6 +226,10 @@ export function validateWorks(data) {
     if (w.named != null && !isIsoDate(w.named)) {
       errors.push(`${id}: named is not an ISO date`);
     }
+    // ordinal (schema v5.2): emergence sequence position; ties share a value.
+    if (w.ordinal != null && (!Number.isInteger(w.ordinal) || w.ordinal < 1)) {
+      errors.push(`${id}: ordinal must be an integer >= 1 or null`);
+    }
     if (media.includes('writing') && !w.publication_date) {
       errors.push(`${id}: writing media requires publication_date`);
     }

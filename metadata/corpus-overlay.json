@@ -8,7 +8,8 @@
     "MOVED: m4bookmaker production-systems → personal-utilities per the classes-of-work suites document (Utilities: m4Bookmaker, audiobook-qc, PPTX Builder). Review.",
     "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted.",
     "IMPORTANCE (2026-07-15 rulings): m4bookmaker 5 → 6 (earning, most-starred repo); kanyo 8 → 7 — NOTE this is a demotion from the prior 8, applied per the practitioner's words; bounce if 8 was meant to stand.",
-    "IMPORTANCE (2026-07-16 full review): resonance-field 3, star-actually 5, voice-dna/superposition 6, kinhin 5, edelmore-diary 6, pink-teaming 8 (the lone tertiary mountain), sage-zfs 4, keisaku 7. pink-reader and reading-instrument were absent from the reviewed list — values unchanged (2 and 6), pending the practitioner."
+    "IMPORTANCE (2026-07-16 full review): resonance-field 3, star-actually 5, voice-dna/superposition 6, kinhin 5, edelmore-diary 6, pink-teaming 8 (the lone tertiary mountain), sage-zfs 4, keisaku 7. pink-reader and reading-instrument were absent from the reviewed list — values unchanged (2 and 6), pending the practitioner.",
+    "ORDINALS (2026-07-16 ruling): the emergence sequence 1-30 is practitioner-ruled and held in the ordinal field (schema v5.2) — it deliberately contradicts conceived-date order in places, so it must never be re-derived from dates. reading-instrument has NO ordinal yet (absent from the ruling) — pending. Towns (writing) stay null and populate by publication_date. RENDERING QUEUED: src/emergence.js still keys on conceived; consuming ordinal-else-conceived is banked ho work."
   ],
   "id_map": {
     "image-2-ppt-dev": "pptx-builder",
@@ -141,7 +142,8 @@
   "patch": {
     "ho-system": {
       "family": "ho",
-      "peak": "peak"
+      "peak": "peak",
+      "ordinal": 4
     },
     "dandori": {
       "family": "ho",
@@ -151,12 +153,14 @@
           "label": "Claude Skill (GitHub)",
           "url": "https://github.com/sageframe-no-kaji/dandori"
         }
-      ]
+      ],
+      "ordinal": 20
     },
     "kinhin": {
       "family": "ho",
       "peak": "sub-peak",
-      "importance": 5
+      "importance": 5,
+      "ordinal": 21
     },
     "star-actually": {
       "family": "actually",
@@ -171,7 +175,8 @@
           "url": "https://github.com/sageframe-no-kaji/star-actually"
         }
       ],
-      "importance": 5
+      "importance": 5,
+      "ordinal": 18
     },
     "ssh-actually": {
       "family": "actually",
@@ -186,62 +191,75 @@
           "label": "Websites repo",
           "url": "https://github.com/sageframe-dharma/star-actually"
         }
-      ]
+      ],
+      "ordinal": 28
     },
     "sageframe": {
       "family": "sageframe",
       "peak": "peak",
-      "repo": "https://github.com/sageframe-irori/sageframe-vault"
+      "repo": "https://github.com/sageframe-irori/sageframe-vault",
+      "ordinal": 1
     },
     "kanyo": {
       "family": "kanyo",
       "peak": "peak",
-      "importance": 7
+      "importance": 7,
+      "ordinal": 2
     },
     "hozo": {
       "family": "nen",
-      "peak": "peak"
+      "peak": "peak",
+      "ordinal": 10
     },
     "palana": {
       "family": "shojiki",
-      "peak": "peak"
+      "peak": "peak",
+      "ordinal": 5
     },
     "forteller": {
       "family": "shojiki",
-      "peak": "sub-peak"
+      "peak": "sub-peak",
+      "ordinal": 6
     },
     "edelmore-diary": {
       "family": "edelmore",
       "peak": "peak",
-      "importance": 6
+      "importance": 6,
+      "ordinal": 23
     },
     "edelmore-reader": {
       "family": "edelmore",
-      "peak": "peak"
+      "peak": "peak",
+      "ordinal": 26
     },
     "sutra": {
       "family": "kekkai",
       "peak": "peak",
-      "importance": 9
+      "importance": 9,
+      "ordinal": 14
     },
     "shodo": {
       "family": "kekkai",
-      "peak": "peak"
+      "peak": "peak",
+      "ordinal": 14
     },
     "kiku": {
       "family": "kekkai",
       "peak": "sub-peak",
-      "peak_of": "interference"
+      "peak_of": "interference",
+      "ordinal": 17
     },
     "destructive-interference": {
       "family": "kekkai",
       "peak": "sub-peak",
-      "peak_of": "interference"
+      "peak_of": "interference",
+      "ordinal": 15
     },
     "m4bookmaker": {
       "group": "personal-utilities",
       "sort_order_within_group": 10,
-      "importance": 6
+      "importance": 6,
+      "ordinal": 12
     },
     "pink-teaming": {
       "deployment": [
@@ -262,7 +280,8 @@
           "url": "https://sageframe.substack.com/p/pink-teaming"
         }
       ],
-      "importance": 8
+      "importance": 8,
+      "ordinal": 24
     },
     "keisaku": {
       "name": "Keisaku",
@@ -278,7 +297,8 @@
       "family": "sageframe",
       "peak": "sub-peak",
       "sort_order_within_group": 30,
-      "conceived": "2026-07-09"
+      "conceived": "2026-07-09",
+      "ordinal": 30
     },
     "shoshin-no-sono": {
       "name": "Shoshin no Sono",
@@ -294,7 +314,8 @@
       "family": "sageframe",
       "peak": "sub-peak",
       "sort_order_within_group": 40,
-      "conceived": "2026-05-18"
+      "conceived": "2026-05-18",
+      "ordinal": 27
     },
     "sage-zfs": {
       "importance": 4,
@@ -315,7 +336,8 @@
           "articulated_in": null,
           "note": "Hōzō executes the replication edges; Sage ZFS maps and judges the whole protection graph they live in. Together: the Nen backup discipline."
         }
-      ]
+      ],
+      "ordinal": 29
     },
     "sageframe-mcp": {
       "importance": 3,
@@ -327,7 +349,8 @@
       "family": "shojiki",
       "peak": "sub-peak",
       "sort_order_within_group": 50,
-      "conceived": "2026-06-30"
+      "conceived": "2026-06-30",
+      "ordinal": 6
     },
     "sharibako": {
       "name": "Sharibako",
@@ -342,7 +365,8 @@
       "family": "shojiki",
       "peak": "peak",
       "sort_order_within_group": 30,
-      "conceived": "2026-06-30"
+      "conceived": "2026-06-30",
+      "ordinal": 5
     },
     "voice-dna": {
       "name": "Voice DNA",
@@ -356,7 +380,8 @@
       "peak": "sub-peak",
       "peak_of": "interference",
       "sort_order_within_group": 60,
-      "conceived": "2026-07-02"
+      "conceived": "2026-07-02",
+      "ordinal": 19
     },
     "superposition": {
       "name": "Superposition",
@@ -379,7 +404,8 @@
           "articulated_in": null,
           "note": "The method inverted: Voice DNA reads a finished corpus; Superposition extracts voice by reaction from someone who cannot yet name it."
         }
-      ]
+      ],
+      "ordinal": 19
     },
     "kanyo-viewer": {
       "name": "Kanyō Viewer",
@@ -392,7 +418,8 @@
       "family": "kanyo",
       "peak": "sub-peak",
       "sort_order_within_group": 15,
-      "conceived": "2026-01-14"
+      "conceived": "2026-01-14",
+      "ordinal": 3
     },
     "audiobook-qc": {
       "importance": 3,
@@ -411,7 +438,8 @@
           "articulated_in": null,
           "note": "The natural companion in the audiobook workflow: audiobook-qc finds the defects worth fixing before m4Bookmaker assembles the book."
         }
-      ]
+      ],
+      "ordinal": 13
     },
     "pptx-builder": {
       "name": "PPTX Builder",
@@ -421,7 +449,8 @@
         "sovereignty"
       ],
       "sort_order_within_group": 30,
-      "conceived": "2025-10-23"
+      "conceived": "2025-10-23",
+      "ordinal": 7
     },
     "pink-reader": {
       "importance": 2,
@@ -439,7 +468,8 @@
           "articulated_in": null,
           "note": "The Reading Instrument generalized to whatever a reader brings."
         }
-      ]
+      ],
+      "ordinal": 25
     },
     "interference": {
       "name": "Interference",
@@ -454,7 +484,8 @@
       "family": "kekkai",
       "peak": "peak",
       "sort_order_within_group": 10,
-      "conceived": "2026-07-03"
+      "conceived": "2026-07-03",
+      "ordinal": 14
     },
     "the-wrong-rand": {
       "importance": 2,
@@ -759,7 +790,17 @@
       "sort_order_within_group": 50
     },
     "resonance-field": {
-      "importance": 3
+      "importance": 3,
+      "ordinal": 16
+    },
+    "aspirational-intelligence": {
+      "ordinal": 7
+    },
+    "satori": {
+      "ordinal": 11
+    },
+    "glassroom": {
+      "ordinal": 22
     }
   },
   "new_works": [
@@ -836,7 +877,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 25
+      "sort_order_within_group": 25,
+      "ordinal": 28
     },
     {
       "id": "constructive-interference",
@@ -891,7 +933,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 5
+      "sort_order_within_group": 5,
+      "ordinal": 8
     },
     {
       "id": "medium-outlet",
@@ -941,7 +984,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 7
+      "sort_order_within_group": 7,
+      "ordinal": 9
     }
   ]
 }
