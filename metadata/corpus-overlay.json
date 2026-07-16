@@ -9,7 +9,8 @@
     "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted.",
     "IMPORTANCE (2026-07-15 rulings): m4bookmaker 5 → 6 (earning, most-starred repo); kanyo 8 → 7 — NOTE this is a demotion from the prior 8, applied per the practitioner's words; bounce if 8 was meant to stand.",
     "IMPORTANCE (2026-07-16 full review): resonance-field 3, star-actually 5, voice-dna/superposition 6, kinhin 5, edelmore-diary 6, pink-teaming 8 (the lone tertiary mountain), sage-zfs 4, keisaku 7. pink-reader and reading-instrument were absent from the reviewed list — values unchanged (2 and 6), pending the practitioner.",
-    "ORDINALS (2026-07-16 ruling, final): emergence sequence 1-31, practitioner-ruled, held in the ordinal field (schema v5.2) — deliberately contradicts conceived-date order in places; never re-derive from dates. reading-instrument rises 25 (right after pink-teaming, before pink-reader); its height stands at 6, unreviewed. Towns (writing) stay null by design and populate by publication_date. RENDERING QUEUED: src/emergence.js still keys on conceived; ordinal-else-conceived is banked ho work."
+    "ORDINALS (2026-07-16 ruling, final): emergence sequence 1-31, practitioner-ruled, held in the ordinal field (schema v5.2) — deliberately contradicts conceived-date order in places; never re-derive from dates. reading-instrument rises 25 (right after pink-teaming, before pink-reader); its height stands at 6, unreviewed. Towns (writing) stay null by design and populate by publication_date. RENDERING QUEUED: src/emergence.js still keys on conceived; ordinal-else-conceived is banked ho work.",
+    "STYLE (2026-07-16 ruling): always write '*, Actually' in prose, never 'star-actually' (the slug is data, not language). Range descriptions are portfolio register: full sentences, first-read accessible, friendly — no combative framing, no truncated fragments."
   ],
   "id_map": {
     "image-2-ppt-dev": "pptx-builder",
@@ -54,7 +55,7 @@
       "closeness": "bonded",
       "peak_id": "kanyo",
       "parent": null,
-      "description": "A computer-vision system that has watched Harvard's falcon cameras around the clock since early 2026, and the public website where anyone can browse what it saw. Kanyō does the watching — detecting birds, recording arrivals and departures, sending alerts. The Viewer turns those recordings into a site you can visit. Built by a designer with no engineering background, running in production for a real researcher — the proof that the methodology works.",
+      "description": "Kanyō is a computer-vision system that has watched Harvard's falcon cameras around the clock since early 2026, and the Viewer is the public website where anyone can browse what it saw. Kanyō does the watching — detecting birds, recording arrivals and departures, sending alerts — and the Viewer turns those recordings into a site you can visit. It was built by a designer with no engineering background and runs in production for a real researcher.",
       "color": null
     },
     {
@@ -63,7 +64,7 @@
       "closeness": "shared-code",
       "peak_id": null,
       "parent": null,
-      "description": "Two reading-and-writing tools built for my own children, sharing one codebase and one idea: software can feel like a real book. The Diary opens to today's page, takes dictation, and reads entries back aloud. The Reader turns an ebook into a read-along book, each word glowing as it is spoken. Built for specific kids the mainstream options were failing — a tool made for one person, done fully, is a complete project.",
+      "description": "Edelmore is a pair of reading-and-writing tools built for my own children, sharing one codebase and one idea: software can feel like a real book. The Diary opens to today's page, takes dictation, and reads entries back aloud. The Reader turns an ebook into a read-along book, each word glowing as it is spoken. They were built for specific kids the mainstream options were failing — a tool made for one person, done fully, is a complete project.",
       "color": null
     },
     {
@@ -72,7 +73,7 @@
       "closeness": "suite",
       "peak_id": "palana",
       "parent": null,
-      "description": "Tools for people who run their own servers and want to actually understand them. Most options force a choice: hand control to someone else's cloud, or earn it the hard way at the command line. These tools refuse the choice — friendly interfaces that keep the command line's full power and transparency underneath. Power over your own machines, held in the open.",
+      "description": "Kṣetra-Ops is a set of tools for people who run their own servers and want to actually understand them. Most options force a choice: hand control to someone else's cloud, or earn it the hard way at the command line. These tools refuse the choice — they are friendly interfaces that keep the command line's full power and transparency underneath. It is power over your own machines, held in the open.",
       "color": null
     },
     {
@@ -81,7 +82,7 @@
       "closeness": "suite",
       "peak_id": "palana",
       "parent": "kshetra-ops",
-      "description": "The hands-on-the-machines toolkit. Pālana is the workbench for managing files and services across your servers; Forteller pushes configuration out from one source of truth; Sharibako keeps API keys and secrets encrypted on your own disk; sageframe-mcp lets AI agents read the same live picture of the machines. Named 正直 — honesty — because every tool shows you exactly what it is doing.",
+      "description": "Shōjiki is the hands-on-the-machines toolkit. Pālana is the workbench for managing files and services across your servers; Forteller pushes configuration out from one source of truth; Sharibako keeps API keys and secrets encrypted on your own disk; and sageframe-mcp lets AI agents read the same live picture of the machines. The name is 正直, honesty, because every tool shows you exactly what it is doing.",
       "color": null
     },
     {
@@ -90,7 +91,7 @@
       "closeness": "suite",
       "peak_id": "hozo",
       "parent": "kshetra-ops",
-      "description": "The backup discipline. Hōzō copies data snapshots to a backup machine that wakes only when needed and sleeps the rest of the time; Sage ZFS checks the whole backup picture — what is protected, what is stale, what would actually restore. Named 念 — mindfulness — because a backup is a promise you have to keep checking.",
+      "description": "Nen holds the backup discipline. Hōzō copies data snapshots to a backup machine that wakes only when needed and sleeps the rest of the time, and Sage ZFS checks the whole backup picture — what is protected, what is stale, what would actually restore. The name is 念, mindfulness, because a backup is a promise you have to keep checking.",
       "color": null
     },
     {
@@ -99,7 +100,7 @@
       "closeness": "suite",
       "peak_id": "ho-system",
       "parent": null,
-      "description": "The methodology everything else on this map was built with. The Ho System is a discipline for building real software with AI while keeping your own judgment: the human makes the architectural decisions, the AI implements, and every session is bounded and reviewed. Dandori extends the discipline to autonomous agents; Kinhin is the workbench where a practitioner watches their own practice develop. The claim, proven by the rest of this map: you can ship serious software with AI without becoming someone who cannot ship alone.",
+      "description": "Everything on this map was built with the methodology that lives here. The Ho System is a discipline for building real software with AI while keeping your own judgment: the human makes the architectural decisions, the AI implements, and every session is bounded and reviewed. Dandori extends the discipline to autonomous agents, and Kinhin is the workbench where a practitioner watches their own practice develop. You can ship serious software with AI without becoming someone who cannot ship alone — the rest of this map is the evidence.",
       "color": null
     },
     {
@@ -108,7 +109,7 @@
       "closeness": "suite",
       "peak_id": "star-actually",
       "parent": "ho",
-      "description": "A better way to teach technical subjects, and the sites that prove it. star-actually is the engine: it turns a folder of layered explanations into a website where you arrive with a question and read only as deep as you need. SSH, Actually teaches the tools every developer pretends to understand; Ho, Actually teaches the methodology this whole body of work runs on.",
+      "description": "This range is a new way to teach technical subjects, built on curiosity and exploration. *, Actually is the engine: it turns a folder of layered explanations into a website where you arrive with a question and read only as deep as you need. SSH, Actually and Ho, Actually are the first instances — one teaches SSH, a tool every developer uses and few were ever taught well; the other teaches the methodology this whole body of work runs on.",
       "color": null
     },
     {
@@ -117,7 +118,7 @@
       "closeness": "suite",
       "peak_id": "sageframe",
       "parent": null,
-      "description": "The system that holds the body of work together. The Sageframe vault is where the thinking lives; Keisaku reads the current state of every project straight from the work itself, so the record is never stale; and Shoshin no Sono — the map you are looking at — draws it all as one territory. The tallest peak because everything else grew out of it.",
+      "description": "Sageframe is the start of it all — the organizing system the whole body of work grew out of. The vault is where the thinking lives; Keisaku reads the current state of every project straight from the work itself, so the record is never stale; and Shoshin no Sono — the map you are looking at — draws it all as one territory.",
       "color": null
     },
     {
@@ -126,7 +127,7 @@
       "closeness": "suite",
       "peak_id": null,
       "parent": null,
-      "description": "Instruments for a hard question: when you work with AI for months, how do you keep the work — and the voice — yours? Sutra is a writing tool with the power of version control and none of its interface; Shodō makes years of AI conversations searchable; and around the Interference site gather the four instruments that catch the drift — Voice DNA mirrors your voice back to you, Superposition helps a non-writer produce something genuinely theirs, Kiku scans a conversation history for known failure patterns, and Destructive Interference names the eight ways AI-shaped prose goes wrong. Named 結界 — the ritual boundary.",
+      "description": "The Kekkai range gathers the instruments for a hard question: when you work with AI for months, how do you keep the work — and the voice — yours? Sutra is a writing tool with the power of version control and none of its interface, and Shodō makes years of AI conversations searchable. Around the Interference site gather the four instruments that catch the drift: Voice DNA mirrors your voice back to you, Superposition helps a non-writer produce something genuinely theirs, Kiku scans a conversation history for known failure patterns, and Destructive Interference names the eight ways AI-shaped prose goes wrong. The name is 結界, the ritual boundary.",
       "color": null
     },
     {
@@ -135,7 +136,7 @@
       "closeness": "bonded",
       "peak_id": "constructive-interference",
       "parent": null,
-      "description": "The essays. Constructive Interference on Substack is where this work writes about itself — the methodology, the tools, and what months of collaboration with a machine actually feel like. Essays about a specific project settle on the map beside that project; the rest gather here, a city at the mountain's base.",
+      "description": "Constructive Interference is the writing practice of the body of work — essays on Substack about the methodology, the tools, and what months of collaboration with a machine actually feel like. An essay about a specific project settles on the map beside that project; the rest gather here, a city at the mountain's base.",
       "color": null
     }
   ],
