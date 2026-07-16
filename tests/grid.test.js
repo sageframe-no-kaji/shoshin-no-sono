@@ -9,7 +9,7 @@ const EMPTY = { themes: [], media: [], status: [] };
 
 describe('filterWorks — the filter_composition rule', () => {
   it('empty state matches everything', () => {
-    expect(filterWorks(idx, EMPTY)).toHaveLength(29);
+    expect(filterWorks(idx, EMPTY)).toHaveLength(62);
   });
 
   it('single theme narrows (additive within not triggered)', () => {
@@ -31,14 +31,35 @@ describe('filterWorks — the filter_composition rule', () => {
       media: ['writing'],
       status: [],
     }).map((w) => w.id);
-    expect(ids.sort()).toEqual(['falcon-cameras', 'three-hours']);
+    expect(ids.sort()).toEqual([
+      'a-condition-of-the-dash',
+      'everybody-is-lying',
+      'everybody-is-shipping-work-nobody-asked-for',
+      'falcon-cameras',
+      'ho-actually',
+      'personal-statement-for-fulbright-application-2003',
+      'prompting-not-programming',
+      'three-hours',
+      'walking-without-google-maps',
+    ]);
   });
 
   it('status filters compose too', () => {
     const ids = filterWorks(idx, { themes: [], media: ['software'], status: ['in-development'] }).map(
       (w) => w.id,
     );
-    expect(ids.sort()).toEqual(['forteller', 'kinhin', 'palana', 'satori']);
+    expect(ids.sort()).toEqual([
+      'audiobook-qc',
+      'forteller',
+      'keisaku',
+      'kinhin',
+      'palana',
+      'sage-zfs',
+      'sageframe-mcp',
+      'satori',
+      'sharibako',
+      'shoshin-no-sono',
+    ]);
   });
 });
 
@@ -58,7 +79,7 @@ describe('renderCatalog', () => {
     expect(html).toContain('data-work="dandori"');
     expect(html).toContain('Dandori');
     expect(html).toContain('段取り');
-    expect(html).toContain('29 of 29 works');
+    expect(html).toContain('62 of 62 works');
     expect(html.indexOf('Methodology')).toBeLessThan(html.indexOf('Archived'));
   });
 

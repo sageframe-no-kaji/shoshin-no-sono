@@ -24,13 +24,17 @@ describe('the Indexer against the real corpus', () => {
     expect(sources.sort()).toEqual(
       [
         'aspirational-intelligence',
+        'bad-vibes',
         'dandori',
         'falcon-cameras',
+        'ho-actually',
         'hozo',
         'kanyo',
         'kinhin',
         'm4bookmaker',
+        'prompting-not-programming',
         'three-hours',
+        'walking-without-google-maps',
       ].sort(),
     );
   });
@@ -57,14 +61,30 @@ describe('the Indexer against the real corpus', () => {
     expect(groups[3].id).toBe('writing');
   });
 
-  it('worksByGroup("writing") returns the six essays in sort order', () => {
+  it('worksByGroup("writing") returns the twenty-two writing works in sort order', () => {
     expect(idx.worksByGroup('writing').map((w) => w.id)).toEqual([
+      'constructive-interference',
+      'medium-outlet',
       'falcon-cameras',
       'three-hours',
       'the-same-lever',
       'the-fourth-boundary',
       'the-empty-container',
       'judgment-at-scale',
+      'the-wrong-rand',
+      'everybody-is-lying',
+      'i-just-want-to-own-my-audiobooks',
+      'a-condition-of-the-dash',
+      'walking-without-google-maps',
+      'the-bootstrapper-s-catch-22',
+      'thinking-outside-the-skull',
+      'prompting-not-programming',
+      'bad-vibes',
+      'your-machines-are-not-strangers',
+      'everybody-is-making-out-with-ai-in-the-back-of-the-bus',
+      'everybody-is-shipping-work-nobody-asked-for',
+      'pink-teaming-how-the-page-reads',
+      'pink-teaming-the-practice-of-reading',
     ]);
   });
 

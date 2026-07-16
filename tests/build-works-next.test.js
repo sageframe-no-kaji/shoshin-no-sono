@@ -304,7 +304,7 @@ describe('buildWorksNext', () => {
           },
         ],
       },
-      // id-mapped injected work
+      // id-mapped work that already landed locally (skip path)
       {
         id: 'image-2-ppt-dev',
         name: 'PPTX Builder',
@@ -316,6 +316,18 @@ describe('buildWorksNext', () => {
         short_description: 'converts',
         substantive_description: ['converts fully'],
       },
+      // genuinely new work (injection path)
+      {
+        id: 'mini-new-tool',
+        name: 'Mini New Tool',
+        media: ['software'],
+        status: 'in-development',
+        repo: 'git@github-no-kaji:x/mini-new-tool.git',
+        created: '2026-07-01',
+        last_updated: '2026-07-10',
+        short_description: 'a small tool',
+        substantive_description: ['a small tool, fully'],
+      },
     ],
   });
 
@@ -325,18 +337,15 @@ describe('buildWorksNext', () => {
       'image-2-ppt-dev': 'pptx-builder',
       'i-built-a-computer-vision-system': 'falcon-cameras',
     },
-    include: ['image-2-ppt-dev', 'kanyo', 'ghost-work'],
-    families: [
-      { id: 'kanyo', name: 'Kanyō', closeness: 'bonded', peak_id: 'kanyo', parent: null, description: null, color: null },
-    ],
+    include: ['image-2-ppt-dev', 'mini-new-tool', 'kanyo', 'ghost-work'],
     patch: {
       kanyo: { family: 'kanyo', peak: 'peak' },
-      'pptx-builder': {
+      'mini-new-tool': {
         importance: 2,
         group: 'production-systems',
         themes: ['sovereignty'],
         sort_order_within_group: 90,
-        conceived: '2025-10-23',
+        conceived: '2026-07-01',
       },
       'no-such-work': { importance: 1 },
     },
@@ -346,7 +355,8 @@ describe('buildWorksNext', () => {
   it('produces a valid catalog from the real corpus and a miniature public feed', () => {
     const { data, report } = buildWorksNext(real(), miniPublic(), miniOverlay());
     expect(validateWorks(data)).toEqual([]);
-    expect(report).toContain('injected: pptx-builder');
+    expect(report).toContain('injected: mini-new-tool');
+    expect(report).toContain('skip (already local): image-2-ppt-dev -> pptx-builder');
     expect(report).toContain('skip (already local): kanyo -> kanyo');
     expect(report).toContain('MISSING in public.json: ghost-work');
     expect(report).toContain('PATCH TARGET MISSING: no-such-work');
@@ -365,9 +375,18 @@ describe('buildWorksNext', () => {
     expect(byId.has('image-2-ppt-dev')).toBe(false);
   });
 
-  it('carries the overlay families block and stamps document.last_updated', () => {
+  it('prefers an overlay families block, falls back to the local one, and stamps document.last_updated', () => {
+    const withOverlayBlock = miniOverlay();
+    withOverlayBlock.families = [
+      { id: 'kanyo', name: 'Kanyō', closeness: 'bonded', peak_id: 'kanyo', parent: null, description: null, color: null },
+    ];
+    // Overlay block wins when present — works referencing other families go dangling, by design.
+    const { data: overlaid } = buildWorksNext(real(), { works: [] }, withOverlayBlock);
+    expect(overlaid.families).toHaveLength(1);
+
+    // No overlay block: the local corpus's own families stand.
     const { data } = buildWorksNext(real(), miniPublic(), miniOverlay());
-    expect(data.families).toHaveLength(1);
+    expect(data.families).toHaveLength(real().families.length);
     expect(data.document.last_updated).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
@@ -383,7 +402,7 @@ describe('buildWorksNext', () => {
     const { data } = buildWorksNext(real(), { works: [] }, {});
     expect(validateWorks(data)).toEqual([]);
     expect(data.works).toHaveLength(real().works.length);
-    expect(data.families).toEqual([]);
+    expect(data.families).toHaveLength(real().families.length);
   });
 });
 

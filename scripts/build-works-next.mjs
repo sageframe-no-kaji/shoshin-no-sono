@@ -297,8 +297,13 @@ export function buildWorksNext(local, pub, overlay) {
   }
   const localIds = new Set(works.map((w) => w.id));
 
-  // 2. Overlay-authored new works (no public record exists).
+  // 2. Overlay-authored new works (no public record exists). Skipped once they
+  //    live in the local corpus — the merge is idempotent after landing.
   for (const w of overlay.new_works ?? []) {
+    if (works.some((existing) => existing.id === w.id)) {
+      report.push(`skip (already local): authored ${w.id}`);
+      continue;
+    }
     works.push({ ...w });
     report.push(`authored: ${w.id}`);
   }
@@ -333,7 +338,10 @@ export function buildWorksNext(local, pub, overlay) {
 
   // House style pass — prose surfaces only.
   for (const w of works) chicagoWork(w);
-  const families = (overlay.families ?? []).map((/** @type {any} */ f) => ({
+  // The overlay owns the families block when it carries one; otherwise the
+  // local corpus's own block stands (works.json carries families natively
+  // since the 2026-07-16 merge).
+  const families = (overlay.families ?? local.families ?? []).map((/** @type {any} */ f) => ({
     ...f,
     description: chicago(f.description),
   }));

@@ -10,7 +10,8 @@
     "IMPORTANCE (2026-07-15 rulings): m4bookmaker 5 → 6 (earning, most-starred repo); kanyo 8 → 7 — NOTE this is a demotion from the prior 8, applied per the practitioner's words; bounce if 8 was meant to stand.",
     "IMPORTANCE (2026-07-16 full review): resonance-field 3, star-actually 5, voice-dna/superposition 6, kinhin 5, edelmore-diary 6, pink-teaming 8 (the lone tertiary mountain), sage-zfs 4, keisaku 7. pink-reader and reading-instrument were absent from the reviewed list — values unchanged (2 and 6), pending the practitioner.",
     "ORDINALS (2026-07-16 ruling, final): emergence sequence 1-31, practitioner-ruled, held in the ordinal field (schema v5.2) — deliberately contradicts conceived-date order in places; never re-derive from dates. reading-instrument rises 25 (right after pink-teaming, before pink-reader); its height stands at 6, unreviewed. Towns (writing) stay null by design and populate by publication_date. RENDERING QUEUED: src/emergence.js still keys on conceived; ordinal-else-conceived is banked ho work.",
-    "STYLE (2026-07-16 ruling): always write '*, Actually' in prose, never 'star-actually' (the slug is data, not language). Range descriptions are portfolio register: full sentences, first-read accessible, friendly — no combative framing, no truncated fragments."
+    "STYLE (2026-07-16 ruling): always write '*, Actually' in prose, never 'star-actually' (the slug is data, not language). Range descriptions are portfolio register: full sentences, first-read accessible, friendly — no combative framing, no truncated fragments.",
+    "STATUS (2026-07-16): voice-dna and superposition patched to 'shipped' — keisaku carries no status for them and the scaffold default (in-development) contradicted their own descriptions (both packaged and live/in use). Review if wrong."
   ],
   "id_map": {
     "image-2-ppt-dev": "pptx-builder",
@@ -382,7 +383,8 @@
       "peak_of": "interference",
       "sort_order_within_group": 60,
       "conceived": "2026-07-02",
-      "ordinal": 19
+      "ordinal": 19,
+      "status": "shipped"
     },
     "superposition": {
       "name": "Superposition",
@@ -406,7 +408,8 @@
           "note": "The method inverted: Voice DNA reads a finished corpus; Superposition extracts voice by reaction from someone who cannot yet name it."
         }
       ],
-      "ordinal": 19
+      "ordinal": 19,
+      "status": "shipped"
     },
     "kanyo-viewer": {
       "name": "Kanyō Viewer",

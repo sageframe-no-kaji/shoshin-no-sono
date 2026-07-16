@@ -232,13 +232,14 @@ describe('validateWorks on degenerate documents', () => {
   });
 });
 
-describe('validateWorks — families (schema v5, optional until the data lands)', () => {
-  /** A well-formed family injected into the real corpus. @param {any} d */
+describe('validateWorks — families (schema v5; the corpus carries real families since 2026-07-16)', () => {
+  /** A well-formed synthetic family appended to the real corpus. @param {any} d */
   const addFamily = (d) => {
-    d.families = [{ id: 'kshetra-ops', name: 'Kṣetra-Ops', closeness: 'suite', peak_id: 'forteller' }];
+    d.families.push({ id: 'test-range', name: 'Test Range', closeness: 'suite', peak_id: 'forteller' });
   };
 
-  it('a well-formed family block passes', () => {
+  it('the real corpus family block passes as-is, and a well-formed addition passes', () => {
+    expect(corrupt(() => {})).toEqual([]);
     expect(corrupt(addFamily)).toEqual([]);
   });
 
@@ -246,10 +247,10 @@ describe('validateWorks — families (schema v5, optional until the data lands)'
     const errors = corrupt((d) => {
       addFamily(d);
       const f = d.works.find((/** @type {any} */ w) => w.id === 'forteller');
-      f.family = 'kshetra-ops';
+      f.family = 'test-range';
       f.peak = 'peak';
       const p = d.works.find((/** @type {any} */ w) => w.id === 'palana');
-      p.family = 'kshetra-ops';
+      p.family = 'test-range';
       p.peak = 'sub-peak';
     });
     expect(errors).toEqual([]);
@@ -257,24 +258,24 @@ describe('validateWorks — families (schema v5, optional until the data lands)'
 
   it('rejects a non-slug family id', () => {
     const errors = corrupt((d) => {
-      d.families = [{ id: 'Kshetra Ops', name: 'Kṣetra-Ops', closeness: 'suite', peak_id: null }];
+      d.families.push({ id: 'Test Range', name: 'Test Range', closeness: 'suite', peak_id: null });
     });
     expect(errors.join('\n')).toContain('id is not a kebab-case slug');
   });
 
   it('rejects a duplicate family id', () => {
     const errors = corrupt((d) => {
-      d.families = [
-        { id: 'kshetra-ops', name: 'A', closeness: 'suite', peak_id: null },
-        { id: 'kshetra-ops', name: 'B', closeness: 'kindred', peak_id: null },
-      ];
+      d.families.push(
+        { id: 'test-range', name: 'A', closeness: 'suite', peak_id: null },
+        { id: 'test-range', name: 'B', closeness: 'kindred', peak_id: null },
+      );
     });
     expect(errors.join('\n')).toContain('duplicate family id');
   });
 
   it('rejects a missing family name and an unknown closeness', () => {
     const errors = corrupt((d) => {
-      d.families = [{ id: 'utilities', name: '', closeness: 'entangled', peak_id: null }];
+      d.families.push({ id: 'test-range', name: '', closeness: 'entangled', peak_id: null });
     });
     const text = errors.join('\n');
     expect(text).toContain('name is required');
@@ -283,7 +284,7 @@ describe('validateWorks — families (schema v5, optional until the data lands)'
 
   it('rejects a dangling peak_id', () => {
     const errors = corrupt((d) => {
-      d.families = [{ id: 'utilities', name: 'Utilities', closeness: 'kindred', peak_id: 'ghost-work' }];
+      d.families.push({ id: 'test-range', name: 'Test Range', closeness: 'kindred', peak_id: 'ghost-work' });
     });
     expect(errors.join('\n')).toContain('dangling peak_id ghost-work');
   });
@@ -297,11 +298,10 @@ describe('validateWorks — families (schema v5, optional until the data lands)'
 
   it('rejects an invalid peak role, and a peak role without a family', () => {
     const errors = corrupt((d) => {
-      addFamily(d);
       const f = d.works.find((/** @type {any} */ w) => w.id === 'forteller');
-      f.family = 'kshetra-ops';
       f.peak = 'summit'; // not in the vocabulary
-      d.works[0].peak = 'peak'; // family is null on this work
+      const s = d.works.find((/** @type {any} */ w) => w.id === 'satori'); // rangeless work
+      s.peak = 'peak';
     });
     const text = errors.join('\n');
     expect(text).toContain("peak must be 'peak' | 'sub-peak' | null");
@@ -310,21 +310,21 @@ describe('validateWorks — families (schema v5, optional until the data lands)'
 });
 
 describe('validateWorks — nested ranges and sibling anchors (schema v5.1)', () => {
-  /** Kṣetra-Ops holding two child ranges, per the corpus-inject rulings. @param {any} d */
+  /** A synthetic parent range holding two children, mirroring the Kṣetra-Ops shape. @param {any} d */
   const addNestedFamilies = (d) => {
-    d.families = [
+    d.families.push(
       {
-        id: 'kshetra-ops',
-        name: 'Kṣetra-Ops',
+        id: 'test-parent',
+        name: 'Test Parent',
         closeness: 'suite',
         peak_id: 'palana',
         parent: null,
         description: 'An honest system for user responsibility and power over your own machines.',
         color: '#8a6d3b',
       },
-      { id: 'shojiki', name: 'Shōjiki (正直)', closeness: 'suite', peak_id: 'palana', parent: 'kshetra-ops' },
-      { id: 'nen', name: 'Nen (念)', closeness: 'suite', peak_id: 'hozo', parent: 'kshetra-ops' },
-    ];
+      { id: 'test-child-a', name: 'Child A', closeness: 'suite', peak_id: 'palana', parent: 'test-parent' },
+      { id: 'test-child-b', name: 'Child B', closeness: 'suite', peak_id: 'hozo', parent: 'test-parent' },
+    );
   };
 
   it('a well-formed nested range block passes, description and color included', () => {
@@ -333,14 +333,14 @@ describe('validateWorks — nested ranges and sibling anchors (schema v5.1)', ()
 
   it('rejects a dangling parent', () => {
     const errors = corrupt((d) => {
-      d.families = [{ id: 'shojiki', name: 'Shōjiki', closeness: 'suite', peak_id: null, parent: 'ghost-range' }];
+      d.families.push({ id: 'test-child-a', name: 'Child A', closeness: 'suite', peak_id: null, parent: 'ghost-range' });
     });
     expect(errors.join('\n')).toContain('dangling parent ghost-range');
   });
 
   it('rejects a self-referencing parent', () => {
     const errors = corrupt((d) => {
-      d.families = [{ id: 'shojiki', name: 'Shōjiki', closeness: 'suite', peak_id: null, parent: 'shojiki' }];
+      d.families.push({ id: 'test-child-a', name: 'Child A', closeness: 'suite', peak_id: null, parent: 'test-child-a' });
     });
     expect(errors.join('\n')).toContain('parent references itself');
   });
@@ -348,30 +348,30 @@ describe('validateWorks — nested ranges and sibling anchors (schema v5.1)', ()
   it('rejects nesting deeper than one level', () => {
     const errors = corrupt((d) => {
       addNestedFamilies(d);
-      d.families.push({ id: 'deeper', name: 'Deeper', closeness: 'suite', peak_id: null, parent: 'shojiki' });
+      d.families.push({ id: 'deeper', name: 'Deeper', closeness: 'suite', peak_id: null, parent: 'test-child-a' });
     });
     expect(errors.join('\n')).toContain('is itself a child range — one level deep only');
   });
 
   it('rejects a non-string description and a malformed color', () => {
     const errors = corrupt((d) => {
-      d.families = [
-        { id: 'nen', name: 'Nen', closeness: 'suite', peak_id: null, description: 42, color: 'chartreuse' },
-      ];
+      d.families.push(
+        { id: 'test-bad', name: 'Bad', closeness: 'suite', peak_id: null, description: 42, color: 'chartreuse' },
+      );
     });
     const text = errors.join('\n');
     expect(text).toContain('description must be a string or null');
     expect(text).toContain('color must be a #rrggbb hex string or null');
   });
 
-  /** The Kekkai shape: peer summits with instruments anchored to one of them. @param {any} d */
+  /** The Kekkai shape rebuilt synthetically: peer summits, instruments anchored to one. @param {any} d */
   const addKekkai = (d) => {
-    d.families = [{ id: 'kekkai', name: 'Kekkai (結界)', closeness: 'suite', peak_id: null }];
+    d.families.push({ id: 'test-cluster', name: 'Test Cluster', closeness: 'suite', peak_id: null });
     const sutra = d.works.find((/** @type {any} */ w) => w.id === 'sutra');
-    sutra.family = 'kekkai';
+    sutra.family = 'test-cluster';
     sutra.peak = 'peak';
     const kiku = d.works.find((/** @type {any} */ w) => w.id === 'kiku');
-    kiku.family = 'kekkai';
+    kiku.family = 'test-cluster';
     kiku.peak = 'sub-peak';
     kiku.peak_of = 'sutra';
   };

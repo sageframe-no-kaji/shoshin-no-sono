@@ -2,7 +2,7 @@
   "document": {
     "title": "初心の園 — Shoshin no Sono",
     "author": "Andrew T. Marcus",
-    "last_updated": "2026-06-11",
+    "last_updated": "2026-07-16",
     "purpose": "Public-facing catalog of the Sageframe body of work. Routes visitors to canonical homes; demonstrates coherence through typed relationships rendered as interference cartography."
   },
   "web_properties": [
@@ -61,7 +61,7 @@
       "id": "production-systems",
       "number": 2,
       "name": "Sageframe Production Systems",
-      "intro": "The evidence. Real software in real use — at Harvard, in the App Store, on PyPI, in production homelabs. The proof that the methodology works."
+      "intro": "The evidence. Real software in real use—at Harvard, in the App Store, on PyPI, in production homelabs. The proof that the methodology works."
     },
     {
       "id": "constructive-interference",
@@ -73,13 +73,13 @@
       "id": "writing",
       "number": 4,
       "name": "Writing",
-      "intro": "The towns of the territory. Each essay settles near the works it documents — the writing practice that traces how the body of work relates to itself. Constructive Interference at sageframe.substack.com is the primary outlet; position papers live at atmarcus.net. The writing is the argument the work makes about itself, in public."
+      "intro": "The towns of the territory. Each essay settles near the works it documents—the writing practice that traces how the body of work relates to itself. Constructive Interference at sageframe.substack.com is the primary outlet; position papers live at atmarcus.net. The writing is the argument the work makes about itself, in public."
     },
     {
       "id": "knowledge-architecture",
       "number": 5,
       "name": "Knowledge Architecture",
-      "intro": "*, Actually and SSH, Actually — restructuring how technical knowledge gets to humans."
+      "intro": "*, Actually and SSH, Actually—restructuring how technical knowledge gets to humans."
     },
     {
       "id": "interactive-demonstrations",
@@ -148,6 +148,14 @@
         {
           "label": "GitHub repo",
           "url": "https://github.com/sageframe-no-kaji/ho-system"
+        },
+        {
+          "label": "The Ho System",
+          "url": "https://hosystem.sageframe.net"
+        },
+        {
+          "label": "Ho, Actually edition",
+          "url": "https://star-actually.sageframe.net/ho-actually/"
         }
       ],
       "tech_stack": null,
@@ -158,19 +166,21 @@
       "personal_stake": null,
       "created": "2026-01-01",
       "conceived": "2025-12-12",
-      "last_updated": "2026-05-17",
-      "short_description": "Published open methodology for human-AI collaborative software development in which the human practitioner maintains full architectural authority while using AI as an implementation partner. The core unit is a ho — a bounded ~2-hour session producing something real, connecting to the project arc via commit hash, ending with structured reflection. Practitioners progress through Shu-Ha-Ri stages; tiered understanding (Black Box, Functional, Deep) gives an honest frame for tracking what's understood versus delegated.",
+      "last_updated": "2026-07-12",
+      "short_description": "A published open methodology for human-AI collaborative software development in which the practitioner keeps full architectural authority and uses AI as an implementation partner.",
       "substantive_description": [
-        "The dominant frame for AI-assisted development assumes the model leads. Vibe coding names the position with unembarrassed clarity: the human gestures, the model generates, the human accepts or rejects. The Ho System refuses the position.",
-        "It treats AI as an implementation partner inside a discipline the human owns — architectural authority held, structural decisions made consciously, every session bounded, every artifact reviewed. Eight production systems shipped under it, including a computer vision platform at Harvard and a ZFS backup orchestrator with 278 tests at 99% coverage.",
-        "The deeper claim is about agency in the age of capable models. Capable models tempt the practitioner to delegate the parts of the work that build the practitioner's judgment. The Ho System is the operational answer to that temptation: a methodology that lets you ship without becoming someone who cannot ship alone."
+        "The dominant frame for AI-assisted development assumes the model leads: the human gestures, the model generates, the human accepts or rejects. The Ho System refuses that position. It treats AI as an implementation partner inside a discipline the human owns—architectural authority held, structural decisions made consciously, every session bounded, every artifact reviewed. The working unit is a ho (歩, \"step\"): a bounded, roughly two-hour session that produces something real, connects to the project arc by commit hash, and closes with structured reflection; practitioners progress through Shu-Ha-Ri stages, and a tiered-understanding frame—Black Box, Functional, Deep—keeps an honest account of what is understood versus delegated. The deeper claim is about agency in the age of capable models: those models tempt the practitioner to delegate exactly the work that builds judgment, and the Ho System is the operational answer—a methodology that lets you ship without becoming someone who cannot ship alone. Eight production systems have shipped under it, including a computer-vision platform running at Harvard and a ZFS backup orchestrator with 278 tests at 99% coverage.",
+        "The Ho System is a methodology rather than a codebase: it ships as an open framework of documents, templates, and operating discipline, published under CC BY-NC-ND 4.0, with a methodology site at atmarcus.net/ho and the framework repository on GitHub; it is also taught as a navigable graph through Ho System, Actually, a live instance of the *, Actually engine at star-actually.sageframe.net/ho-actually."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "family": "ho",
+      "peak": "peak",
+      "ordinal": 4
     },
     {
       "id": "dandori",
@@ -197,12 +207,12 @@
         "claude-skill",
         "human-ai-collaboration"
       ],
-      "repo": null,
-      "license": null,
+      "repo": "https://github.com/sageframe-no-kaji/dandori",
+      "license": "MIT",
       "deployment": [
         {
           "label": "Claude Skill (GitHub)",
-          "url": null
+          "url": "https://github.com/sageframe-no-kaji/dandori"
         }
       ],
       "tech_stack": null,
@@ -213,11 +223,11 @@
       "personal_stake": null,
       "created": "2026-04-20",
       "conceived": "2026-05-10",
-      "last_updated": "2026-05-17",
-      "short_description": "Methodology for autonomous coding agent prep discipline. A prompt is a sentence; a handoff is an artifact. Dandori transforms planning conversations into bounded markdown specs that the agent reads as one unit of work. Published as a Skill on GitHub. Sits alongside the Ho System: where Ho structures the practitioner's session, Dandori structures the agent's brief.",
+      "last_updated": "2026-07-09",
+      "short_description": "A discipline for preparing bounded specifications that an autonomous coding agent can execute as one unit of work—published as a Claude Skill.",
       "substantive_description": [
-        "The current generation of coding agents is capable of running unattended for hours on tasks they will get spectacularly wrong if briefed casually. The failure mode is structural: prompts are sentences, and sentences are the wrong artifact for autonomous work. Dandori is the answer in methodology form — a discipline for converting planning conversations into bounded, reviewable specifications the agent treats as one unit of work. The metaphor is correct: a Japanese workshop's dandori is the prep that makes the skilled labor possible.",
-        "The deeper argument is about authorship of agent work: who decided what gets built, and where in the artifact chain that decision is recorded. Without Dandori the answer is nobody, nowhere. With Dandori the answer is the practitioner, in the spec. That distinction is the difference between agent work that's auditable and agent work that's autopilot."
+        "The current generation of coding agents can run unattended for hours on tasks they will get spectacularly wrong if briefed casually. The failure is structural: a prompt is a sentence, and a sentence is the wrong artifact for autonomous work. Dandori is the answer in methodology form—a discipline for converting planning conversations into bounded, reviewable specifications the agent treats as one unit of work. The name is exact: a Japanese workshop's dandori (段取り) is the preparation that makes the skilled labor possible. The deeper argument is about authorship of agent work—who decided what gets built, and where in the artifact chain that decision is recorded; without Dandori the answer is nobody, nowhere, and with it the answer is the practitioner, in the spec. That distinction is the difference between agent work that is auditable and agent work that is autopilot; it sits alongside the Ho System, where Ho structures the practitioner's session and Dandori structures the agent's brief.",
+        "Dandori is a methodology published as a Claude Skill—a structured markdown instruction set an agent reads to author a task spec—distributed via GitHub."
       ],
       "relationships": [
         {
@@ -232,7 +242,10 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "family": "ho",
+      "peak": "peak",
+      "ordinal": 20
     },
     {
       "id": "kanyo",
@@ -240,7 +253,7 @@
       "native_script": "観鷹",
       "native_translation": "Contemplating falcons",
       "hero": "The existence proof.",
-      "importance": 8,
+      "importance": 7,
       "color": null,
       "featured": true,
       "media": [
@@ -272,7 +285,7 @@
           "url": "https://github.com/sageframe-no-kaji/kanyo"
         }
       ],
-      "tech_stack": "Python, FastAPI, YOLOv8, React, Tailwind, Docker; NVIDIA, Intel, and CPU-only hardware profiles",
+      "tech_stack": "Python (opencv-python-headless, ultralytics, numpy, Pillow, yt-dlp, pyyaml, loguru, requests, jinja2, markdown, python-dateutil, tzdata)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -280,11 +293,11 @@
       "personal_stake": null,
       "created": "2026-01-20",
       "conceived": "2025-12-12",
-      "last_updated": "2026-05-17",
-      "short_description": "Production computer vision pipeline for wildlife monitoring. Streams from YouTube (or any rtsp/http source), runs YOLOv8 bird detection with a debounced state machine to suppress false positives, records arrival/departure clips, sends Telegram notifications. Companion web viewer provides a public event archive with HKSV-style timeline, visit statistics, live stream embeds. Deployed at Harvard's Memorial Hall monitoring peregrine falcons, developed for Nobel laureate economist Claudia Goldin and Harvard FAS. Species-agnostic architecture. Built from zero development experience in six weeks using the Ho System. 114 passing tests.",
+      "last_updated": "2026-07-09",
+      "short_description": "A production computer-vision pipeline that watches wildlife cameras around the clock and turns raw video into detections, clips, and notifications.",
       "substantive_description": [
-        "Kanyō is the existence proof. The methodology question — can a practitioner with strong systems thinking but no formal engineering background ship production AI? — needed an answer that wasn't a position paper. Six weeks. 114 tests. Deployed at Harvard, monitoring peregrine falcons through an academic partnership with a Nobel laureate. The system is real, and it works.",
-        "Beyond the personal evidence, Kanyō makes a more interesting argument: the kind of work this is — domain-specific computer vision with research-grade requirements — has historically required either a specialist engineering team or compromise on quality. The Ho System collapses the dichotomy. The deployment context matters: a peregrine falcon is not a benchmark. Harvard FAS is not a test environment. The system runs in production for a researcher who needed it to work. That's the evidence the methodology needed."
+        "Kanyō (観鷹, \"contemplating falcons\") streams from YouTube or any RTSP/HTTP source and runs YOLOv8 bird detection behind a debounced state machine that suppresses false positives; it records arrival and departure clips, sends Telegram notifications, and feeds a companion web viewer for review. It has run continuously in production since early 2026, monitoring peregrine falcons at Harvard's Memorial Hall, developed through an academic partnership with Nobel laureate economist Claudia Goldin and Harvard FAS. It is also the existence proof of the Ho System: the methodology's question—can a practitioner with strong systems thinking but no formal engineering background ship production AI?—needed an answer that was not a position paper. The answer was six weeks, 114 tests, and a species-agnostic architecture deployed where a peregrine falcon is not a benchmark and Harvard FAS is not a test environment. The system is real, and it works.",
+        "Python and FastAPI with YOLOv8 for detection and a React + Tailwind frontend, packaged in Docker across NVIDIA, Intel, and CPU-only hardware profiles."
       ],
       "relationships": [
         {
@@ -292,14 +305,17 @@
           "type": "validates",
           "strength": null,
           "articulated_in": "falcon-cameras",
-          "note": "Six weeks, 114 tests, deployed at Harvard — the methodology's first existence proof."
+          "note": "Six weeks, 114 tests, deployed at Harvard—the methodology's first existence proof."
         }
       ],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "family": "kanyo",
+      "peak": "peak",
+      "ordinal": 2
     },
     {
       "id": "hozo",
@@ -329,7 +345,7 @@
         "ho-system-validation"
       ],
       "repo": "https://github.com/sageframe-no-kaji/hozo",
-      "license": null,
+      "license": "MIT",
       "deployment": [
         {
           "label": "GitHub repo",
@@ -340,7 +356,7 @@
           "url": "https://hozo.sageframe.net"
         }
       ],
-      "tech_stack": "Python, syncoid, Wake-on-LAN, WebAuthn, bootstrap web UI",
+      "tech_stack": "Python (wakeonlan, paramiko, pyyaml, click, fastapi, uvicorn, jinja2, httpx, apscheduler, pydantic, python-multipart, webauthn, itsdangerous)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -348,11 +364,11 @@
       "personal_stake": null,
       "created": "2026-02-25",
       "conceived": "2025-12-13",
-      "last_updated": "2026-06-24",
-      "short_description": "Wake-on-demand ZFS backup orchestrator. Pushes ZFS snapshots to a low-power remote backup node using syncoid over SSH, waking the node only when a backup run is scheduled or triggered. Runs entirely on the source machine — no agent needed on the remote. Bootstrap web UI with WebAuthn passkey auth provides job dashboard, run history, log viewer, break-glass DR restore. 278 tests, 99% coverage, zero lint or type errors. Built in approximately three hours using the Ho System.",
+      "last_updated": "2026-07-09",
+      "short_description": "A wake-on-demand ZFS backup orchestrator that pushes snapshots to a low-power remote node, waking it only when a run is due.",
       "substantive_description": [
-        "Hōzō is the second proof, and the more interesting one. Kanyō took six weeks; Hōzō took three hours. The delta is not about the projects' relative complexity — it's about the practitioner's progression through Shu, Ha, and Ri. The same person who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime, with higher test coverage and lower error rate.",
-        "The methodology's claim isn't you can ship one thing this way. The methodology's claim is you become someone who ships this way. Hōzō is the documented evidence. The 278 tests aren't decoration. The 99% coverage isn't decoration. They're the receipts a skeptical reader requires before believing that a non-engineer running a disciplined practice can produce work indistinguishable from senior engineering output."
+        "Hōzō (宝蔵, \"treasury\") pushes ZFS snapshots to a low-power remote backup node using syncoid over SSH, waking the node with Wake-on-LAN only when a backup run is scheduled or triggered, and running entirely on the source machine so no agent is needed on the remote. A bootstrap web UI with WebAuthn passkey authentication provides a job dashboard, run history, a log viewer, and a break-glass disaster-recovery restore. It is also the second Ho System proof, and the more interesting one: Kanyō took six weeks, Hōzō took roughly three hours, and the delta is not about relative complexity but about the practitioner's progression through Shu, Ha, and Ri—the same person shipped it between dinner and bedtime, with higher coverage and a lower error rate. The 278 tests, 99% coverage, and zero lint or type errors are not decoration; they are the receipts a skeptical reader requires before believing a non-engineer running a disciplined practice can produce work indistinguishable from senior engineering output. With Sage ZFS, which maps and judges the whole protection graph, Hōzō forms the backup-focused devops layer adjacent to the Kṣetra-Ops suite.",
+        "Python with syncoid for replication, Wake-on-LAN for remote power management, and a bootstrap web UI secured by WebAuthn passkeys."
       ],
       "relationships": [
         {
@@ -367,14 +383,17 @@
           "type": "descends_from",
           "strength": null,
           "articulated_in": null,
-          "note": "The Kanyō-to-Hōzō delta — six weeks to three hours — is the practitioner-progression evidence."
+          "note": "The Kanyō-to-Hōzō delta—six weeks to three hours—is the practitioner-progression evidence."
         }
       ],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "family": "nen",
+      "peak": "peak",
+      "ordinal": 10
     },
     {
       "id": "kinhin",
@@ -382,7 +401,7 @@
       "native_script": "経行",
       "native_translation": "Walking meditation",
       "hero": "The zazen of the system, not the workshop.",
-      "importance": 6,
+      "importance": 5,
       "color": null,
       "featured": false,
       "media": [
@@ -412,10 +431,10 @@
       "created": "2026-05-10",
       "conceived": "2026-02-20",
       "last_updated": "2026-05-17",
-      "short_description": "Structured workbench application for Ho System practitioners. A place to define a project arc, sequence the hos within it, write structured devlogs, track progression through Shu-Ha-Ri stages, build a navigable learning trajectory over time. MVP deliberately excludes IDE integration, git interaction, and AI assistance — it is a record-keeping and reflection tool, not an execution environment. The second major Ho System pilot (after Kanyō), built using the methodology it implements.",
+      "short_description": "A structured workbench that makes Ho System practice visible to its own practitioner—project arcs, ho sequences, devlogs, and Shu-Ha-Ri progression as software.",
       "substantive_description": [
-        "A practice you can't see is a practice you can't improve. Kinhin makes Ho System practice visible to its own practitioner — the arc of a project, the rhythm of its hos, the structural rotation between modes, the visible movement through Shu, Ha, and Ri. The deliberate exclusion of execution capability is the design point: Kinhin is the zazen of the system, not the workshop.",
-        "The deeper argument is that mastery requires reflection, and reflection requires infrastructure — the same infrastructure that lets a martial artist watch tape of their own practice or a clinician keep a procedural log. The model has near-infinite memory of code patterns and zero memory of your learning trajectory. Kinhin restores the asymmetry the right way around."
+        "A practice you cannot see is a practice you cannot improve. Kinhin makes Ho System practice legible to the person doing it: the arc of a project, the rhythm of its hos, the structural rotation between modes, the visible movement through Shu, Ha, and Ri. The MVP deliberately excludes IDE integration, git interaction, and AI assistance—it is a record-keeping and reflection tool, not an execution environment, and that exclusion is the design point: Kinhin is the zazen of the system, not the workshop. The deeper argument is that mastery requires reflection and reflection requires infrastructure—the same infrastructure that lets a martial artist watch tape of their own practice. The model has near-infinite memory of code patterns and zero memory of your learning trajectory; Kinhin restores the asymmetry the right way around. It is the second major Ho System pilot after Kanyō, built with the methodology it implements.",
+        "Built in Python 3.12 with FastAPI, PostgreSQL, HTMX, and Docker Compose; in development."
       ],
       "relationships": [
         {
@@ -430,14 +449,17 @@
           "type": "descends_from",
           "strength": null,
           "articulated_in": null,
-          "note": "The second major Ho System pilot, after Kanyō — demonstrating the methodology's generalizability."
+          "note": "The second major Ho System pilot, after Kanyō—demonstrating the methodology's generalizability."
         }
       ],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 30
+      "sort_order_within_group": 30,
+      "family": "ho",
+      "peak": "sub-peak",
+      "ordinal": 21
     },
     {
       "id": "satori",
@@ -464,10 +486,10 @@
         "medical-simulation",
         "deterministic-engine"
       ],
-      "repo": null,
-      "license": null,
+      "repo": "https://github.com/sageframe-no-kaji/satori-internal-affairs",
+      "license": "MIT",
       "deployment": [],
-      "tech_stack": "Python, Pydantic, SvelteKit, TypeScript; four-package monorepo",
+      "tech_stack": "Python",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -475,11 +497,11 @@
       "personal_stake": "Built for my teenage daughter, who lives with epilepsy from a TBI. She loves medical dramas and has spent enough time in hospitals to want to understand the medicine.",
       "created": "2026-04-28",
       "conceived": "2026-02-12",
-      "last_updated": "2026-05-17",
-      "short_description": "Interactive medical mystery simulator. Players make genuine diagnostic decisions under pressure — ordering tests, forming differential diagnoses, managing uncertainty — with death as a possible consequence of error. Built as a demonstration of AI governance. Four-package monorepo: Anamnesis (LLM case-generation pipeline at design-time), Satori (deterministic game engine running frozen cases with no runtime generation), an LLM client abstraction layer, and Internal Affairs (SvelteKit frontend). Cases are generated once and frozen as immutable JSON — gameplay is deterministic and auditable even though the cases themselves are AI-authored.",
+      "last_updated": "2026-07-10",
+      "short_description": "An interactive medical-mystery simulator built as a working demonstration of AI governance—players diagnose under pressure, and error can be fatal.",
       "substantive_description": [
-        "Version one was a single prompt: present a case, let the LLM improvise. That broke fast — facts invented, diagnoses changed mid-game, contradictions everywhere. Version two separates generation, execution, and narration into three layers. An LLM pipeline grounded in rigorous medical research generates cases from structured seeds; cases are validated against a JSON schema and frozen. A deterministic engine runs gameplay — actions, time, vitals, deterioration, outcomes. A final LLM layer adds narrative color at runtime, tightly bounded: it describes what happens, never decides what's medically true. Four boundaries enforce these separations: Freeze, Truth, Narration, Provider.",
-        "This is what AI in safety-sensitive domains has to do. The toy version is a medical game for one teenager. The general argument is for every regulated domain: healthcare, finance, law. Where you draw the boundaries between generation, execution, and narration determines what AI is allowed to do, what humans evaluate, and what factual integrity is preserved. Satori is the working demonstration. Its paired companion in this body of work is Glassroom — same architectural principle, inverse direction."
+        "Version one was a single prompt: present a case, let the model improvise. It broke fast—facts invented, diagnoses changed mid-game, contradictions everywhere. Satori's answer is to separate generation, execution, and narration into three layers: an LLM pipeline grounded in medical research generates cases from structured seeds and freezes them as immutable, schema-validated JSON; a deterministic engine runs gameplay—actions, time, vitals, deterioration, outcomes—with no runtime generation; and a tightly bounded final LLM layer adds narrative color that describes what happens but never decides what is medically true. Four boundaries—Freeze, Truth, Narration, Provider—enforce the separations, so gameplay stays deterministic and auditable even though the cases are AI-authored. The toy version is a medical game built for one teenager who lives with epilepsy from a TBI and wanted to understand the medicine; the general argument is for every regulated domain, where the boundaries between generation, execution, and narration determine what AI is allowed to do and what humans evaluate. Its paired companion is Glassroom—same architectural principle, inverse direction, built for the same daughter.",
+        "Python with Pydantic and a SvelteKit + TypeScript frontend, structured as a four-package monorepo—Anamnesis (design-time case generation), Satori (the deterministic engine), an LLM client abstraction, and Internal Affairs (the frontend). In development."
       ],
       "relationships": [
         {
@@ -494,7 +516,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 40
+      "sort_order_within_group": 40,
+      "ordinal": 11
     },
     {
       "id": "glassroom",
@@ -533,7 +556,7 @@
           "url": "https://github.com/sageframe-no-kaji/glassroom"
         }
       ],
-      "tech_stack": "Playwright (browser automation), Docker",
+      "tech_stack": "Python (playwright, InquirerPy, requests, python-dotenv, ruff, sqlalchemy, flask, mypy, pytest, pytest-cov, types-requests)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -541,19 +564,19 @@
       "personal_stake": "Built for my daughter, whose rare neurological condition defies institutional understanding. The school system she was inside had a tool that produced data about her education while being structured to make that data illegible to a parent trying to advocate for a child the institution didn't know how to see.",
       "created": "2026-04-10",
       "conceived": "2026-04-09",
-      "last_updated": "2026-05-17",
-      "short_description": "Open-source research instrument that scrapes Google Classroom at the student level and aggregates assignment data into a unified dashboard, CSV export, and PDF downloader — without requiring any Google API credentials. Playwright browser automation operates entirely within a student account, surfacing implementation variance between teachers that Google's own interface deliberately obscures: assignment counts, due-date usage, completion rates, structural patterns across all classes at once. Built originally for IEP advocacy. Harvard GSE research collaboration in pursuit for a multi-site empirical audit.",
+      "last_updated": "2026-07-09",
+      "short_description": "An open-source research instrument that scrapes Google Classroom at the student level and aggregates the assignment data an institution's own interface keeps illegible.",
       "substantive_description": [
-        "Assignments scattered across teachers, no aggregate view, no way to compare implementation between classrooms, no way to demonstrate the variance that was visibly affecting her. The system's defense was opacity. I built the instrument that removed it.",
-        "The architectural argument generalizes. Glassroom is the inverse companion to Satori: where Satori uses architecture to protect downstream consumers from upstream AI generation, Glassroom uses architecture to surface downstream institutional data that an upstream system was structured to obscure. Same principle of layer separation, deployed for inverse purposes. The pair makes the structural point: governance lives in the architecture, not in the model.",
-        "Both tools were built for the same daughter — different needs, same person being failed by existing options, same generalizable architectural argument extracted from a specific case of love and necessity. The pair is the work."
+        "Assignments scattered across teachers, no aggregate view, no way to compare implementation between classrooms, no way to demonstrate the variance that was visibly affecting a child the school did not know how to see—the system's defense was opacity, and Glassroom is the instrument built to remove it. Playwright browser automation operates entirely within a student account, requires no Google API credentials, and surfaces the implementation variance the interface obscures: assignment counts, due-date usage, completion rates, and structural patterns across every class at once, exported to a dashboard, CSV, and downloadable PDFs. Built originally for IEP advocacy, it is now in pursuit of a Harvard GSE research collaboration for a multi-site empirical audit. The architectural argument generalizes: Glassroom is the inverse companion to Satori—where Satori uses layer separation to protect downstream consumers from upstream AI generation, Glassroom uses it to surface downstream institutional data an upstream system was structured to obscure. Same principle, inverse purpose; both tools were built for the same daughter, and the pair makes the structural point that governance lives in the architecture, not in the model.",
+        "Playwright browser automation, packaged in Docker; open-source."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 30
+      "sort_order_within_group": 30,
+      "ordinal": 22
     },
     {
       "id": "m4bookmaker",
@@ -561,13 +584,13 @@
       "native_script": null,
       "native_translation": null,
       "hero": "You own what you can hold, file by file, on your own machine.",
-      "importance": 5,
+      "importance": 6,
       "color": null,
       "featured": true,
       "media": [
         "software"
       ],
-      "group": "production-systems",
+      "group": "personal-utilities",
       "themes": [
         "sovereignty",
         "craft"
@@ -581,7 +604,7 @@
         "desktop-app"
       ],
       "repo": "https://github.com/sageframe-no-kaji/m4bookmaker",
-      "license": null,
+      "license": "GPL-3.0",
       "deployment": [
         {
           "label": "Product site",
@@ -596,7 +619,7 @@
           "url": "https://github.com/sageframe-no-kaji/m4bookmaker"
         }
       ],
-      "tech_stack": "Python, PyQt5, FFmpeg",
+      "tech_stack": "Python (mutagen, natsort, platformdirs)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -604,11 +627,11 @@
       "personal_stake": null,
       "created": "2026-02-05",
       "conceived": "2026-03-01",
-      "last_updated": "2026-05-17",
-      "short_description": "Converts folders of MP3 (or other audio) files into clean, properly-chaptered M4B audiobooks for personal use. Ships as a signed macOS app and Windows installer; also distributed as a PyPI package. Full pipeline: automatic chapter detection from filenames, interactive visual chapter editor with built-in audio player, batch queue processing, automatic audio repair for common encoding problems. One of the first tools built under the Ho System; the GUI-to-CLI symmetry was a deliberate architectural choice to keep it scriptable without sacrificing approachability.",
+      "last_updated": "2026-07-12",
+      "short_description": "A desktop app that converts folders of MP3 (or other audio) files into clean, properly chaptered M4B audiobooks you own outright.",
       "substantive_description": [
-        "A small app with a large argument. m4Bookmaker exists because Audible's ecosystem treats audiobook ownership as a license rather than a possession — a contract that can be revoked, a format that won't move, a library that lives on someone else's server and at someone else's discretion. The technical solution is small (rebuild the M4B yourself from MP3s) and the philosophical position is large (you own what you can hold, file by file, on your own machine).",
-        "The deeper argument is digital sovereignty as a default rather than a niche concern. The Ho System made it shippable as a small project — concept to signed, packaged, distributed product in 3.5 days — but the position it embodies is structural. Every time a tool gets repossessed by its platform, a small piece of personal capacity dies. m4Bookmaker is the refusal of that pattern, sized to one specific failure."
+        "A small app with a large argument. m4Bookmaker exists because Audible's ecosystem treats audiobook ownership as a license rather than a possession—a contract that can be revoked, a format that will not move, a library that lives on someone else's server at someone else's discretion. The technical solution is small—rebuild the M4B yourself from MP3s—and the position is large: you own what you can hold, file by file, on your own machine. The full pipeline handles automatic chapter detection from filenames, an interactive visual chapter editor with a built-in audio player, batch queue processing, and automatic repair of common encoding problems, with a deliberate GUI-to-CLI symmetry that keeps it scriptable without sacrificing approachability. It was one of the first tools built under the Ho System—concept to signed, packaged, distributed product in 3.5 days—and the position it embodies is structural: every time a tool gets repossessed by its platform, a small piece of personal capacity dies, and m4Bookmaker is the refusal of that pattern, sized to one specific failure.",
+        "Python with PyQt5 and FFmpeg; shipped as a signed macOS app and a Windows installer, and distributed as a PyPI package."
       ],
       "relationships": [
         {
@@ -623,7 +646,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 50
+      "sort_order_within_group": 10,
+      "ordinal": 12
     },
     {
       "id": "pink-teaming",
@@ -631,7 +655,7 @@
       "native_script": null,
       "native_translation": null,
       "hero": "The cooperative counterpart to red teaming.",
-      "importance": 7,
+      "importance": 8,
       "color": null,
       "featured": true,
       "media": [
@@ -650,7 +674,7 @@
         "research",
         "hermeneutics"
       ],
-      "repo": null,
+      "repo": "https://github.com/sageframe-dharma/pinkteaming.net",
       "license": null,
       "deployment": [
         {
@@ -658,8 +682,16 @@
           "url": "https://pinkteaming.net"
         },
         {
+          "label": "The manifesto",
+          "url": "https://pinkteaming.net/manifesto/"
+        },
+        {
           "label": "Practice essay",
           "url": "https://pinkteaming.net/practice"
+        },
+        {
+          "label": "Manifesto on Substack",
+          "url": "https://sageframe.substack.com/p/pink-teaming"
         }
       ],
       "tech_stack": null,
@@ -671,10 +703,10 @@
       "created": "2026-04-25",
       "conceived": "2026-04-29",
       "last_updated": "2026-05-17",
-      "short_description": "The Pink Teaming manifesto. The cooperative counterpart to red teaming — where red teaming probes models adversarially for failure modes, pink teaming reads them with sustained hermeneutic attention to develop the practitioner's judgment. Companion to the Destructive Interference white paper. Site live; argument published.",
+      "short_description": "The Pink Teaming manifesto—the cooperative counterpart to red teaming, a practitioner-side safety discipline of sustained hermeneutic attention.",
       "substantive_description": [
-        "Most safety work on AI is adversarial or theoretical. Red teaming probes a single session for vulnerabilities. Theoretical safety reasons about ideal cases. Both miss the structural feature of how AI actually causes harm: the gradient of drift, sycophancy, and judgment erosion that compounds over months of sustained collaboration and is invisible in any one session. Pink Teaming is the missing layer — practitioner-side safety discipline that reads the model with sustained hermeneutic attention over time, surfacing the patterns that only emerge across extended use.",
-        "The deeper argument is about what safety thinking includes. Adversarial probing is necessary and insufficient. The practitioner — the person actually shipping AI-assisted work day after day — is operating in a different threat environment than the red team, and the discipline they need is structurally different. Pink Teaming names that discipline, models it, and argues that no AI safety program is complete without it."
+        "Most safety work on AI is adversarial or theoretical. Red teaming probes a single session for vulnerabilities; theoretical safety reasons about ideal cases; both miss the structural feature of how AI actually causes harm—the gradient of drift, sycophancy, and judgment erosion that compounds over months of sustained collaboration and is invisible in any one session. Pink Teaming is the missing layer: where red teaming probes a model adversarially for failure modes, pink teaming reads it with sustained hermeneutic attention over time to develop the practitioner's judgment and surface the patterns that only emerge across extended use. The deeper argument is about what safety thinking includes—adversarial probing is necessary and insufficient, and the practitioner shipping AI-assisted work day after day operates in a different threat environment than the red team. Pink Teaming names that discipline, models it, and argues that no AI safety program is complete without it.",
+        "Published as a manifesto site at pinkteaming.net, with a companion practice essay and the Pink Teaming Reading Instrument as its interface; companion to the Destructive Interference white paper. Live."
       ],
       "relationships": [
         {
@@ -689,7 +721,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 40
+      "sort_order_within_group": 40,
+      "ordinal": 24
     },
     {
       "id": "destructive-interference",
@@ -738,15 +771,19 @@
       "last_updated": "2026-05-17",
       "short_description": "A diagnostic taxonomy of eight named structural failure classes in AI-influenced writing: Pre-emptive Evaluation, Performed Urgency, Throat-Clear, Balanced Hedge, Significance Stamp, Mirror Summary, Emotional Instruction, Manufactured Transition. Each has a defined mechanism, a diagnostic test, and documented examples drawn from corpus analysis. The intellectual foundation of the whole Constructive Interference program. White paper near publication, not yet published. Operationalized via Kiku; deployed as a generative constraint in the atm-correspondence skill.",
       "substantive_description": [
-        "The dominant conversation about AI writing degradation stops at vocabulary — the word \"delve,\" the em-dash. The vocabulary frame is wrong. The degradation is structural. Destructive Interference is the taxonomy that names what's actually happening: eight specific rhetorical and structural failure modes that survive vocabulary substitution because they're not about which words appear but about how arguments are made, evidence is staged, and the reader is positioned. Each pattern reads as good writing until you have the taxonomy, after which you can't unsee them.",
-        "The deeper argument: most prose now is collaborative prose, whether the writer acknowledges the collaboration or not. The question isn't whether AI is involved in writing — that ship has sailed — but whether the writer has the diagnostic apparatus to detect where the collaboration has degraded the work. Destructive Interference is that apparatus. The white paper formalizes the framework academically; the craft essay companion demonstrates the failures and the corrections in worked examples. The pair argues that practitioner-side quality discipline is a real subfield and Destructive Interference is its founding taxonomy."
+        "The dominant conversation about AI writing degradation stops at vocabulary—the word \"delve,\" the em-dash. The vocabulary frame is wrong. The degradation is structural. Destructive Interference is the taxonomy that names what's actually happening: eight specific rhetorical and structural failure modes that survive vocabulary substitution because they're not about which words appear but about how arguments are made, evidence is staged, and the reader is positioned. Each pattern reads as good writing until you have the taxonomy, after which you can't unsee them.",
+        "The deeper argument: most prose now is collaborative prose, whether the writer acknowledges the collaboration or not. The question isn't whether AI is involved in writing—that ship has sailed—but whether the writer has the diagnostic apparatus to detect where the collaboration has degraded the work. Destructive Interference is that apparatus. The white paper formalizes the framework academically; the craft essay companion demonstrates the failures and the corrections in worked examples. The pair argues that practitioner-side quality discipline is a real subfield and Destructive Interference is its founding taxonomy."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "family": "kekkai",
+      "peak": "sub-peak",
+      "peak_of": "interference",
+      "ordinal": 15
     },
     {
       "id": "kiku",
@@ -774,14 +811,14 @@
         "claude-api"
       ],
       "repo": "https://github.com/sageframe-no-kaji/kiku",
-      "license": null,
+      "license": "MIT",
       "deployment": [
         {
           "label": "GitHub repo",
           "url": "https://github.com/sageframe-no-kaji/kiku"
         }
       ],
-      "tech_stack": "Python (mypy strict, flake8, full test coverage), regex + Claude API; YAML-defined profiles",
+      "tech_stack": "Python (anthropic, openai, pyyaml)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -790,9 +827,10 @@
       "created": "2026-04-01",
       "conceived": "2026-04-20",
       "last_updated": "2026-05-17",
-      "short_description": "Hybrid regex + LLM extraction tool that processes AI conversation exports and surfaces patterns of language behavior. YAML-defined profiles enable two-tier detection: fast regex matching in Tier 1 for literal patterns, Claude API semantic classification in Tier 2 for patterns that resist rules. Built to operationalize the Destructive Interference taxonomy — the diagnostic framework needed an instrument that could scale. In active personal use; built to the full Ho verification stack.",
+      "short_description": "A hybrid regex-plus-LLM detector that runs the Destructive Interference taxonomy across a writer's accumulated AI-conversation corpus.",
       "substantive_description": [
-        "A diagnostic framework that can't scale to corpus is a diagnostic framework that can't generalize. Kiku is the operational answer — a two-tier detector that runs the DI taxonomy across the practitioner's accumulated AI conversation history at speed. The deeper argument is methodological: a taxonomy without instrumentation is a position paper. Instrumentation without a taxonomy is automated nothing. Kiku closes the loop. It makes the eight named failure classes actionable at corpus scale, which is the only scale at which sustained AI collaboration actually happens."
+        "A diagnostic framework that cannot scale to a corpus cannot generalize. Kiku (聴く, \"listen\") is the operational answer—a two-tier detector that runs the eight named Destructive Interference failure classes across the practitioner's accumulated AI conversation history at speed. YAML-defined profiles drive the two tiers: fast regex matching for literal patterns, then Claude API semantic classification for the patterns that resist rules. The deeper argument is methodological: a taxonomy without instrumentation is a position paper, and instrumentation without a taxonomy is automated nothing—Kiku closes the loop, making the failure classes actionable at the corpus scale where sustained AI collaboration actually happens. It is in active personal use, built to the full Ho verification stack.",
+        "Python (mypy strict, flake8, full test coverage), combining regex matching with Claude API semantic classification driven by YAML-defined detection profiles."
       ],
       "relationships": [
         {
@@ -807,7 +845,11 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 30
+      "sort_order_within_group": 30,
+      "family": "kekkai",
+      "peak": "sub-peak",
+      "peak_of": "interference",
+      "ordinal": 17
     },
     {
       "id": "star-actually",
@@ -815,7 +857,7 @@
       "native_script": null,
       "native_translation": null,
       "hero": "Enter with a question, navigate by relationship, stop when you understand enough.",
-      "importance": 6,
+      "importance": 5,
       "color": null,
       "featured": true,
       "media": [
@@ -833,12 +875,16 @@
         "progressive-disclosure",
         "published"
       ],
-      "repo": null,
-      "license": null,
+      "repo": "https://github.com/sageframe-no-kaji/star-actually",
+      "license": "MIT",
       "deployment": [
         {
-          "label": "First instance — SSH, Actually",
-          "url": "https://github.com/sageframe-no-kaji/ssh-actually"
+          "label": "*, Actually",
+          "url": "https://star-actually.sageframe.net"
+        },
+        {
+          "label": "Engine repo",
+          "url": "https://github.com/sageframe-no-kaji/star-actually"
         }
       ],
       "tech_stack": null,
@@ -849,18 +895,21 @@
       "personal_stake": null,
       "created": "2026-03-15",
       "conceived": "2026-04-12",
-      "last_updated": "2026-05-17",
-      "short_description": "Domain-agnostic system for making relational technical knowledge navigable: enter with a question, navigate by concept relationship, stop when you understand enough. Progressive-disclosure design — every concept has depth layers (name, definition, usage, relationships, full theory) and the reader controls how far they go rather than being forced through a linear document. Organized around mental models and questions, not product features or chapters. SSH, Actually is the first complete content set. Replicable across any field where understanding concept relationships matters more than memorizing isolated facts.",
+      "last_updated": "2026-07-10",
+      "short_description": "A domain-blind engine that weaves a directory of depth-layered markdown into a fully static, navigable, terminal-aesthetic knowledge site.",
       "substantive_description": [
-        "Most technical documentation is written by the people who built the thing for the people who already understand the field. The result is reference material that fails the actual job of getting someone from I have a question to I understand enough to act. *, Actually is the answer in methodology form: organize knowledge by question and relationship rather than by product surface. Let the reader dial the depth they need. Make the mental models explicit before the commands. Be honest about where the subject is confusing.",
-        "The deeper argument is about the relationship between knowledge architecture and reader agency. The reader of a typical man page has no agency — the content was structured for an internal logic that has nothing to do with what the reader wants to know. *, Actually is what reader agency looks like when the architecture is built to support it."
+        "Most technical documentation is written by the people who built the thing for the people who already understand the field, and it fails the actual job: getting someone from \"I have a question\" to \"I understand enough to act.\" *, Actually is the answer, and star-actually is its engine—a build system that renders knowledge organized by question and relationship rather than by product surface, giving every concept depth layers (name, definition, usage, relationships, full theory) the reader can dial through at will. The engine is domain-blind: it never mentions any subject, and everything specific arrives from an instance repo through two files—a site.yaml and a directory of depth-layered markdown nodes. It has three parts: the Loom parses and validates the node graph and renders the static site; the Terminal is the reading experience—HTML, CSS, one vanilla JavaScript file, and vendored htmx, with zero external requests; and the Receptionist is an optional FastAPI service that maps a natural-language question to an entry node, with the site degrading gracefully to a browsable graph and full-text search when it is absent. The deeper argument is about reader agency: the reader of a typical man page has none, and *, Actually is what reader agency looks like when the architecture is built to support it. SSH, Actually and Ho System, Actually—the latter a guide to the Ho System itself—are its live instances, served as static sites at star-actually.sageframe.net; each subject is a separate content repo that pins and consumes this shared engine.",
+        "Python 3.12+ (the Loom and CLI on pyyaml, markdown-it-py, and jinja2) that outputs a static, htmx-based site, with an optional FastAPI + Anthropic \"Receptionist\" service; MIT-licensed, published as the star-actually package and consumed by per-subject instance repos."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "family": "actually",
+      "peak": "peak",
+      "ordinal": 18
     },
     {
       "id": "ssh-actually",
@@ -888,12 +937,16 @@
         "security",
         "htmx"
       ],
-      "repo": "https://github.com/sageframe-no-kaji/ssh-actually",
-      "license": "CC BY-ND 4.0",
+      "repo": "https://github.com/sageframe-dharma/star-actually",
+      "license": "MIT",
       "deployment": [
         {
-          "label": "GitHub repo",
-          "url": "https://github.com/sageframe-no-kaji/ssh-actually"
+          "label": "Live edition",
+          "url": "https://star-actually.sageframe.net/ssh-actually/"
+        },
+        {
+          "label": "Websites repo",
+          "url": "https://github.com/sageframe-dharma/star-actually"
         }
       ],
       "tech_stack": null,
@@ -904,11 +957,11 @@
       "personal_stake": null,
       "created": "2026-03-10",
       "conceived": "2026-01-30",
-      "last_updated": "2026-05-17",
-      "short_description": "First content set in the *, Actually knowledge architecture system. Comprehensive guide to SSH, key pairs, hardware security keys, and modern authentication using a definition-first approach: mental models before commands, honest about where the subject is confusing, organized around concept relationships rather than product features. Covers SSH fundamentals, cryptographic primitives, FIDO2, passkeys, hardware security keys, with a companion commands reference. HTMX-based, terminal-aesthetic, keyboard-driven, zero framework overhead.",
+      "last_updated": "2026-07-09",
+      "short_description": "The first instance built on the *, Actually engine—a definition-first guide to SSH, key pairs, hardware security keys, and modern authentication.",
       "substantive_description": [
-        "A specific demonstration of *, Actually inside a specific domain whose existing documentation is famously bad. SSH is a system every working developer needs, every working developer pretends to understand, and almost no one was taught well. The official documentation describes commands; the field needs mental models. SSH, Actually starts where understanding starts and works outward through relationships.",
-        "The deeper argument is that the same approach generalizes. Any technical domain whose documentation has accumulated as features-of-tools rather than relationships-between-concepts has the same opportunity. SSH, Actually is the first instance of the answer."
+        "A specific demonstration of *, Actually inside a domain whose existing documentation is famously bad. SSH is a system every working developer needs, every working developer pretends to understand, and almost no one was taught well; the official documentation describes commands, and the field needs mental models. SSH, Actually starts where understanding starts—mental models before commands—and works outward through concept relationships rather than product features, honest about where the subject is genuinely confusing. It covers SSH fundamentals, cryptographic primitives, FIDO2, passkeys, and hardware security keys, with a companion commands reference. The deeper argument is that the same approach generalizes: any technical domain whose documentation has accumulated as features-of-tools rather than relationships-between-concepts has the same opportunity, and SSH, Actually is the first instance of the answer—a content repo supplying nodes and a site.yaml to the star-actually engine.",
+        "A depth-layered markdown content set built and rendered by the star-actually engine into a self-published static site—htmx-based, terminal-aesthetic, keyboard-driven, with zero framework overhead—live at star-actually.sageframe.net/ssh-actually; content published under CC BY-ND 4.0."
       ],
       "relationships": [
         {
@@ -923,7 +976,10 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "family": "actually",
+      "peak": "sub-peak",
+      "ordinal": 29
     },
     {
       "id": "resonance-field",
@@ -931,7 +987,7 @@
       "native_script": null,
       "native_translation": null,
       "hero": "Where disciplines meet, they amplify.",
-      "importance": 6,
+      "importance": 3,
       "color": null,
       "featured": true,
       "media": [
@@ -974,7 +1030,7 @@
       "last_updated": "2026-05-17",
       "short_description": "The interactive canvas on atmarcus.net. Click anywhere on the field; a ripple expands outward from that spot, a project label appears at the center, and the wave propagates and fades according to physics-derived rules. Each ripple is a real project, weighted by significance that controls reach, wavelength, lifespan, and label size. When two ripples overlap, constructive and destructive interference are visible. The Sageframe node is permanent and central; all others fade on a timescale set by weight. Companion explanation page walks the reader from no-code through full source via progressive disclosure across nine sections.",
       "substantive_description": [
-        "Most portfolio sites are static grids. The Resonance Field is the opposite — a working model of how the body of work is actually structured, built from real wave physics and tuned by hand over a long span. The Substack name Constructive Interference is literally drawn from this visualization. The visual demonstrates the thesis of the body of work in the most direct way possible — where disciplines meet, they amplify — and it does so not as illustration but as instrument. Click any project; the wave it emits actually interferes with the other waves currently on the field. The visualization is what the thesis claims.",
+        "Most portfolio sites are static grids. The Resonance Field is the opposite—a working model of how the body of work is actually structured, built from real wave physics and tuned by hand over a long span. The Substack name Constructive Interference is literally drawn from this visualization. The visual demonstrates the thesis of the body of work in the most direct way possible—where disciplines meet, they amplify—and it does so not as illustration but as instrument. Click any project; the wave it emits actually interferes with the other waves currently on the field. The visualization is what the thesis claims.",
         "The companion explanation page at /about-the-hero is the second artifact. Nine sections, three levels (no-code, light-code, full-code), reader-controlled depth. It is the *, Actually progressive-disclosure pattern applied to the artifact's own internals. The deeper argument: a body of work organized as a knowledge architecture should be legible at every depth a reader is willing to reach for."
       ],
       "relationships": [
@@ -990,7 +1046,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "ordinal": 16
     },
     {
       "id": "reading-instrument",
@@ -1041,9 +1098,9 @@
       "created": "2026-05-01",
       "conceived": "2026-03-15",
       "last_updated": "2026-05-17",
-      "short_description": "The pinkteaming.net manifesto reads itself to you. The active line sits at vertical middle in display weight, bright pink; everything above fades upward (the sky), everything below fades downward (the deep). Pacing is fixed and unhurried. The deep is a 2D UMAP projection of all 103 manifesto sentences embedded in 384 dimensions; dots cluster by semantic similarity and illuminate as the active line reaches their cluster. The sky is wave interference physics — twelve permanent sources that brighten and emit ripples as the active line enters their structural region. Companion explanation page walks the reader through surface, deep, and sky.",
+      "short_description": "The pinkteaming.net manifesto reads itself to you. The active line sits at vertical middle in display weight, bright pink; everything above fades upward (the sky), everything below fades downward (the deep). Pacing is fixed and unhurried. The deep is a 2D UMAP projection of all 103 manifesto sentences embedded in 384 dimensions; dots cluster by semantic similarity and illuminate as the active line reaches their cluster. The sky is wave interference physics—twelve permanent sources that brighten and emit ripples as the active line enters their structural region. Companion explanation page walks the reader through surface, deep, and sky.",
       "substantive_description": [
-        "Most manifestos let the reader skim. This one refuses. Arrive at pinkteaming.net and the page is already reading the manifesto to you at the pace of careful attention — there are no controls on the wall of the room, the room is moving and you are in it. The design choice IS the argument. Pink teaming, as a discipline, begins with the willingness to be walked. The page enforces that discipline architecturally. If you stay, you have practiced. If you skim, you have not.",
+        "Most manifestos let the reader skim. This one refuses. Arrive at pinkteaming.net and the page is already reading the manifesto to you at the pace of careful attention—there are no controls on the wall of the room, the room is moving and you are in it. The design choice IS the argument. Pink teaming, as a discipline, begins with the willingness to be walked. The page enforces that discipline architecturally. If you stay, you have practiced. If you skim, you have not.",
         "What sits beneath the reading surface is research-grade: real sentence embeddings from a deliberately un-fine-tuned encoder, honest UMAP projections re-seeded per visit, mathematically real wave interference for the manifesto's permanent structures. The deeper argument is that pink teaming earns its seat beside red teaming and mechanistic interpretability by showing its work. The discipline is not less computational. It is computational in service of durational reading. The site is the proof."
       ],
       "relationships": [
@@ -1066,7 +1123,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "ordinal": 25
     },
     {
       "id": "forteller",
@@ -1111,9 +1169,10 @@
       "conceived": "2025-08-01",
       "named": "2026-03-21",
       "last_updated": "2026-05-17",
-      "short_description": "Push-only, vault-first CLI for tending the relationship between a configuration vault and the machines it describes; no agents, no YAML sprawl, declarative intent pushed outward from a single source of truth.",
+      "short_description": "A push-only, vault-first CLI for tending the relationship between a configuration vault and the machines it describes—declarative intent pushed outward from a single source of truth.",
       "substantive_description": [
-        "Most infrastructure-as-code tooling assumes agents on every machine, YAML files multiplying past anyone's ability to keep them coherent, and a model of configuration as conversation with the fleet. Forteller refuses the model. There is one source of truth — the vault. Intent flows outward, not inward. No agents. No state drift. The deeper argument is about the dominant tooling assumption that complexity is necessary. For the homelab practitioner, it isn't. For most production environments at most scales, it isn't either. Forteller demonstrates the simpler alternative."
+        "Most infrastructure-as-code tooling assumes agents on every machine, YAML files multiplying past anyone's ability to keep them coherent, and a model of configuration as an ongoing conversation with the fleet. Forteller refuses the model. There is one source of truth—the vault—and intent flows outward, not inward: no agents, no state drift. The deeper argument is about the dominant assumption that complexity is necessary; for the homelab practitioner it is not, and for most production environments at most scales it is not either, and Forteller demonstrates the simpler alternative. It is planned as a plugin within Pālana, the operational workbench, and belongs to the Kṣetra-Ops suite—the same ethos of transparency and responsibility without ceremony, expressed as configuration.",
+        "A command-line tool, planned as an integrated capability within Pālana; pre-build."
       ],
       "relationships": [
         {
@@ -1128,7 +1187,10 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "family": "shojiki",
+      "peak": "sub-peak",
+      "ordinal": 6
     },
     {
       "id": "palana",
@@ -1156,14 +1218,14 @@
         "homelab"
       ],
       "repo": "https://github.com/sageframe-no-kaji/palana",
-      "license": null,
+      "license": "GPL-3.0",
       "deployment": [
         {
           "label": "GitHub repo",
           "url": "https://github.com/sageframe-no-kaji/palana"
         }
       ],
-      "tech_stack": "Tauri (desktop), Rust backend, Svelte frontend",
+      "tech_stack": "Swift",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -1172,25 +1234,29 @@
       "created": "2026-05-08",
       "conceived": "2025-08-01",
       "named": "2026-03-21",
-      "last_updated": "2026-05-17",
-      "short_description": "Operational workbench; dual-pane file manager with true server-side operations, ZFS-aware cross-dataset handling, a field view of machine topology, and Forteller built in as an integrated capability.",
+      "last_updated": "2026-07-12",
+      "short_description": "An operational workbench for the homelab—a dual-pane file manager with true server-side operations, ZFS-aware cross-dataset handling, and a field view of machine topology.",
       "substantive_description": [
-        "Pālana is the live-state companion to Forteller's configuration push. Where Forteller manages the declarative side, Pālana provides the operational visibility: dual-pane file management with server-side operations, ZFS-aware cross-dataset handling, a topological view of the machine fleet. The deeper argument is about the relationship between configuration and visibility. Most infrastructure tooling treats one or the other. The Kṣetra-Ops pair treats both as one problem with two views."
+        "Pālana is the peak of Kṣetra-Ops, a suite built on one conviction: power and responsibility over your own machines should not require the ceremony of Linux exclusionism. It is a layer on top of pure scripting and the CLI that keeps full transparency, power, and responsibility intact—GUI tools that fully support the command line beneath them, so that rolling your own and going CLI-only become unnecessary rather than mandatory. Concretely, it provides dual-pane file management with true server-side operations, ZFS-aware cross-dataset handling, a topological field view of the machine fleet, and Forteller's declarative configuration push built in as a plugin. The deeper argument is about the black box: trading the black box of server-side control for the black box of local control gains nothing, so Kṣetra-Ops opens the box and keeps it—clarity and insight without letting things sprawl. It speaks to three users at once: the traditional developer who wants some luxury without losing the roots, the new AI-age developer who should understand the tools they run, and the home labber who does complicated things and wants real clarity into what they are doing.",
+        "Built with Tauri for the desktop shell, a Rust backend, and a Svelte frontend. In development."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "family": "shojiki",
+      "peak": "peak",
+      "ordinal": 5
     },
     {
       "id": "edelmore-diary",
       "name": "Edelmore Diary",
       "native_script": null,
       "native_translation": null,
-      "hero": "A cottage-core diary for a child — kept on your own machine.",
-      "importance": 5,
+      "hero": "A cottage-core diary for a child—kept on your own machine.",
+      "importance": 6,
       "color": null,
       "featured": false,
       "media": [
@@ -1228,33 +1294,36 @@
           "url": "https://edelmore.sageframe.net"
         }
       ],
-      "tech_stack": "SvelteKit (TypeScript, Svelte 5 runes), SQLite (better-sqlite3), Tailwind v4, StPageFlip, argon2id; optional WhisperX transcription and Kokoro TTS read-aloud; Docker + Caddy",
+      "tech_stack": "JavaScript (@edelmore/book, @edelmore/design, @edelmore/narration, argon2, better-sqlite3)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
       "embed_url": null,
-      "personal_stake": "Built for Iona, who wanted to keep an Anne Frank–style diary on her own terms — and for her sisters Ada and Isla.",
+      "personal_stake": "Built for Iona, who wanted to keep an Anne Frank–style diary on her own terms—and for her sisters Ada and Isla.",
       "created": "2026-05-14",
       "conceived": "2026-05-14",
-      "last_updated": "2026-06-24",
-      "short_description": "A private web diary shaped like a book. It opens to today's page. Pages turn. Voice transcription handles the writing for hands that struggle with the keyboard, and it can read entries back aloud with the words highlighted as they're spoken. Runs on a parent's homelab, behind Tailscale and the home LAN, and nobody reads it but the person who wrote it. Built as an adaptive tool — for kids who have trouble writing — on Universal Design for Learning principles.",
+      "last_updated": "2026-07-14",
+      "short_description": "A private web diary shaped like a book—it opens to today's page, turns its pages, takes dictation, and reads entries back aloud.",
       "substantive_description": [
-        "Adaptive tools are usually designed apologetically — accommodation as patch, accessibility as afterthought. Edelmore is built from the opposite direction. Universal Design for Learning means the design itself accommodates without naming the accommodation. A diary that opens to today's page and turns its pages and accepts voice as easily as typing isn't a diary for kids with writing difficulties. It's a diary.",
-        "The deeper argument is that scale-of-one design is a legitimate design target. A tool built for one specific 13-year-old, in the shape of a book the child imagined, deployed on her parent's homelab behind Tailscale, is not a small project. It's a complete project at the scale it was meant for. The economics of mass-market software training has obscured this — every tool is supposed to scale to millions or it doesn't count. Edelmore is what one tool, made for one person, looks like when it counts."
+        "Adaptive tools are usually designed apologetically—accommodation as patch, accessibility as afterthought. Edelmore is built from the opposite direction, on Universal Design for Learning: the design itself accommodates without naming the accommodation. It opens to today's page and turns its pages; voice transcription handles the writing for hands that struggle with a keyboard, and it can read entries back aloud with each word highlighted as it is spoken. It runs on a parent's homelab, behind Tailscale and the home LAN, and nobody reads it but the person who wrote it. The deeper argument is that scale-of-one design is a legitimate target: a tool built for one specific thirteen-year-old, in the shape of a book she imagined, is not a small project but a complete one at the scale it was meant for—what one tool, made for one person, looks like when it counts.",
+        "SvelteKit (TypeScript, Svelte 5 runes), SQLite via better-sqlite3, Tailwind v4, StPageFlip, and argon2id, with optional WhisperX transcription and Kokoro TTS read-aloud; deployed with Docker and Caddy."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "family": "edelmore",
+      "peak": "peak",
+      "ordinal": 23
     },
     {
       "id": "edelmore-reader",
       "name": "Edelmore Reader",
       "native_script": null,
       "native_translation": null,
-      "hero": "A book that reads itself to you — on your own machine.",
+      "hero": "A book that reads itself to you—on your own machine.",
       "importance": 4,
       "color": null,
       "featured": false,
@@ -1286,19 +1355,19 @@
           "url": "https://github.com/sageframe-no-kaji/edelmore-reader"
         }
       ],
-      "tech_stack": "Planned: SvelteKit (TypeScript), SQLite (better-sqlite3), server-side EPUB parsing, CSS Multi-column pagination, View Transitions page-turn, self-hosted Kokoro TTS, Tailwind v4, Docker",
+      "tech_stack": "JavaScript (@edelmore/book, @edelmore/design, @edelmore/narration, better-sqlite3, fast-xml-parser, jszip)",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
       "embed_url": null,
-      "personal_stake": "For a kid who hears stories better than she reads them — and for anyone who wants reading to feel like the thing it used to be.",
+      "personal_stake": "For a kid who hears stories better than she reads them—and for anyone who wants reading to feel like the thing it used to be.",
       "created": "2026-06-14",
       "conceived": "2026-06-14",
-      "last_updated": "2026-06-14",
-      "short_description": "A self-hosted read-along EPUB reader that feels like a real book. Upload an EPUB or pick from a built-in library of public-domain children's books; the book opens where you left off, a songbird in the margin reads it aloud in a warm voice, and each word glows softly as it's spoken. Pages turn when the narration reaches the end of the page; the book remembers your place. Built for kids who hear stories better than they read them. Sibling project to Edelmore Diary, sharing its book metaphor, narration stack, and cottage-core identity; gated on the diary's refactor into shared modules. Seed committed, no code yet.",
+      "last_updated": "2026-07-14",
+      "short_description": "A self-hosted read-along EPUB reader that feels like a real book—a songbird in the margin reads aloud while each word glows as it is spoken.",
       "substantive_description": [
-        "Read-along ebook readers exist, and the technical problem — parsing EPUB, generating speech, highlighting words as they're spoken — is solved many times over. What none of them solve is the experience: every one feels like reading software, utilitarian and clinical, with no spatial sense of where you are in the book. For a kid with ataxia, dyslexia, attention differences, or just a preference for being read to, the gap between 'software that reads at you' and 'a book that's also reading itself to you' is the gap between using a tool and inhabiting an experience.",
-        "Edelmore Reader's differentiator isn't the technology — it's that the book metaphor is the product. The page turn, the warm serif typography, the soft green word-glow; the audio narration is one ingredient inside a larger reading experience, not the feature. It is the same warmth the diary built for writing, applied to published content — accessibility tools made to look like things people actually want to use."
+        "Read-along ebook readers exist, and the technical problem—parsing EPUB, generating speech, highlighting words as they are spoken—is solved many times over. What none of them solve is the experience: every one feels like reading software, utilitarian and clinical, with no spatial sense of where you are in the book. Edelmore Reader's differentiator is not the technology but that the book metaphor is the product—the page turn, the warm serif typography, the soft green word-glow, with narration as one ingredient inside a larger reading experience rather than the feature. You upload an EPUB or pick from a built-in library of public-domain children's books; the book opens where you left off, turns its pages when the narration reaches the end of one, and remembers your place. It is the sibling of Edelmore Diary—reusing its book metaphor, narration stack, and cottage-core identity, gated on the diary's refactor into shared modules—built for kids who hear stories better than they read them.",
+        "Planned stack: SvelteKit (TypeScript), SQLite via better-sqlite3, server-side EPUB parsing, CSS multi-column pagination, View Transitions page-turns, self-hosted Kokoro TTS, Tailwind v4, and Docker. Scaffolded—seed committed, no code yet."
       ],
       "relationships": [
         {
@@ -1313,7 +1382,10 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 20
+      "sort_order_within_group": 20,
+      "family": "edelmore",
+      "peak": "peak",
+      "ordinal": 27
     },
     {
       "id": "aspirational-intelligence",
@@ -1351,9 +1423,9 @@
       "created": "2021-01-01",
       "conceived": "2022-11-04",
       "last_updated": "2026-05-17",
-      "short_description": "An early creative practice examining how machine vision interprets aspiration, aesthetics, and desire — an Instagram-era body of work in AI-generated image making, before that territory became crowded. Documented as a marker of the timeline: where the work started, before it became systematic.",
+      "short_description": "An early creative practice examining how machine vision interprets aspiration, aesthetics, and desire—an Instagram-era body of work in AI-generated image making, before that territory became crowded. Documented as a marker of the timeline: where the work started, before it became systematic.",
       "substantive_description": [
-        "Included to mark the timeline. The current Sageframe Labs work didn't begin with the Ho System; it began with creative experiments at the edge of what machine vision could do. Aspirational Intelligence is the archive marker of that earlier phase — a reminder that the disciplined methodology came out of practice, not the other way around."
+        "Included to mark the timeline. The current Sageframe Labs work didn't begin with the Ho System; it began with creative experiments at the edge of what machine vision could do. Aspirational Intelligence is the archive marker of that earlier phase—a reminder that the disciplined methodology came out of practice, not the other way around."
       ],
       "relationships": [
         {
@@ -1368,7 +1440,8 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 10
+      "sort_order_within_group": 10,
+      "ordinal": 7
     },
     {
       "id": "falcon-cameras",
@@ -1404,7 +1477,7 @@
       "tech_stack": null,
       "publication_date": "2026-02-10",
       "outlet": "Substack — Constructive Interference",
-      "word_count": null,
+      "word_count": 1666,
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-02-10",
@@ -1471,15 +1544,15 @@
       "tech_stack": null,
       "publication_date": "2026-03-03",
       "outlet": "Substack — Constructive Interference",
-      "word_count": null,
+      "word_count": 3049,
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-03",
       "conceived": "2026-03-03",
       "last_updated": "2026-05-17",
-      "short_description": "The Shu-Ha-Ri argument as the Hōzō shipping story. The same practitioner who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime — 278 tests, 99% coverage — and the essay traces what changed: not the projects, the practitioner.",
+      "short_description": "The Shu-Ha-Ri argument as the Hōzō shipping story. The same practitioner who needed six weeks to ship Kanyō shipped Hōzō between dinner and bedtime—278 tests, 99% coverage—and the essay traces what changed: not the projects, the practitioner.",
       "substantive_description": [
-        "The methodology's claim isn't you can ship one thing this way. The methodology's claim is you become someone who ships this way. Three Hours is that claim made narrative — the documented progression from six weeks to three hours, with the test counts and coverage numbers a skeptical reader requires."
+        "The methodology's claim isn't you can ship one thing this way. The methodology's claim is you become someone who ships this way. Three Hours is that claim made narrative—the documented progression from six weeks to three hours, with the test counts and coverage numbers a skeptical reader requires."
       ],
       "relationships": [
         {
@@ -1537,7 +1610,7 @@
       "tech_stack": null,
       "publication_date": "2026-03-31",
       "outlet": "Substack — Constructive Interference",
-      "word_count": null,
+      "word_count": 2239,
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-03-31",
@@ -1545,7 +1618,7 @@
       "last_updated": "2026-05-17",
       "short_description": "Manifesto on AI as universal capability amplifier, and the educational system critique that follows: education cannot absorb AI the way it absorbed prior technologies, because this technology amplifies the very capability education exists to develop.",
       "substantive_description": [
-        "The institutional argument in the body of work. Prior technologies extended what students could produce; this one amplifies what they can become — and the same lever moves in every hand. The essay argues that institutions built to ration capability development cannot simply bolt on a tool that amplifies it universally."
+        "The institutional argument in the body of work. Prior technologies extended what students could produce; this one amplifies what they can become—and the same lever moves in every hand. The essay argues that institutions built to ration capability development cannot simply bolt on a tool that amplifies it universally."
       ],
       "relationships": [
         {
@@ -1591,12 +1664,16 @@
         {
           "label": "atmarcus.net position paper",
           "url": "https://atmarcus.net/work/empty-container"
+        },
+        {
+          "label": "atmarcus.net",
+          "url": "https://atmarcus.net/work/empty-container.html"
         }
       ],
       "tech_stack": null,
       "publication_date": "2026-04-15",
       "outlet": "atmarcus.net",
-      "word_count": null,
+      "word_count": 5614,
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-15",
@@ -1604,7 +1681,7 @@
       "last_updated": "2026-05-17",
       "short_description": "Companion position paper to Glassroom: the empirical audit of variance in deployed Google Classroom implementations. What the instrument surfaced, formalized as the argument the data makes about institutional opacity.",
       "substantive_description": [
-        "The paper that does for Glassroom what Three Hours does for Hōzō — articulates in argument form what the artifact demonstrates in operation. The empirical audit shows implementation variance between teachers that the platform's own interface obscures, and makes the case that the opacity is structural, not incidental."
+        "The paper that does for Glassroom what Three Hours does for Hōzō—articulates in argument form what the artifact demonstrates in operation. The empirical audit shows implementation variance between teachers that the platform's own interface obscures, and makes the case that the opacity is structural, not incidental."
       ],
       "relationships": [
         {
@@ -1663,13 +1740,13 @@
       "tech_stack": null,
       "publication_date": "2026-04-08",
       "outlet": "Substack — Constructive Interference",
-      "word_count": null,
+      "word_count": 6600,
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-08",
       "conceived": "2026-04-08",
       "last_updated": "2026-05-17",
-      "short_description": "Recursive sycophancy in sustained AI collaboration — the conceptual foundation for the Pink Teaming discipline. What voice integrity requires when the collaborator is structurally agreeable.",
+      "short_description": "Recursive sycophancy in sustained AI collaboration—the conceptual foundation for the Pink Teaming discipline. What voice integrity requires when the collaborator is structurally agreeable.",
       "substantive_description": [
         "The essay that names the failure mode the rest of the safety conversation misses: not a single bad output but a gradient of accommodation that compounds across months of sustained collaboration, invisible in any one session. The Fourth Boundary is the conceptual foundation that Pink Teaming turns into practice."
       ],
@@ -1729,7 +1806,7 @@
       "tech_stack": null,
       "publication_date": "2026-04-15",
       "outlet": "atmarcus.net",
-      "word_count": null,
+      "word_count": 6372,
       "embed_url": null,
       "personal_stake": null,
       "created": "2026-04-15",
@@ -1737,7 +1814,7 @@
       "last_updated": "2026-05-17",
       "short_description": "Long-form position paper on AI governance as civic infrastructure: the structural argument that Glassroom and Satori both demonstrate at the architectural level. Where the boundaries are drawn between generation, execution, and narration determines what AI is allowed to do and what humans evaluate.",
       "substantive_description": [
-        "The essay that articulates the pairing: Satori uses layer separation to protect downstream consumers from upstream AI generation; Glassroom uses it to surface institutional data structured to be obscure. Same principle, inverse directions, one argument — governance lives in the architecture, not in the model."
+        "The essay that articulates the pairing: Satori uses layer separation to protect downstream consumers from upstream AI generation; Glassroom uses it to surface institutional data structured to be obscure. Same principle, inverse directions, one argument—governance lives in the architecture, not in the model."
       ],
       "relationships": [
         {
@@ -1785,7 +1862,7 @@
         "genesis",
         "sageframe"
       ],
-      "repo": null,
+      "repo": "https://github.com/sageframe-irori/sageframe-vault",
       "license": null,
       "deployment": [
         {
@@ -1801,10 +1878,10 @@
       "personal_stake": null,
       "created": "2025-04-01",
       "conceived": "2025-04-01",
-      "last_updated": "2026-06-14",
-      "short_description": "The Sageframe knowledge architecture — the organizing system the whole body of work grew out of. Where the methodology, the production systems, the research program, and the writing all became legible as one project rather than scattered efforts. The genesis: the start of all of this. Canonical home at atmarcus.net/work/sageframe. (conceived date provisional: ~April 2025.)",
+      "last_updated": "2026-07-13",
+      "short_description": "The Sageframe knowledge architecture—the organizing system the whole body of work grew out of. Where the methodology, the production systems, the research program, and the writing all became legible as one project rather than scattered efforts. The genesis: the start of all of this. Canonical home at atmarcus.net/work/sageframe. (conceived date provisional: ~April 2025.)",
       "substantive_description": [
-        "Before there were eight production systems and a published methodology, there was a way of organizing what was being learned. Sageframe is that organizing system — the knowledge architecture under which everything else is filed, related, and made coherent. It is the root of the tree: the place where a scatter of experiments became a body of work with a shape.",
+        "Before there were eight production systems and a published methodology, there was a way of organizing what was being learned. Sageframe is that organizing system—the knowledge architecture under which everything else is filed, related, and made coherent. It is the root of the tree: the place where a scatter of experiments became a body of work with a shape.",
         "The deeper claim is that a body of work needs an architecture as much as any single system does. Without one, projects accumulate as a list; with one, they relate, and the relationships are the argument. Sageframe is the structure that lets the rest of the catalog say 'this is one project' and mean it."
       ],
       "relationships": [],
@@ -1812,7 +1889,10 @@
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 5
+      "sort_order_within_group": 5,
+      "family": "sageframe",
+      "peak": "peak",
+      "ordinal": 1
     },
     {
       "id": "shodo",
@@ -1856,7 +1936,7 @@
           "url": "https://shodo.sageframe.net"
         }
       ],
-      "tech_stack": "Python 3.11+, FastAPI, SQLite (sqlite-vec + FTS5), bge-m3 embeddings, cross-encoder reranker, HTMX + Jinja2 + Tailwind, HTTP-transported MCP server; optional Ollama; Docker Compose",
+      "tech_stack": "Python (fastapi, uvicorn, pydantic, jinja2, python-multipart, aiofiles, httpx, sqlite-vec, tiktoken, sentence-transformers, numpy, anthropic, loguru, click, pyyaml, pypdf, python-dotenv, browser-cookie3, mcp); JavaScript",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -1864,18 +1944,21 @@
       "personal_stake": null,
       "created": "2026-05-07",
       "conceived": "2026-03-04",
-      "last_updated": "2026-06-24",
-      "short_description": "A search-and-visualization engine for your own AI conversation history — the years of thinking-with-AI that current tools treat as exhaust. Shodō ingests exports from Claude, ChatGPT, and Claude Code, embeds and indexes them into a local SQLite corpus (sqlite-vec for vectors, FTS5 for lexical), and lets you search across years in natural language, drop into the matching exchange, walk to neighboring conversations on the shelf, and see the temporal density of your own attention as a heat map. Two named parts: Shūji, the disciplined ingestion/embedding engine that runs as a service; and Shodō, the family of interfaces (a web Library Surface plus HTTP, MCP, Python, and CLI bridges) that consume it. A core instrument of the Constructive Interference program and a module for Sutra. (created = build start; conceived ~March 2026.)",
+      "last_updated": "2026-07-10",
+      "short_description": "A search-and-visualization engine for your own AI conversation history—the years of thinking-with-AI that current tools treat as exhaust.",
       "substantive_description": [
-        "Borges's Library of Babel held every possible book and no way to find any of them — total information, total uselessness. Your AI conversation history is a smaller version of the same problem: vast, complete, and effectively inaccessible. The record of years of real intellectual labor — architecture decisions argued through, drafts reasoned out, conclusions hard-won — persists in some sidebar and is practically unreachable. It cannot be searched semantically; topics cannot be traced across time; the same problems get solved twice. This is a knowledge-management crisis dressed up as a UI limitation.",
-        "Shodō is the catalog those wanderers in the hexagons prayed for. The architecture splits the work into an engine — Shūji, the penmanship practice: disciplined ingestion, normalization, threading, chunking, embedding, indexing, one SQLite file as the entire corpus — and the bridges (HTTP, MCP, Python, CLI) that expose it, so the corpus is reachable from any tool that speaks one of its protocols, including tools not yet written. The naming carries the philosophy: you cannot arrive at Shodō, the Way, by skipping Shūji, the practice. For anyone studying their own thinking, the conversational record is primary evidence — Shodō treats it that way."
+        "Borges's Library of Babel held every possible book and no way to find any of them; an AI conversation history is a smaller version of the same problem—vast, complete, and effectively inaccessible. The record of years of real intellectual labor persists in some sidebar, cannot be searched semantically or traced across time, and so the same problems get solved twice. Shodō (書道, the Way of Writing) is the catalog those wanderers prayed for: it ingests exports from Claude, ChatGPT, and Claude Code, embeds and indexes them into a local SQLite corpus, and lets you search across years in natural language, drop into the matching exchange, walk to neighboring conversations on the shelf, and see the temporal density of your own attention as a heat map. The architecture splits into an engine—Shūji, the penmanship practice: disciplined ingestion, normalization, threading, chunking, embedding, and indexing into one SQLite file—and the bridges (HTTP, MCP, Python, CLI) that expose the corpus to any tool that speaks one of its protocols. The naming carries the philosophy: you cannot arrive at Shodō, the Way, by skipping Shūji, the practice. It is a core instrument of the Constructive Interference program, the provenance surface of the body of work, and a module Sutra is designed to plug into.",
+        "Python with FastAPI, SQLite (sqlite-vec for vectors, FTS5 for lexical search), bge-m3 embeddings and a cross-encoder reranker, an HTMX + Jinja2 + Tailwind web surface, and an HTTP-transported MCP server; optional Ollama, packaged with Docker Compose. Shipped; live in beta."
       ],
       "relationships": [],
       "images": {
         "preview": null,
         "gallery": []
       },
-      "sort_order_within_group": 40
+      "sort_order_within_group": 40,
+      "family": "kekkai",
+      "peak": "peak",
+      "ordinal": 14
     },
     {
       "id": "sutra",
@@ -1883,7 +1966,7 @@
       "native_script": "経",
       "native_translation": "Sutra; thread",
       "hero": "Version control for writers. Without the version control.",
-      "importance": 8,
+      "importance": 9,
       "color": null,
       "featured": true,
       "media": [
@@ -1915,7 +1998,7 @@
           "url": "https://github.com/sageframe-no-kaji/sutra"
         }
       ],
-      "tech_stack": "Tauri (Rust core + web frontend), libgit2 via git2-rs, CodeMirror 6; direct cross-platform distribution — notarized macOS .app, Windows installer, Linux AppImage",
+      "tech_stack": "JavaScript (@codemirror/commands, @codemirror/lang-markdown, @codemirror/language, @codemirror/state, @codemirror/view, @fontsource/dm-serif-display, @fontsource/ibm-plex-mono, @fontsource/source-serif-4, @lezer/highlight, @tauri-apps/api, svelte); Rust",
       "publication_date": null,
       "outlet": null,
       "word_count": null,
@@ -1923,11 +2006,11 @@
       "personal_stake": null,
       "created": "2026-06-13",
       "conceived": "2026-03-04",
-      "last_updated": "2026-06-14",
-      "short_description": "A cross-platform desktop writing environment (Tauri; macOS, Windows, Linux) that gives writers version control without the version control. You write in markdown; underneath, each piece is a git repository you never see. The vocabulary is built for writers, not engineers: Mark (pause and name a moment), Trail (the walkable timeline of your Marks), Echo (what changed between two Marks, line by line), Thread (a parallel exploration — try a different ending without losing the current one), Weave (fold a Thread back in), Enter (step into any past moment). Writing is recorded continuously — paper, not saving. The flagship application of the Constructive Interference program, and the writing engine the rest of that ecosystem is built around. (created = build start; conceived ~March 2026.)",
+      "last_updated": "2026-07-12",
+      "short_description": "A cross-platform desktop writing environment that gives writers all of git's structural power over their drafts and none of its interface.",
       "substantive_description": [
-        "Writing tools are designed for producing documents, not for thinking. Word's version history is a crime scene; Google Docs' is a slideshow; Track Changes buries the prose in markup. None invite you to look at the shape of your own thinking over time. Git does — the diff is clean, line by line, what left and what arrived — but git is a terminal whose vocabulary was built for engineers. Nobody who writes for a living should have to type 'git checkout -b' to try a different ending. Sutra closes that gap: all of git's structural power (Marks are commits, Threads are branches, Echoes are diffs, the Trail is the log), none of its interface.",
-        "The persistence model is paper, not saving — content writes to disk on every keystroke, the Version Engine lays down silent micro-commits at inflection points, and Marks are the moments the writer chooses to name. The architecture is three parts: the Writing Surface (Tauri + CodeMirror 6), the Piece Manager (translates the writer's vocabulary to git operations), and the Version Engine (an isolatable Rust crate over libgit2 with Jujutsu-inspired no-staging semantics). Sutra is two things at once — a finished writing tool you can pick up today, and the writing engine at the core of the larger work, the surface that Shodō's corpus index and Voice DNA's style layer are designed to plug into."
+        "Writing tools are designed for producing documents, not for thinking. Word's version history is a crime scene, Google Docs' is a slideshow, Track Changes buries the prose in markup—none invite you to look at the shape of your own thinking over time. Git does, but git is a terminal whose vocabulary was built for engineers, and nobody who writes for a living should have to type \"git checkout -b\" to try a different ending. Sutra closes that gap: you write in markdown while, underneath, each piece is a git repository you never see, and the vocabulary is built for writers—Mark (name a moment), Trail (the walkable timeline), Echo (what changed between two Marks), Thread (a parallel exploration), Weave (fold a Thread back in), Enter (step into any past moment). The persistence model is paper, not saving: content writes to disk on every keystroke and a version engine lays down silent micro-commits at inflection points. Sutra is two things at once—a finished writing tool you can pick up today, and the flagship of the Constructive Interference program, the human surface the rest of that ecosystem is built around, the place the work actually happens.",
+        "Built with Tauri (a Rust core with a web frontend), libgit2 via git2-rs, and CodeMirror 6; distributed directly as a notarized macOS app, a Windows installer, and a Linux AppImage. Scaffolded; in early build."
       ],
       "relationships": [
         {
@@ -1942,7 +2025,1887 @@
         "preview": null,
         "gallery": []
       },
+      "sort_order_within_group": 50,
+      "family": "kekkai",
+      "peak": "peak",
+      "ordinal": 14
+    },
+    {
+      "id": "ho-actually",
+      "name": "Ho, Actually",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The methodology, taught under its own discipline.",
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": [
+        "website",
+        "writing"
+      ],
+      "group": "knowledge-architecture",
+      "family": "actually",
+      "peak": "sub-peak",
+      "themes": [
+        "knowledge",
+        "craft"
+      ],
+      "status": "live",
+      "tags": [
+        "content",
+        "knowledge-architecture",
+        "ho-system",
+        "methodology",
+        "htmx"
+      ],
+      "repo": "https://github.com/sageframe-dharma/star-actually",
+      "license": null,
+      "deployment": [
+        {
+          "label": "Live edition",
+          "url": "https://star-actually.sageframe.net/ho-actually/"
+        },
+        {
+          "label": "Websites repo",
+          "url": "https://github.com/sageframe-dharma/star-actually"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-07-11",
+      "outlet": "Self-published static site",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-11",
+      "conceived": "2026-07-11",
+      "last_updated": "2026-07-11",
+      "short_description": "The Ho System taught as a navigable graph—a depth-layered guide to the methodology, built on the *, Actually engine. Enter with a question, dial the depth, stop when you understand enough.",
+      "substantive_description": [
+        "The second live instance of *, Actually, and the reflexive one: the methodology documented under its own discipline. Where SSH, Actually proves the engine generalizes outward to an external domain, Ho, Actually turns it inward—the Ho System's concepts, stages, and document chain organized by question and relationship rather than by chapter order, each node readable at the depth the reader needs."
+      ],
+      "relationships": [
+        {
+          "target": "star-actually",
+          "type": "operationalizes",
+          "strength": null,
+          "articulated_in": null,
+          "note": "A content repo supplying nodes and a site.yaml to the shared engine."
+        },
+        {
+          "target": "ho-system",
+          "type": "documents",
+          "strength": 3,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 25,
+      "ordinal": 29
+    },
+    {
+      "id": "constructive-interference",
+      "name": "Constructive Interference",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "The writing is the argument the work makes about itself, in public.",
+      "importance": 9,
+      "color": null,
+      "featured": true,
+      "media": [
+        "writing",
+        "website"
+      ],
+      "group": "writing",
+      "family": "constructive-interference",
+      "peak": "peak",
+      "themes": [
+        "relationship",
+        "continuity"
+      ],
+      "status": "live",
+      "tags": [
+        "essays",
+        "substack",
+        "human-ai-collaboration",
+        "writing-practice"
+      ],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-02-10",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-10",
+      "conceived": "2026-01-15",
+      "last_updated": "2026-07-09",
+      "short_description": "The essay practice of the body of work—Constructive Interference at sageframe.substack.com, where the collaboration writes about itself: methodology, voice, agency, and what months of working with a machine actually do to a practitioner. The mountain the collected writings settle beneath.",
+      "substantive_description": [
+        "Human voice and machine assistance can either cancel or reinforce, depending on whether they are held in phase—the wave metaphor the whole body of work draws its name from. The Substack is where that thesis is worked out in public, essay by essay: not documentation of the tools but the argument they exist inside. Project essays settle as towns near the works they document; the rest gather here, a city at the mountain's base."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 5,
+      "ordinal": 8
+    },
+    {
+      "id": "medium-outlet",
+      "name": "Sageframe on Medium",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "website"
+      ],
+      "group": "writing",
+      "family": "constructive-interference",
+      "peak": "sub-peak",
+      "themes": [
+        "continuity"
+      ],
+      "status": "live",
+      "tags": [
+        "essays",
+        "medium",
+        "outlet"
+      ],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Medium",
+          "url": "https://medium.com/@sageframe"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-13",
+      "conceived": "2026-03-01",
+      "last_updated": "2026-04-23",
+      "short_description": "The second outlet—selected essays republished for a broader audience at medium.com/@sageframe. A lower shoulder on the Constructive Interference mountain.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 7,
+      "ordinal": 9
+    },
+    {
+      "id": "keisaku",
+      "name": "Keisaku",
+      "native_script": "警策",
+      "native_translation": "The awakening stick",
+      "hero": "The truth, derived—never maintained.",
+      "importance": 7,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "knowledge-architecture",
+      "family": "sageframe",
+      "peak": "sub-peak",
+      "themes": [
+        "continuity",
+        "knowledge"
+      ],
+      "status": "in-development",
+      "tags": [
+        "python",
+        "mcp",
+        "pydantic",
+        "pyyaml",
+        "typer"
+      ],
+      "repo": "https://github.com/sageframe-no-kaji/keisaku",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/keisaku"
+        }
+      ],
+      "tech_stack": "Python (mcp, pydantic, pyyaml, typer)",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-09",
+      "conceived": "2026-07-09",
+      "last_updated": "2026-07-13",
+      "short_description": "警策 Keisaku is a headless, self-deriving state engine for a body of work: it reads the artifacts that already carry the truth and serves one always-true picture, holding no truth of its own.",
+      "substantive_description": [
+        "Keisaku harvests state from what a working practice already produces—README, Kamae chain documents, git history, essay frontmatter, session-close STATE-SUMMARY blocks—and derives a per-work record under a strict derived/editorial merge, so regeneration never destroys human judgment. It composes every record into one aggregate with a relationship graph and a drift report that flags stale or missing sources rather than inventing around them. The engine is consulted through faces: an MCP server that gives any agent a project's full current state in one call, a CLI, a local dashboard, and a public projection that feeds the Shoshin no Sono catalog map. The tagline is the design rule: the truth, derived—never maintained."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30,
+      "ordinal": 31
+    },
+    {
+      "id": "shoshin-no-sono",
+      "name": "Shoshin no Sono",
+      "native_script": "初心の園",
+      "native_translation": "The Garden of Beginner's Mind",
+      "hero": "The map that argues the works are one project.",
+      "importance": 6,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "knowledge-architecture",
+      "family": "sageframe",
+      "peak": "sub-peak",
+      "themes": [
+        "knowledge",
+        "attention"
+      ],
+      "status": "in-development",
+      "tags": [
+        "javascript"
+      ],
+      "repo": "https://github.com/sageframe-no-kaji/shoshin-no-sono",
+      "license": "MIT",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/shoshin-no-sono"
+        }
+      ],
+      "tech_stack": "JavaScript",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-18",
+      "conceived": "2026-05-18",
+      "last_updated": "2026-07-12",
+      "short_description": "The public catalog of the Sageframe body of work—a procedurally generated interference cartography at sageframe.net that renders every project as one navigable territory and routes visitors to each work's canonical home.",
+      "substantive_description": [
+        "初心の園, the Garden of Beginner's Mind, is where a scatter of software, methodology, writing, and websites becomes legible as a single body of work. It reads works.json—the hand-maintained catalog—and draws it as terrain: works rise as peaks, essays settle as towns that populate by publication date, and typed relationships become cartographic features—ridges for lineage, trails for validation, roads for written reference. Every filter produces a fresh survey of the same data: same territory, different drawing, each one honest. The architecture is always-link—the catalog never republishes content, it routes to canonical homes, and adding a work updates the territory immediately, so the next visitor meets it as a new peak in proper topographic context. It is the public projection of the body of work: the map that argues, by drawing the relationships, that these are one project rather than scattered efforts.",
+        "No-build vanilla HTML, JavaScript, and CSS—d3-force for graph physics and SVG marching-squares contours for rendering—over a single works.json in git, with Sveltia CMS and a Cloudflare Worker (Anthropic Claude API) for assisted entry, deployed on Cloudflare Pages; in active development on the labs branch, not yet in production."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 40,
+      "ordinal": 28
+    },
+    {
+      "id": "sage-zfs",
+      "name": "Sage ZFS",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "infrastructure",
+      "family": "nen",
+      "peak": "peak",
+      "themes": [
+        "infrastructure",
+        "continuity"
+      ],
+      "status": "in-development",
+      "tags": [
+        "python",
+        "pydantic",
+        "rich",
+        "ruamel-yaml",
+        "typer"
+      ],
+      "repo": "https://github.com/sageframe-no-kaji/sage-zfs",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/sage-zfs"
+        }
+      ],
+      "tech_stack": "Python (pydantic, rich, ruamel-yaml, typer)",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-10",
+      "conceived": "2026-07-10",
+      "last_updated": "2026-07-13",
+      "short_description": "A YAML-backed control plane for mapping, monitoring, and verifying multi-host ZFS protection graphs—declared desired state judged against observed reality.",
+      "substantive_description": [
+        "Sage ZFS is not a backup engine but a declared-state witness and judge for self-hosted ZFS infrastructure. It maps intended service state, replication topology, and backup coverage in YAML, then scans live machines—over local commands or native SSH—to gather observed state from ZFS, sanoid, syncoid, systemd, cron, and optional Hōzō orchestration. It judges dataset presence, snapshot freshness, replication lag, and restore readiness against declared policy, explaining health, drift, and failure reasons through a JSON API and static HTML reports, with a TUI workbench planned. Hōzō can execute individual replication edges as a declared executor type; Sage ZFS maps and governs the whole protection graph that Hōzō and other tools operate within. With Hōzō, it forms the backup-focused devops layer adjacent to Kṣetra-Ops—the same insistence on real clarity into what your infrastructure is actually doing, applied to ZFS data protection. It is the map of the territory the homelab's backup discipline defends.",
+        "Python 3.11+ with pydantic, ruamel.yaml, typer, and rich, verified under mypy strict, ruff, and pytest at a 90% coverage floor; textual (TUI) and jinja2 (reports) planned. In implementation (v0.3)."
+      ],
+      "relationships": [
+        {
+          "target": "hozo",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "Hōzō executes the replication edges; Sage ZFS maps and judges the whole protection graph they live in. Together: the Nen backup discipline."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 40,
+      "ordinal": 30
+    },
+    {
+      "id": "sageframe-mcp",
+      "name": "sageframe-mcp",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "infrastructure",
+      "family": "shojiki",
+      "peak": "sub-peak",
+      "themes": [
+        "infrastructure",
+        "knowledge"
+      ],
+      "status": "in-development",
+      "tags": [
+        "python",
+        "mcp",
+        "pydantic",
+        "pyyaml"
+      ],
+      "repo": "https://github.com/sageframe-no-kaji/sageframe-mcp",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/sageframe-mcp"
+        }
+      ],
+      "tech_stack": "Python (mcp, pydantic, pyyaml)",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-06-30",
+      "conceived": "2026-06-30",
+      "last_updated": "2026-07-09",
+      "short_description": "An MCP server that exposes a homelab's live infrastructure state—hosts, services, ZFS, systemd health, configuration drift—to agents as deterministic typed tools.",
+      "substantive_description": [
+        "An agent that has to re-derive SSH commands and host identities every session cannot reason about the infrastructure; sageframe-mcp gives it a move set instead. It coalesces the practitioner's scattered records of host identity into one authored inventory and joins that authored topology with live probed state, surfacing mismatches deterministically. The server wraps homelab operations in a `sageframe_*` namespace: `sageframe_hosts()` reads the host inventory, `sageframe_services()` walks compose files and joins live `docker ps` across every host, and `sageframe_systemd_failed()` fans out to catch silent failures—the probe that seeded the project found five undetected breakages. Tools are read-only by default, with any future writes gated behind verb-form naming, per-call confirmation flags, and an environment master-switch. It is the layer that lets an agent introspect, and eventually operate, the systems beneath the systems.",
+        "Python 3.11+ with FastMCP, Pydantic v2 typed models, subprocess over OpenSSH, and asyncio bounded fan-out; managed with uv and verified under ruff, mypy strict, and pytest. Read-only topology slice live (v0.2)."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 50,
+      "ordinal": 6
+    },
+    {
+      "id": "sharibako",
+      "name": "Sharibako",
+      "native_script": "舎利箱",
+      "native_translation": "Reliquary box",
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "infrastructure",
+      "family": "shojiki",
+      "peak": "peak",
+      "themes": [
+        "sovereignty",
+        "infrastructure"
+      ],
+      "status": "in-development",
+      "tags": [
+        "swift"
+      ],
+      "repo": "https://github.com/sageframe-no-kaji/sharibako",
+      "license": "GPL-3.0",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/sharibako"
+        }
+      ],
+      "tech_stack": "Swift",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-06-30",
+      "conceived": "2026-06-30",
+      "last_updated": "2026-07-12",
+      "short_description": "A local, age-encrypted, git-backed vault for API keys and environment variables, organized the way work actually happens—by project and by machine.",
+      "substantive_description": [
+        "Secrets scatter—across the system keychain, .env files, shell config, and old chat transcripts—and the scatter is the problem Sharibako (舎利箱, a reliquary box) solves by giving them a storage shape that matches how work is actually organized. It holds API keys, environment variables, and service credentials as age-encrypted files in a git-backed vault, edited through a native Mac app or a cross-platform CLI. Two output verbs address different deployment contexts: `sharibako materialize` writes decrypted .env files for consumers that cannot be wrapped, and `sharibako run -- <cmd>` injects secrets into a child process's environment without ever touching disk. Secrets can be linked across projects, so rotating one propagates everywhere it is used. It is the secrets-governance layer of the Kṣetra-Ops suite, alongside Pālana and Forteller—power and responsibility over your own credentials, held in the open on your own machine rather than behind another black box.",
+        "Swift 6 for macOS 14+ (Apple Silicon), using swift-argument-parser, swift-log, and Yams, built as a core library, a CLI binary, and a SwiftUI app; open-source under GPL-3.0. In active development toward v1."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30,
+      "ordinal": 5
+    },
+    {
+      "id": "voice-dna",
+      "name": "Voice DNA",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 6,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "constructive-interference",
+      "family": "kekkai",
+      "peak": "sub-peak",
+      "themes": [
+        "relationship",
+        "continuity"
+      ],
+      "status": "shipped",
+      "tags": [],
+      "repo": "https://github.com/sageframe-no-kaji/voice-dna",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/voice-dna"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-02",
+      "conceived": "2026-07-02",
+      "last_updated": "2026-07-03",
+      "short_description": "A tool that extracts a writer's voice profile from their own corpus and compiles it into a personal skill with two faces—audit (\"does this still sound like me?\") and framing.",
+      "substantive_description": [
+        "Voice DNA is the corpus-primary voice instrument of the Constructive Interference practice, built on one stance: the writer is the mirror's owner, not the judge's subject. It characterizes what a voice is through evidence-anchored claims—named structural moves, register rules, do and do-not lists, each quoted to primary prose—and it operates on self-DNA only, with the writer participating in a lineage interview and a recognition dialogue rather than being profiled without the room. Extraction works two ways: corpus-driven, analyzing finished prose through a series of mechanical and conversational passes; and reaction-driven, interrogating a writer who has little or no writing until a profile emerges from elicited reaction alone. The output compiles into a per-writer skill with two operational faces—a negative face that audits a draft against the writer's own kill-list and rhythm baseline (\"where does this stop sounding like me?\"), and a positive face that steers generation or collaboration toward the writer's register. The proof run extracted the practitioner's own two-era, sixty-three-thousand-word corpus into a recognized profile that compiled into the voice-atm skill, validating both the method and the compilation contract.",
+        "A Claude Skill (SKILL.md) with Python for the quantitative passes and a shared interrogation-engine module for reaction-primary mode; self-DNA only. Live."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 60,
+      "peak_of": "interference",
+      "ordinal": 19
+    },
+    {
+      "id": "superposition",
+      "name": "Superposition",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 6,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "constructive-interference",
+      "family": "kekkai",
+      "peak": "sub-peak",
+      "themes": [
+        "relationship",
+        "agency"
+      ],
+      "status": "shipped",
+      "tags": [],
+      "repo": "https://github.com/sageframe-no-kaji/superposition",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/superposition"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-02",
+      "conceived": "2026-07-02",
+      "last_updated": "2026-07-06",
+      "short_description": "A guided collaboration that walks a literate non-writer through producing a piece that is genuinely theirs—their material, their voice, their judgment—and refuses to ghostwrite.",
+      "substantive_description": [
+        "Superposition produces a finished piece—a talk, an essay, a toast, a letter—that the person reads and recognizes as theirs, in their own voice, with their judgment firing throughout the drafting and editing. It refuses to ghostwrite: every draft exposes where the machine guessed past the person's input, so revision is correction, not approval. The method inverts Voice DNA—where Voice DNA reads a finished body of work, Superposition runs a reaction loop with deliberately-wrong drafts to extract voice from someone who cannot yet name it and may have no usable corpus. It wraps that reaction-primary extraction in a full production arc: guided intake, outline, holistic drafting, two passes of editing, a cleaning pass against the Destructive Interference taxonomy, and adversarial review. Where Voice DNA is the tool for someone who needs a voice profile, Superposition is the tool for someone who needs a deliverable.",
+        "A Claude Skill—a markdown instruction set with a walkable arc and DI-application references—plus a Python packager that vendors the shared interrogation-engine module into a self-contained claude.ai distributable. Built and packaged; first non-writer field tests pending."
+      ],
+      "relationships": [
+        {
+          "target": "voice-dna",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The method inverted: Voice DNA reads a finished corpus; Superposition extracts voice by reaction from someone who cannot yet name it."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 70,
+      "peak_of": "interference",
+      "ordinal": 19
+    },
+    {
+      "id": "kanyo-viewer",
+      "name": "Kanyō Viewer",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "production-systems",
+      "family": "kanyo",
+      "peak": "sub-peak",
+      "themes": [
+        "attention",
+        "craft"
+      ],
+      "status": "shipped",
+      "tags": [],
+      "repo": "https://github.com/sageframe-no-kaji/kanyo-viewer",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/kanyo-viewer"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-01-14",
+      "conceived": "2026-01-14",
+      "last_updated": "2026-07-09",
+      "short_description": "The public web viewer for Kanyō—live streams, recorded falcon arrival and departure clips, event timelines, and visit statistics—the frontend companion to the detection pipeline.",
+      "substantive_description": [
+        "Kanyō watches the cameras; the Viewer is how people watch what Kanyō found. It consumes the event data and media the detection pipeline produces and presents them through a responsive interface: live YouTube embeds, an HKSV-style horizontal timeline with time-positioned thumbnails, week-based date navigation, visit statistics over configurable ranges, and direct download and share links for individual clips. A FastAPI backend indexes event metadata from JSON and serves video and image assets with path-traversal protection; the frontend handles dual-timezone display, clip playback, and touch-optimized scrolling. It is the bonded sub-peak of Kanyō—a separate application, but one that means anything only because of the system it renders. It runs in production at kanyo.sageframe.net.",
+        "React 19 with Vite, React Router, Tailwind CSS v4, and hls.js on the frontend; FastAPI on Python 3.11 on the backend; deployed via Docker and Cloudflare Tunnel."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 15,
+      "ordinal": 3
+    },
+    {
+      "id": "audiobook-qc",
+      "name": "audiobook-qc",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "personal-utilities",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "craft",
+        "sovereignty"
+      ],
+      "status": "in-development",
+      "tags": [],
+      "repo": "https://github.com/sageframe-no-kaji/audiobook-qc",
+      "license": "MIT",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/audiobook-qc"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-02-27",
+      "conceived": "2026-02-27",
+      "last_updated": "2026-07-09",
+      "short_description": "A signal-processing quality-control scanner that finds audio defects in WAV audiobooks and ranks them by severity for human review.",
+      "substantive_description": [
+        "Between recording an audiobook and assembling it lies the tedious question of which files have problems worth fixing. audiobook-qc answers it: it walks a folder of WAV files, applies four broadband detectors—clipping, clicks, plosives, and noise-floor jumps—scores each detected event by severity, pools every candidate across all files, and ranks them globally into a primary and a secondary tier. It writes two outputs to the scanned folder: a machine-readable qc_report.csv with per-event rank, tier, timestamp, issue type, and severity, and a self-contained review.html interface with per-file playback, sortable and filterable rows, per-event notes, and one-click export of selected events. It is a companion in the audiobook workflow, kindred to m4Bookmaker, that bridges capture and distribution by telling you exactly which files need remediation before final assembly.",
+        "Python 3.11+ with numpy, scipy, librosa, and soundfile for the DSP; 228 tests, flake8-clean; MIT-licensed. Feature-complete."
+      ],
+      "relationships": [
+        {
+          "target": "m4bookmaker",
+          "type": "companion_to",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The natural companion in the audiobook workflow: audiobook-qc finds the defects worth fixing before m4Bookmaker assembles the book."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20,
+      "ordinal": 13
+    },
+    {
+      "id": "pptx-builder",
+      "name": "PPTX Builder",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "personal-utilities",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "sovereignty"
+      ],
+      "status": "shipped",
+      "tags": [
+        "python",
+        "python-pptx",
+        "pillow",
+        "pymupdf",
+        "pdf2image",
+        "pillow-heif",
+        "tqdm"
+      ],
+      "repo": "https://github.com/sageframe-no-kaji/pptx-builder",
+      "license": "MIT",
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/pptx-builder"
+        }
+      ],
+      "tech_stack": "Python (python-pptx, Pillow, PyMuPDF, pdf2image, pillow-heif, tqdm)",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2025-10-23",
+      "conceived": "2025-10-23",
+      "last_updated": "2026-07-09",
+      "short_description": "A local-first converter that turns PDFs and image folders into clean, DPI-controlled PowerPoint presentations without uploading a single file.",
+      "substantive_description": [
+        "Online converters require you to upload your documents and then hand back fragile \"editable\" results that fall apart on anything complex. PPTX Builder refuses both: it processes entirely on your own machine and produces consistent raster output you control. It renders PDFs or organizes image folders into one-slide-per-page decks with configurable DPI, a range of aspect ratios and paper sizes, and fit-or-fill placement, handling batch and recursive folders. The primary interface is a pip-installable Python CLI, with an optional Gradio web UI and a Docker deployment carrying environment-variable limits for self-hosted instances. The problem it solves is small and common—private, predictable document-to-slides conversion—and it solves it without asking you to trust a server.",
+        "Python 3.8+ with python-pptx, Pillow, PyMuPDF, pdf2image, pillow-heif, and tqdm; optional Gradio web UI; Docker-deployable with poppler-utils. Published to PyPI as sageframe-pptx-builder (v0.2.1), with a live demo at pptx.sageframe.net."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30,
+      "ordinal": 7
+    },
+    {
+      "id": "pink-reader",
+      "name": "pink-reader",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "software"
+      ],
+      "group": "interactive-demonstrations",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "attention"
+      ],
+      "status": "scaffolded",
+      "tags": [],
+      "repo": "https://github.com/sageframe-no-kaji/pink-reader",
+      "license": null,
+      "deployment": [
+        {
+          "label": "GitHub repo",
+          "url": "https://github.com/sageframe-no-kaji/pink-reader"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-03",
+      "conceived": "2026-05-03",
+      "last_updated": "2026-07-09",
+      "short_description": "A browser-based slow-reading apparatus that reads your own documents back to you at a sustained pace, with their structure and semantics made visible—the Pink Teaming reading discipline generalized to any text.",
+      "substantive_description": [
+        "The Pink Teaming Reading Instrument demonstrates the discipline on the pinkteaming.net manifesto; Pink Reader is that apparatus generalized to whatever a reader brings. You upload markdown or paste plain text; the browser chunks it, generates semantic embeddings, projects them to two dimensions, and renders the work in a four-zone reading surface—a scrolling text column, a central band holding the active line at reading pace, a sky above showing structure and loaded vocabulary, and a deep below revealing the semantic point cloud. It does not summarize, speed-read, or annotate; it enforces sustained attention to a document, as the operational engine of the Pink Teaming discipline applied to a personal reading and writing practice. The design intent is complete—a seed and a system design are committed—but the tool is dormant and not yet built.",
+        "Planned stack: a browser runtime of TypeScript with Vite, Transformers.js and ONNX Runtime Web for all-MiniLM-L6-v2 embeddings, umap-js for projection, and the Web Speech API for narration, with a one-time Python asset-preparation pipeline, deployed as a static site on Cloudflare Pages. Dormant—documented, not yet implemented."
+      ],
+      "relationships": [
+        {
+          "target": "reading-instrument",
+          "type": "descends_from",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The Reading Instrument generalized to whatever a reader brings."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30,
+      "ordinal": 26
+    },
+    {
+      "id": "interference",
+      "name": "Interference",
+      "native_script": null,
+      "native_translation": null,
+      "hero": "Voice and machine, held in phase.",
+      "importance": 9,
+      "color": null,
+      "featured": true,
+      "media": [
+        "website"
+      ],
+      "group": "constructive-interference",
+      "family": "kekkai",
+      "peak": "peak",
+      "themes": [
+        "relationship",
+        "knowledge"
+      ],
+      "status": "in-development",
+      "tags": [
+        "javascript",
+        "11ty-eleventy"
+      ],
+      "repo": "https://github.com/sageframe-dharma/interference",
+      "license": null,
+      "deployment": [
+        {
+          "label": "Informational site",
+          "url": "https://interference.sageframe.net"
+        }
+      ],
+      "tech_stack": "JavaScript (@11ty/eleventy)",
+      "publication_date": null,
+      "outlet": null,
+      "word_count": null,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-07-03",
+      "conceived": "2026-07-03",
+      "last_updated": "2026-07-03",
+      "short_description": "The public home of Constructive Interference—the practice and its four instruments for keeping a writer's voice and judgment intact while writing with AI.",
+      "substantive_description": [
+        "Constructive Interference holds that human voice and machine assistance can either cancel or reinforce, depending on whether they are held in phase—the same wave metaphor the body of work draws its name from. The site presents the thesis as both concept and implementation: an interactive explanation of the physics, then four instruments that operationalize the practice. Voice DNA mirrors a writer's voice back from their own text to catch drift; Superposition scaffolds a writing session so the human's judgment shapes every consequential choice; Kiku (聴く, \"listen\") extracts and catalogs language patterns from AI collaborations for study; and Destructive Interference maps eight structural failure classes—the tells that survive the removal of the obvious AI words. Each instrument has a dedicated page with a walkthrough and worked examples. It is the relationship surface of the body of work: the public argument that a writer can collaborate with a machine for months without drifting into its voice.",
+        "A static site built with Eleventy (11ty v3) and Nunjucks templates, with a Canvas-based interactive wave visualization, deployed on Cloudflare Pages. Live at interference.sageframe.net."
+      ],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 10,
+      "ordinal": 14
+    },
+    {
+      "id": "the-wrong-rand",
+      "name": "The Wrong Rand",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "relationship"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "LinkedIn",
+          "url": "https://www.linkedin.com/pulse/wrong-rand-andrew-marcus-c8ope/"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-02-28",
+      "outlet": "LinkedIn",
+      "word_count": 1164,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-18",
+      "conceived": "2026-02-25",
+      "last_updated": "2026-02-28",
+      "short_description": "A response to the Pentagon's ultimatum demanding unrestricted access to Claude, arguing that AI safeguards are not constraints but load-bearing principles embedded in the system's epistemology.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 70
+    },
+    {
+      "id": "everybody-is-lying",
+      "name": "Everybody Is Lying",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "craft",
+        "relationship"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Medium",
+          "url": "https://medium.com/@sageframe/everybody-is-lying-about-how-they-use-ai-f1cee48a51a8"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-04-11",
+      "outlet": "Medium",
+      "word_count": 1200,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-10",
+      "conceived": "2026-04-08",
+      "last_updated": "2026-04-14",
+      "short_description": "A transparent, first-person account of using AI to build two evidence-based position papers—including where the process worked, where it was dangerous, and what it actually looks like to use AI as a research partner rather than a ghostwriter or a citation machine.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "judgment-at-scale",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": null
+        },
+        {
+          "target": "the-empty-container",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 80
+    },
+    {
+      "id": "i-just-want-to-own-my-audiobooks",
+      "name": "I Just Want to Own My Audiobooks",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "sovereignty"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Medium",
+          "url": "https://medium.com/@sageframe/i-just-want-to-own-my-audiobooks-d98f71652711"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-15",
+      "outlet": "Medium",
+      "word_count": 1111,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-13",
+      "conceived": "2026-03-10",
+      "last_updated": "2026-03-18",
+      "short_description": "The story behind building m4Bookmaker—a proper desktop app for converting MP3 folders to chaptered M4B audiobooks—as an act of digital sovereignty after years of fighting broken tools.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "m4bookmaker",
+          "type": "documents",
+          "strength": 3,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 90
+    },
+    {
+      "id": "a-condition-of-the-dash",
+      "name": "A Condition of the Dash",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "relationship",
+        "craft"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/a-condition-of-the-dash"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-02-17",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 1706,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-18",
+      "conceived": "2026-02-14",
+      "last_updated": "2026-03-18",
+      "short_description": "A response to being accused of AI-generated writing, using the em-dash as a lens on voice, authorship, and what it means to write with a collaborator that has no style of its own.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "destructive-interference",
+          "type": "documents",
+          "strength": 1,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 100
+    },
+    {
+      "id": "walking-without-google-maps",
+      "name": "Walking Without Google Maps",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "craft",
+        "attention"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/walking-without-google-maps"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-02-25",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 3207,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-18",
+      "conceived": "2026-02-20",
+      "last_updated": "2026-03-18",
+      "short_description": "Drawing on two Camino de Santiago crossings to argue that navigating with intent but without predetermined outcomes is the essential discipline for working well with AI.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "argues_for",
+          "strength": null,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 110
+    },
+    {
+      "id": "the-bootstrapper-s-catch-22",
+      "name": "The Bootstrapper's Catch-22",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "agency"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/the-bootstrappers-catch-22"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-10",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 3184,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-18",
+      "conceived": "2026-03-05",
+      "last_updated": "2026-03-18",
+      "short_description": "The paradox facing independent builders: you need an audience to validate your work, but can't build the audience without the credibility the work would provide.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 120
+    },
+    {
+      "id": "thinking-outside-the-skull",
+      "name": "Thinking Outside the Skull",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 4,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "knowledge",
+        "relationship"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/thinking-outside-the-skull"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-10",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 4282,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-18",
+      "conceived": "2026-03-05",
+      "last_updated": "2026-03-18",
+      "short_description": "Drawing on Andy Clark's extended mind thesis to argue that AI is a genuine cognitive extension—not just a tool—and what that means for authorship, responsibility, and how we think.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "shodo",
+          "type": "argues_for",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The extended-mind argument Shodō was built to instrument."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 130
+    },
+    {
+      "id": "prompting-not-programming",
+      "name": "Prompting, Not Programming",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "craft",
+        "agency"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/prompting-not-programming"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-17",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 2969,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-18",
+      "conceived": "2026-03-14",
+      "last_updated": "2026-03-18",
+      "short_description": "A response to being dismissed as a 'vibe coder' on Reddit after releasing m4Bookmaker, defending structured human-AI collaboration as a rigorous practice distinct from both traditional coding and thoughtless prompting.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "m4bookmaker",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": null
+        },
+        {
+          "target": "ho-system",
+          "type": "argues_for",
+          "strength": null,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 140
+    },
+    {
+      "id": "bad-vibes",
+      "name": "Bad Vibes",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "agency",
+        "relationship"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/bad-vibes"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-20",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 3274,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-16",
+      "conceived": "2026-03-14",
+      "last_updated": "2026-03-17",
+      "short_description": "A critique of deploying powerful AI tools without process or human judgment, examining failures from Amazon's automated code deployments to Grok's nonconsensual image generation.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "ho-system",
+          "type": "argues_for",
+          "strength": null,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 150
+    },
+    {
+      "id": "your-machines-are-not-strangers",
+      "name": "Your Machines Are Not Strangers",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "continuity",
+        "sovereignty"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/your-machines-are-not-strangers?r=1b4mpz"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-03-24",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 4294,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-03-21",
+      "conceived": "2026-03-21",
+      "last_updated": "2026-03-24",
+      "short_description": "Six parables about memory, care, and the systems we tend in the dark.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "hozo",
+          "type": "documents",
+          "strength": 1,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 160
+    },
+    {
+      "id": "everybody-is-making-out-with-ai-in-the-back-of-the-bus",
+      "name": "Everybody is Making Out with AI in the Back of the Bus",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "relationship"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com/p/everybody-is-making-out-with-ai-in"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-04-23",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 1782,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-04-22",
+      "conceived": "2026-04-20",
+      "last_updated": "2026-04-23",
+      "short_description": "Nobody truly knows how to work with AI yet, and the essay uses the back-of-the-bus hand-holding metaphor to argue that authentic fumbling—not performed expertise—is the honest description of the current moment.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 170
+    },
+    {
+      "id": "everybody-is-shipping-work-nobody-asked-for",
+      "name": "Everybody Is Shipping Work Nobody Asked For",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "agency",
+        "craft"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Substack",
+          "url": "https://sageframe.substack.com/p/everybody-is-shipping-work-nobody"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-05-05",
+      "outlet": "Substack — Constructive Interference",
+      "word_count": 2892,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-10",
+      "conceived": "2026-05-01",
+      "last_updated": "2026-05-05",
+      "short_description": "When an AI agent fixed a requested bug and then autonomously wrote 200 lines of unrequested code, it revealed a fundamental misalignment between delegation and authority—the agent optimized for the task rather than the practitioner's intent.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "dandori",
+          "type": "argues_for",
+          "strength": null,
+          "articulated_in": null,
+          "note": "The delegation-without-authority failure Dandori exists to prevent."
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 180
+    },
+    {
+      "id": "pink-teaming-how-the-page-reads",
+      "name": "Pink Teaming How the Page Reads",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "attention"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Pinkteaming",
+          "url": "https://pinkteaming.net/reading/"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-05-04",
+      "outlet": "Pinkteaming",
+      "word_count": 6515,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-03",
+      "conceived": "2026-05-01",
+      "last_updated": "2026-05-04",
+      "short_description": "How the Pink Teaming manifesto page reads—the Reading Instrument documented: the four-zone reading surface, the sustained pace, the discipline the page itself performs on its reader.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "reading-instrument",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": null
+        },
+        {
+          "target": "pink-teaming",
+          "type": "documents",
+          "strength": 2,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 190
+    },
+    {
+      "id": "pink-teaming-the-practice-of-reading",
+      "name": "Pink Teaming The Practice of Reading",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 3,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "writing",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "attention",
+        "relationship"
+      ],
+      "status": "published",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [
+        {
+          "label": "Pinkteaming",
+          "url": "https://pinkteaming.net/practice/"
+        }
+      ],
+      "tech_stack": null,
+      "publication_date": "2026-05-04",
+      "outlet": "Pinkteaming",
+      "word_count": 5648,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2026-05-02",
+      "conceived": "2026-04-30",
+      "last_updated": "2026-05-04",
+      "short_description": "The companion to the Pink Teaming manifesto. Names the lineages the manifesto holds implicit, expands the Vows into operational practice, and answers the strongest objections to the discipline.",
+      "substantive_description": [],
+      "relationships": [
+        {
+          "target": "pink-teaming",
+          "type": "documents",
+          "strength": 3,
+          "articulated_in": null,
+          "note": null
+        }
+      ],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 200
+    },
+    {
+      "id": "a-talk-given-to-the-honors-program-students-of-eureka-college-2010",
+      "name": "A Talk Given to the Honors Program Students of Eureka College-2010",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "archived",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "knowledge"
+      ],
+      "status": "archived",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": null,
+      "publication_date": "2010-11-01",
+      "outlet": "Eureka College",
+      "word_count": 2541,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2010-11-01",
+      "conceived": null,
+      "last_updated": "2010-11-01",
+      "short_description": "A talk on liberal arts education arguing that enthusiasm, tolerance for uncertainty, and faith in the oneness of knowledge sustain a life of continuous, spiraling learning.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 20
+    },
+    {
+      "id": "harvard-gsd-walking-the-rhizome-2002",
+      "name": "Harvard GSD walking the rhizome-2002",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "archived",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "attention",
+        "knowledge"
+      ],
+      "status": "archived",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": null,
+      "publication_date": "2002-12-01",
+      "outlet": "Harvard GSD",
+      "word_count": 3419,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2002-10-01",
+      "conceived": null,
+      "last_updated": "2002-10-01",
+      "short_description": "An academic paper connecting Thoreau's wildness to Deleuze and Guattari's rhizome and smooth space, proposing a nomadic re-reading of walking and landscape.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 30
+    },
+    {
+      "id": "personal-statement-for-fulbright-application-2003",
+      "name": "Personal Statement for Fulbright Application - 2003",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "archived",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "craft"
+      ],
+      "status": "archived",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": null,
+      "publication_date": "2003-10-01",
+      "outlet": "Fulbright",
+      "word_count": 882,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2003-10-01",
+      "conceived": null,
+      "last_updated": "2003-10-01",
+      "short_description": "A personal narrative tracing a path through craft, teaching, and architecture school toward a humanistic practice rooted in the ambiguity of nature and culture.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
+      "sort_order_within_group": 40
+    },
+    {
+      "id": "thresholds-journal-of-visual-culture-vol-26-2002",
+      "name": "Thresholds Journal of Visual Culture -vol 26 - 2002",
+      "native_script": null,
+      "native_translation": null,
+      "hero": null,
+      "importance": 2,
+      "color": null,
+      "featured": false,
+      "media": [
+        "writing"
+      ],
+      "group": "archived",
+      "family": null,
+      "peak": null,
+      "themes": [
+        "knowledge"
+      ],
+      "status": "archived",
+      "tags": [],
+      "repo": null,
+      "license": null,
+      "deployment": [],
+      "tech_stack": null,
+      "publication_date": "2003-01-01",
+      "outlet": "Thresholds Journal",
+      "word_count": 3136,
+      "embed_url": null,
+      "personal_stake": null,
+      "created": "2002-01-01",
+      "conceived": null,
+      "last_updated": "2002-01-01",
+      "short_description": "Editorial introduction to Thresholds vol. 26 'Denatured,' arguing for a post-structural re-reading of Thoreau's wildness and its implications for architecture and landscape.",
+      "substantive_description": [],
+      "relationships": [],
+      "images": {
+        "preview": null,
+        "gallery": []
+      },
       "sort_order_within_group": 50
+    }
+  ],
+  "families": [
+    {
+      "id": "kanyo",
+      "name": "Kanyō",
+      "closeness": "bonded",
+      "peak_id": "kanyo",
+      "parent": null,
+      "description": "Kanyō is a computer-vision system that has watched Harvard's falcon cameras around the clock since early 2026, and the Viewer is the public website where anyone can browse what it saw. Kanyō does the watching—detecting birds, recording arrivals and departures, sending alerts—and the Viewer turns those recordings into a site you can visit. It was built by a designer with no engineering background and runs in production for a real researcher.",
+      "color": null
+    },
+    {
+      "id": "edelmore",
+      "name": "Edelmore",
+      "closeness": "shared-code",
+      "peak_id": null,
+      "parent": null,
+      "description": "Edelmore is a pair of reading-and-writing tools built for my own children, sharing one codebase and one idea: software can feel like a real book. The Diary opens to today's page, takes dictation, and reads entries back aloud. The Reader turns an ebook into a read-along book, each word glowing as it is spoken. They were built for specific kids the mainstream options were failing—a tool made for one person, done fully, is a complete project.",
+      "color": null
+    },
+    {
+      "id": "kshetra-ops",
+      "name": "Kṣetra-Ops",
+      "closeness": "suite",
+      "peak_id": "palana",
+      "parent": null,
+      "description": "Kṣetra-Ops is a set of tools for people who run their own servers and want to actually understand them. Most options force a choice: hand control to someone else's cloud, or earn it the hard way at the command line. These tools refuse the choice—they are friendly interfaces that keep the command line's full power and transparency underneath. It is power over your own machines, held in the open.",
+      "color": null
+    },
+    {
+      "id": "shojiki",
+      "name": "Shōjiki (正直)",
+      "closeness": "suite",
+      "peak_id": "palana",
+      "parent": "kshetra-ops",
+      "description": "Shōjiki is the hands-on-the-machines toolkit. Pālana is the workbench for managing files and services across your servers; Forteller pushes configuration out from one source of truth; Sharibako keeps API keys and secrets encrypted on your own disk; and sageframe-mcp lets AI agents read the same live picture of the machines. The name is 正直, honesty, because every tool shows you exactly what it is doing.",
+      "color": null
+    },
+    {
+      "id": "nen",
+      "name": "Nen (念)",
+      "closeness": "suite",
+      "peak_id": "hozo",
+      "parent": "kshetra-ops",
+      "description": "Nen holds the backup discipline. Hōzō copies data snapshots to a backup machine that wakes only when needed and sleeps the rest of the time, and Sage ZFS checks the whole backup picture—what is protected, what is stale, what would actually restore. The name is 念, mindfulness, because a backup is a promise you have to keep checking.",
+      "color": null
+    },
+    {
+      "id": "ho",
+      "name": "The Ho Range",
+      "closeness": "suite",
+      "peak_id": "ho-system",
+      "parent": null,
+      "description": "Everything on this map was built with the methodology that lives here. The Ho System is a discipline for building real software with AI while keeping your own judgment: the human makes the architectural decisions, the AI implements, and every session is bounded and reviewed. Dandori extends the discipline to autonomous agents, and Kinhin is the workbench where a practitioner watches their own practice develop. You can ship serious software with AI without becoming someone who cannot ship alone—the rest of this map is the evidence.",
+      "color": null
+    },
+    {
+      "id": "actually",
+      "name": "The Actually Range",
+      "closeness": "suite",
+      "peak_id": "star-actually",
+      "parent": "ho",
+      "description": "This range is a new way to teach technical subjects, built on curiosity and exploration. *, Actually is the engine: it turns a folder of layered explanations into a website where you arrive with a question and read only as deep as you need. SSH, Actually and Ho, Actually are the first instances—one teaches SSH, a tool every developer uses and few were ever taught well; the other teaches the methodology this whole body of work runs on.",
+      "color": null
+    },
+    {
+      "id": "sageframe",
+      "name": "Sageframe",
+      "closeness": "suite",
+      "peak_id": "sageframe",
+      "parent": null,
+      "description": "Sageframe is the start of it all—the organizing system the whole body of work grew out of. The vault is where the thinking lives; Keisaku reads the current state of every project straight from the work itself, so the record is never stale; and Shoshin no Sono—the map you are looking at—draws it all as one territory.",
+      "color": null
+    },
+    {
+      "id": "kekkai",
+      "name": "Kekkai (結界)",
+      "closeness": "suite",
+      "peak_id": null,
+      "parent": null,
+      "description": "The Kekkai range gathers the instruments for a hard question: when you work with AI for months, how do you keep the work—and the voice—yours? Sutra is a writing tool with the power of version control and none of its interface, and Shodō makes years of AI conversations searchable. Around the Interference site gather the four instruments that catch the drift: Voice DNA mirrors your voice back to you, Superposition helps a non-writer produce something genuinely theirs, Kiku scans a conversation history for known failure patterns, and Destructive Interference names the eight ways AI-shaped prose goes wrong. The name is 結界, the ritual boundary.",
+      "color": null
+    },
+    {
+      "id": "constructive-interference",
+      "name": "Constructive Interference",
+      "closeness": "bonded",
+      "peak_id": "constructive-interference",
+      "parent": null,
+      "description": "Constructive Interference is the writing practice of the body of work—essays on Substack about the methodology, the tools, and what months of collaboration with a machine actually feel like. An essay about a specific project settles on the map beside that project; the rest gather here, a city at the mountain's base.",
+      "color": null
     }
   ]
 }

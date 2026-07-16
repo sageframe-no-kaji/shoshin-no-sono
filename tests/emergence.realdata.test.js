@@ -13,8 +13,14 @@ const idx = createIndexer(data);
 const timeline = buildEmergenceTimeline(idx);
 
 describe('emergence over the real corpus', () => {
-  it('holds aspirational-intelligence as the lone pre-history floor', () => {
-    expect(timeline.floorIds).toEqual(['aspirational-intelligence']);
+  it('holds the five archived works as the pre-history floor', () => {
+    expect(timeline.floorIds).toEqual([
+      'aspirational-intelligence',
+      'a-talk-given-to-the-honors-program-students-of-eureka-college-2010',
+      'harvard-gsd-walking-the-rhizome-2002',
+      'personal-statement-for-fulbright-application-2003',
+      'thresholds-journal-of-visual-culture-vol-26-2002',
+    ]);
   });
 
   it('opens the world on sageframe and runs in conceived order', () => {
@@ -46,18 +52,12 @@ describe('emergence over the real corpus', () => {
     expect(mar4?.ids.sort()).toEqual(['shodo', 'sutra']);
   });
 
-  it('arrives the six writing towns after the world, the 2026-04-15 pair sharing a beat', () => {
+  it('arrives every writing-group work as a town after the world, the 2026-04-15 pair sharing a beat', () => {
     const townIds = timeline.writing.flatMap((b) => b.ids);
-    expect(townIds.sort()).toEqual(
-      [
-        'falcon-cameras',
-        'three-hours',
-        'the-same-lever',
-        'the-fourth-boundary',
-        'the-empty-container',
-        'judgment-at-scale',
-      ].sort(),
-    );
+    const writingGroup = data.works
+      .filter((/** @type {any} */ w) => w.group === 'writing')
+      .map((/** @type {any} */ w) => w.id);
+    expect(townIds.sort()).toEqual(writingGroup.sort());
     expect(timeline.writing[0].index).toBe(timeline.world.length);
     const pair = timeline.writing.find((b) => b.date === '2026-04-15');
     expect(pair?.ids.sort()).toEqual(['judgment-at-scale', 'the-empty-container']);
