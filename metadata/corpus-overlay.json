@@ -5,10 +5,10 @@
     "UPSTREAM: public.json carries a duplicate id 'pink-teaming' (site work + manifesto essay). Handled here by folding the essay record's deployments into the site work; fix at the keisaku layer eventually.",
     "UPSTREAM: pink-teaming-how-the-page-reads has a wrong short_description in public.json (a copy of the falcon-cameras essay's). Overridden in patch below.",
     "PROVISIONAL: every injected work's conceived date is a placeholder (≈ created). The ordinal pass refines these last.",
-    "PROVISIONAL: ho-actually repo URL, created and publication dates are guesses — confirm.",
-    "MISSING URL: i-just-want-to-own-my-audiobooks (Medium) and everybody-is-making-out-with-ai-in-the-back-of-the-bus (Substack) have no deployment URL in public.json — supply the canonical links.",
+    "REPO: ho-actually has no GitHub repo (checked 2026-07-15 — only star-actually, ssh-actually, ho-system exist). repo null until the content repo is pushed; built 2026-07-11 per the practitioner.",
     "MOVED: m4bookmaker production-systems → personal-utilities per the classes-of-work suites document (Utilities: m4Bookmaker, audiobook-qc, PPTX Builder). Review.",
-    "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted."
+    "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted.",
+    "IMPORTANCE (2026-07-15 rulings): m4bookmaker 5 → 6 (earning, most-starred repo); kanyo 8 → 7 — NOTE this is a demotion from the prior 8, applied per the practitioner's words; bounce if 8 was meant to stand."
   ],
 
   "id_map": {
@@ -155,7 +155,7 @@
     "star-actually": { "family": "actually", "peak": "peak" },
     "ssh-actually": { "family": "actually", "peak": "sub-peak" },
     "sageframe": { "family": "sageframe", "peak": "peak", "repo": "https://github.com/sageframe-irori/sageframe-vault" },
-    "kanyo": { "family": "kanyo", "peak": "peak" },
+    "kanyo": { "family": "kanyo", "peak": "peak", "importance": 7 },
     "hozo": { "family": "nen", "peak": "peak" },
     "palana": { "family": "shojiki", "peak": "peak" },
     "forteller": { "family": "shojiki", "peak": "sub-peak" },
@@ -165,7 +165,7 @@
     "shodo": { "family": "kekkai", "peak": "peak" },
     "kiku": { "family": "kekkai", "peak": "sub-peak", "peak_of": "interference" },
     "destructive-interference": { "family": "kekkai", "peak": "sub-peak", "peak_of": "interference" },
-    "m4bookmaker": { "group": "personal-utilities", "sort_order_within_group": 10 },
+    "m4bookmaker": { "group": "personal-utilities", "sort_order_within_group": 10, "importance": 6 },
     "pink-teaming": {
       "deployment": [
         { "label": "Manifesto site", "url": "https://pinkteaming.net" },
@@ -358,6 +358,12 @@
       "themes": ["sovereignty"],
       "sort_order_within_group": 90,
       "conceived": "2026-03-10",
+      "deployment": [
+        {
+          "label": "Medium",
+          "url": "https://medium.com/@sageframe/i-just-want-to-own-my-audiobooks-d98f71652711"
+        }
+      ],
       "relationships": [
         { "target": "m4bookmaker", "type": "documents", "strength": 3, "articulated_in": null, "note": null }
       ]
@@ -435,7 +441,13 @@
       "group": "writing",
       "themes": ["relationship"],
       "sort_order_within_group": 170,
-      "conceived": "2026-04-20"
+      "conceived": "2026-04-20",
+      "deployment": [
+        {
+          "label": "Substack — Constructive Interference",
+          "url": "https://sageframe.substack.com/p/everybody-is-making-out-with-ai-in"
+        }
+      ]
     },
     "everybody-is-shipping-work-nobody-asked-for": {
       "importance": 3,
@@ -513,20 +525,20 @@
       "themes": ["knowledge", "craft"],
       "status": "live",
       "tags": ["content", "knowledge-architecture", "ho-system", "methodology", "htmx"],
-      "repo": "https://github.com/sageframe-no-kaji/ho-actually",
+      "repo": null,
       "license": null,
       "deployment": [
         { "label": "Live edition", "url": "https://star-actually.sageframe.net/ho-actually/" }
       ],
       "tech_stack": null,
-      "publication_date": "2026-07-01",
+      "publication_date": "2026-07-11",
       "outlet": "Self-published static site",
       "word_count": null,
       "embed_url": null,
       "personal_stake": null,
-      "created": "2026-07-01",
-      "conceived": "2026-06-15",
-      "last_updated": "2026-07-10",
+      "created": "2026-07-11",
+      "conceived": "2026-07-11",
+      "last_updated": "2026-07-11",
       "short_description": "The Ho System taught as a navigable graph — a depth-layered guide to the methodology, built on the *, Actually engine. Enter with a question, dial the depth, stop when you understand enough.",
       "substantive_description": [
         "The second live instance of *, Actually, and the reflexive one: the methodology documented under its own discipline. Where SSH, Actually proves the engine generalizes outward to an external domain, Ho, Actually turns it inward — the Ho System's concepts, stages, and document chain organized by question and relationship rather than by chapter order, each node readable at the depth the reader needs."
