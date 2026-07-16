@@ -5,7 +5,7 @@
     "UPSTREAM: public.json carries a duplicate id 'pink-teaming' (site work + manifesto essay). Handled here by folding the essay record's deployments into the site work; fix at the keisaku layer eventually.",
     "UPSTREAM: pink-teaming-how-the-page-reads has a wrong short_description in public.json (a copy of the falcon-cameras essay's). Overridden in patch below.",
     "PROVISIONAL: every injected work's conceived date is a placeholder (≈ created). The ordinal pass refines these last.",
-    "REPO: ho-actually has no GitHub repo (checked 2026-07-15 — only star-actually, ssh-actually, ho-system exist). repo null until the content repo is pushed; built 2026-07-11 per the practitioner.",
+    "REPO TOPOLOGY (2026-07-15 ruling): sageframe-no-kaji/star-actually is the ENGINE; sageframe-dharma/star-actually is the websites repo carrying the Ho and SSH editions; sageframe-no-kaji/ssh-actually is DEAD (despite a 07-14 push). ssh-actually and ho-actually works point at the dharma websites repo; star-actually keeps the engine repo.",
     "MOVED: m4bookmaker production-systems → personal-utilities per the classes-of-work suites document (Utilities: m4Bookmaker, audiobook-qc, PPTX Builder). Review.",
     "IMPORTANCE: sutra raised 8 → 9 per the next-three-highest ruling (sutra, shodō, interference at 9 under Sageframe's 10). ho-system also sits at 9 — not demoted.",
     "IMPORTANCE (2026-07-15 rulings): m4bookmaker 5 → 6 (earning, most-starred repo); kanyo 8 → 7 — NOTE this is a demotion from the prior 8, applied per the practitioner's words; bounce if 8 was meant to stand."
@@ -153,7 +153,15 @@
     },
     "kinhin": { "family": "ho", "peak": "sub-peak" },
     "star-actually": { "family": "actually", "peak": "peak" },
-    "ssh-actually": { "family": "actually", "peak": "sub-peak" },
+    "ssh-actually": {
+      "family": "actually",
+      "peak": "sub-peak",
+      "repo": "https://github.com/sageframe-dharma/star-actually",
+      "deployment": [
+        { "label": "Live edition", "url": "https://star-actually.sageframe.net/ssh-actually/" },
+        { "label": "Websites repo", "url": "https://github.com/sageframe-dharma/star-actually" }
+      ]
+    },
     "sageframe": { "family": "sageframe", "peak": "peak", "repo": "https://github.com/sageframe-irori/sageframe-vault" },
     "kanyo": { "family": "kanyo", "peak": "peak", "importance": 7 },
     "hozo": { "family": "nen", "peak": "peak" },
@@ -525,10 +533,11 @@
       "themes": ["knowledge", "craft"],
       "status": "live",
       "tags": ["content", "knowledge-architecture", "ho-system", "methodology", "htmx"],
-      "repo": null,
+      "repo": "https://github.com/sageframe-dharma/star-actually",
       "license": null,
       "deployment": [
-        { "label": "Live edition", "url": "https://star-actually.sageframe.net/ho-actually/" }
+        { "label": "Live edition", "url": "https://star-actually.sageframe.net/ho-actually/" },
+        { "label": "Websites repo", "url": "https://github.com/sageframe-dharma/star-actually" }
       ],
       "tech_stack": null,
       "publication_date": "2026-07-11",
