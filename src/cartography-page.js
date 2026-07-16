@@ -80,8 +80,8 @@ const tuners = {
   peakLabelScale: 0.5, // peak label BASE type size (ho-07.6)
   importanceScale: 0.6, // how much a peak's importance scales its label, like a real map (ho-07.6)
   townLabelScale: 0.85, // town label type — its own dial (ho-07.6)
-  townInk: 0.32, // settlement building lightness 0 (ink) → 1 (light warm grey) — ho-07.6
-  townClear: 4, // cream clearing half-width around the buildings — the last clearing to get a dial
+  townInk: 0.62, // settlement building lightness 0 (ink) → 1 (light warm grey) — ho-07.6's 0.32 re-landed lighter at the ho-08 furniture pass (2026-07-15)
+  townClear: 2.5, // cream clearing half-width around the buildings — the last clearing to get a dial (locked 2026-07-15)
 
   // ho-07 towns
   anchorBias: 4,
@@ -307,7 +307,7 @@ const TOWN_TUNER_SPECS = [
   { key: 't2', label: 'size: village→town', min: 0.8, max: 1.8, step: 0.05, locked: true },
   { key: 't3', label: 'size: town→city', min: 1.0, max: 2.2, step: 0.05, locked: true },
   { key: 'townInk', label: 'building lightness', min: 0, max: 1, step: 0.02, locked: true },
-  { key: 'townClear', label: 'town clearing', min: 0, max: 16, step: 0.5 },
+  { key: 'townClear', label: 'town clearing', min: 0, max: 16, step: 0.5, locked: true },
 ];
 
 /** Place names, iso elevation labels, town labels, and label treatment. @type {TunerSpec[]} */
